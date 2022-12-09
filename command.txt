@@ -1,0 +1,3 @@
+test
+
+python main.py --config config/nturgbd120-cross-subject/default.yaml --work-dir work_dir/ --phase test --save-score True --weights work_dir/ntu120/csubctrgcn/runs-100-98400.pt

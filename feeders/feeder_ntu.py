@@ -94,8 +94,9 @@ class Feeder(Dataset):
         return data_numpy, label, index
 
     def top_k(self, score, top_k):
-        rank = score.argsort()
-        hit_top_k = [l in rank[i, -top_k:] for i, l in enumerate(self.label)]
+        rank = score.argsort()  # score从小到大排列后，输出其索引值
+        newlabel = self.label[0:len(rank)]
+        hit_top_k = [l in rank[i, -top_k:] for i, l in enumerate(newlabel)]  # i：索引值，l：value值
         return sum(hit_top_k) * 1.0 / len(hit_top_k)
 
 

@@ -26,7 +26,7 @@ test_feeder_args:
   debug: False
 
 # model
-model: model.ctrgcn.Model
+model: model.sectrgcn.Model
 model_args:
   num_class: 60
   num_point: 25
@@ -46,5 +46,5 @@ warm_up_epoch: 5
 device: [0]
 batch_size: 64
 test_batch_size: 64
-num_epoch: 65
+num_epoch: 100
 nesterov: True

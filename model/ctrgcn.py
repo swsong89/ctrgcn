@@ -5,6 +5,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
+from graph.ntu_rgb_d import Graph
 
 def import_class(name):
     components = name.split('.')
@@ -275,19 +276,24 @@ class Model(nn.Module):
                  drop_out=0, adaptive=True):
         super(Model, self).__init__()
 
-        if graph is None:
-            raise ValueError()
-        else:
-            Graph = import_class(graph)
-            self.graph = Graph(**graph_args)
+        #if graph is None:
+        #    raise ValueError()
+        #else:
+        #    Graph = import_class(graph)
+        #    self.graph = Graph(**graph_args)
+
+        self.graph = Graph(**graph_args)
 
         A = self.graph.A # 3,25,25
 
         self.num_class = num_class
         self.num_point = num_point
-        self.data_bn = nn.BatchNorm1d(num_person * in_channels * num_point)
+        self.data_bn = nn.BatchNorm1d(num_person * in_channels * num_point)  # [2*3*25]
 
         base_channel = 64
+
+        # self.seginfo = SGN(self, num_classes, 64, bias=True)
+
         self.l1 = TCN_GCN_unit(in_channels, base_channel, A, residual=False, adaptive=adaptive)
         self.l2 = TCN_GCN_unit(base_channel, base_channel, A, adaptive=adaptive)
         self.l3 = TCN_GCN_unit(base_channel, base_channel, A, adaptive=adaptive)
@@ -309,13 +315,15 @@ class Model(nn.Module):
 
     def forward(self, x):
         if len(x.shape) == 3:
-            N, T, VC = x.shape
-            x = x.view(N, T, self.num_point, -1).permute(0, 3, 1, 2).contiguous().unsqueeze(-1)
-        N, C, T, V, M = x.size()
+            N, T, VC = x.shape  # [bs, step, 25*3]
 
-        x = x.permute(0, 4, 3, 1, 2).contiguous().view(N, M * V * C, T)
+            # [bs, step, 25, 3] -> [bs, 3, step, 25] -> [bs, 3, step, 25, 1]
+            x = x.view(N, T, self.num_point, -1).permute(0, 3, 1, 2).contiguous().unsqueeze(-1)
+        N, C, T, V, M = x.size()   # [bs, 3, step, 25, M(numperson:2)]
+
+        x = x.permute(0, 4, 3, 1, 2).contiguous().view(N, M * V * C, T)  # [bs, 2*25*3, step]
         x = self.data_bn(x)
-        x = x.view(N, M, V, C, T).permute(0, 1, 3, 4, 2).contiguous().view(N * M, C, T, V)
+        x = x.view(N, M, V, C, T).permute(0, 1, 3, 4, 2).contiguous().view(N * M, C, T, V)  # [bs*2, 3, step, 25]
         x = self.l1(x)
         x = self.l2(x)
         x = self.l3(x)

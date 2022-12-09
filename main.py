@@ -25,7 +25,8 @@ import yaml
 from tensorboardX import SummaryWriter
 from tqdm import tqdm
 
-from torchlight import DictAction
+from torchlight.torchlight import DictAction
+from model.loss import FocalLoss
 
 
 import resource
@@ -103,7 +104,7 @@ def get_parser():
     parser.add_argument(
         '--eval-interval',
         type=int,
-        default=5,
+        default=1,
         help='the interval for evaluating models (#iteration)')
     parser.add_argument(
         '--print-log',
@@ -263,7 +264,7 @@ class Processor():
             batch_size=self.arg.test_batch_size,
             shuffle=False,
             num_workers=self.arg.num_worker,
-            drop_last=False,
+            drop_last=True,
             worker_init_fn=init_seed)
 
     def load_model(self):
@@ -274,7 +275,9 @@ class Processor():
         print(Model)
         self.model = Model(**self.arg.model_args)
         print(self.model)
-        self.loss = nn.CrossEntropyLoss().cuda(output_device)
+        # self.loss = nn.CrossEntropyLoss().cuda(output_device)
+        num_class = self.model.num_class
+        self.loss = FocalLoss(num_class, output_device).cuda(output_device)
 
         if self.arg.weights:
             self.global_step = int(arg.weights[:-3].split('-')[-1])
@@ -390,6 +393,7 @@ class Processor():
             timer['dataloader'] += self.split_time()
 
             # forward
+            # bs = self.get_bs(data)
             output = self.model(data)
             loss = self.loss(output, label)
             # backward
@@ -445,6 +449,7 @@ class Processor():
                 with torch.no_grad():
                     data = data.float().cuda(self.output_device)
                     label = label.long().cuda(self.output_device)
+                    # bs = self.get_bs(data)
                     output = self.model(data)
                     loss = self.loss(output, label)
                     score_frag.append(output.data.cpu().numpy())
@@ -500,6 +505,16 @@ class Processor():
                 writer = csv.writer(f)
                 writer.writerow(each_acc)
                 writer.writerows(confusion)
+
+    def get_bs(self, data):
+        if len(data.shape) == 3:
+            N, T, VC = data.shape  # [bs, step, 25*3]
+
+            # [bs, step, 25, 3] -> [bs, 3, step, 25] -> [bs, 3, step, 25, 1]
+            x = data.view(N, T, self.num_point, -1).permute(0, 3, 1, 2).contiguous().unsqueeze(-1)
+        N, C, T, V, M = data.size()  # [bs, 3, step, 25, M(numperson:2)]
+
+        return N * M
 
     def start(self):
         if self.arg.phase == 'train':
@@ -561,7 +576,7 @@ if __name__ == '__main__':
     p = parser.parse_args()
     if p.config is not None:
         with open(p.config, 'r') as f:
-            default_arg = yaml.load(f)
+            default_arg = yaml.load(f, Loader=yaml.FullLoader)
         key = vars(p).keys()
         for k in default_arg.keys():
             if k not in key:
