@@ -65,22 +65,23 @@ def get_parser():
         description='Spatial Temporal Graph Convolution Network')
     parser.add_argument(
         '--work-dir',
-        default='./work_dir/temp',
+        default='./work_dir/tmp',
         help='the work folder for storing results')
 
     parser.add_argument('-model_saved_name', default='')
     parser.add_argument(
         '--config',
-        default='./config/nturgbd-cross-view/test_bone.yaml',
+        default='./config/nturgbd120-cross-subject/default.yaml',
         help='path to the configuration file')
 
     # processor
     parser.add_argument(
-        '--phase', default='train', help='must be train or test')
+        # '--phase', default='train', help='must be train or test')
+        '--phase', default='test', help='must be train or test')
     parser.add_argument(
         '--save-score',
         type=str2bool,
-        default=False,
+        default=True,
         help='if ture, the classification score will be stored')
 
     # visulize and debug
@@ -146,7 +147,7 @@ def get_parser():
         help='the arguments of model')
     parser.add_argument(
         '--weights',
-        default=None,
+        default='work_dir/ntu120/csubsectrgcnfl/runs-100-98400.pt',
         help='the weights for network initialization')
     parser.add_argument(
         '--ignore-weights',
@@ -274,7 +275,7 @@ class Processor():
         shutil.copy2(inspect.getfile(Model), self.arg.work_dir)
         print(Model)
         self.model = Model(**self.arg.model_args)
-        print(self.model)
+        # print(self.model)
         # self.loss = nn.CrossEntropyLoss().cuda(output_device)
         num_class = self.model.num_class
         self.loss = FocalLoss(num_class, output_device).cuda(output_device)
@@ -450,7 +451,7 @@ class Processor():
                     data = data.float().cuda(self.output_device)
                     label = label.long().cuda(self.output_device)
                     # bs = self.get_bs(data)
-                    output = self.model(data)
+                    output = self.model(data)  # bs,C,T,V,M [64, 3, 64, 25, 2]
                     loss = self.loss(output, label)
                     score_frag.append(output.data.cpu().numpy())
                     loss_value.append(loss.data.item())
@@ -585,6 +586,11 @@ if __name__ == '__main__':
         parser.set_defaults(**default_arg)
 
     arg = parser.parse_args()
+    # 处理gpu
+    # arg.device = int(arg.device)
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(arg.device)
+    # 处理因为加了关节点信息网络创建需要指导batchsize
+    arg.model_args['batch_size'] =  arg.batch_size if arg.phase == 'train' and arg.model == 'model.sectrgcn.Model' else arg.test_batch_size
     init_seed(arg.seed)
     processor = Processor(arg)
     processor.start()

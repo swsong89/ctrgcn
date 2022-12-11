@@ -43,7 +43,7 @@ step: [35, 55]
 warm_up_epoch: 5
 
 # training
-device: [0]
+# device: [0]
 batch_size: 64
 test_batch_size: 64
 num_epoch: 100

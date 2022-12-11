@@ -1,0 +1,6 @@
+多模态输入测试
+python ensemble.py --dataset ntu120/xsub  --joint-dir pretrained_model/CTRGCN_NTU120_CSub_joint_84.9/ --bone-dir pretrained_model/CTRGCN_NTU120_CSub_bone_85.7/ --joint-motion-dir pretrained_model/CTRGCN_NTU120_CSub_joint_motion_81.4/ --bone-motion-dir pretrained_model/CTRGCN_NTU120_CSub_bone_motion_81.2/
+100%|██████████████████████████████████████████████████████████████████████████████| 50919/50919 [00:00<00:00, 61230.69it/s]
+Top1 Acc: 88.9138%
+Top5 Acc: 98.2521%
+论文 CTRGCN NTU120 xsub 88.9 xset 90.6

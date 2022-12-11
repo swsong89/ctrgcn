@@ -51,7 +51,7 @@ def weights_init(m):
             m.bias.data.fill_(0)
 
 class SECTRGC(nn.Module):
-    def __init__(self, in_channels, out_channels, rel_reduction=8, mid_reduction=1):
+    def __init__(self, in_channels, out_channels, rel_reduction=8, mid_reduction=1, bs=128):
         super(SECTRGC, self).__init__()
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -72,12 +72,12 @@ class SECTRGC(nn.Module):
             elif isinstance(m, nn.BatchNorm2d):
                 bn_init(m, 1)
 
-        self.dr_joint_spa = DRJointSpa()
+        self.dr_joint_spa = DRJointSpa(bs=bs)
 
-    def forward(self, x, A=None, alpha=1):  # x:[bs*2, 3, step, 25]
+    def forward(self, x, A=None, alpha=1):  # x:[bs*2, 3, step, 25]  step相当于多少帧
         x1, x2 = self.conv1(x).mean(-2), self.conv2(x).mean(-2)  # x3:[bs, 64, step, 25]
-        x3 = x.permute(0, 1, 3, 2).contiguous()  # x3: [bs*2, 3, step, 25]
-        x3 = self.dr_joint_spa(x3)  # 原：[bs, 64, step, 25]， 现:[bs, 64, 25, step]
+        x3 = x.permute(0, 1, 3, 2).contiguous()  # x3: [bs*2, 3, step, 25] ->  [128, 3, 25, 64]
+        x3 = self.dr_joint_spa(x3)  # 原：[bs, 64, step, 25]， 现:[bs, 64, 25, step]  # 创新点动力学信息及关节点类别信息,实际上就是杂iCTR-GC左边1x1conv分支加上了信息，别的没有变
         x3 = x3.permute(0, 1, 3, 2).contiguous()  # [bs, 64, step, 25]，现：[bs, 64, step, 25]
         x1 = self.tanh(x1.unsqueeze(-1) - x2.unsqueeze(-2))
         x1 = self.conv4(x1) * alpha + (A.unsqueeze(0).unsqueeze(0) if A is not None else 0)  # N,C,V,V [bs, 64, 25, 25]
@@ -86,7 +86,7 @@ class SECTRGC(nn.Module):
 
 
 
-class CTRGC(nn.Module):
+class CTRGC(nn.Module):  #  # CTRGCN部分 Figure3.(b)
     def __init__(self, in_channels, out_channels, rel_reduction=8, mid_reduction=1):
         super(CTRGC, self).__init__()
         self.in_channels = in_channels
@@ -109,8 +109,8 @@ class CTRGC(nn.Module):
                 bn_init(m, 1)
 
     def forward(self, x, A=None, alpha=1):
-        x1, x2, x3 = self.conv1(x).mean(-2), self.conv2(x).mean(-2), self.conv3(x)
-        x1 = self.tanh(x1.unsqueeze(-1) - x2.unsqueeze(-2))
-        x1 = self.conv4(x1) * alpha + (A.unsqueeze(0).unsqueeze(0) if A is not None else 0)  # N,C,V,V
+        x1, x2, x3 = self.conv1(x).mean(-2), self.conv2(x).mean(-2), self.conv3(x)  # x1是先1x1conv,再在T池化是ctr-gc中间卷积,x2是左边卷积,x3是中下1x1卷积
+        x1 = self.tanh(x1.unsqueeze(-1) - x2.unsqueeze(-2))  # 原论文是有M1,M2,实际上只使用了m1,这两个实际上是替代关系
+        x1 = self.conv4(x1) * alpha + (A.unsqueeze(0).unsqueeze(0) if A is not None else 0)  # N,C,V,V  refine阶段
         x1 = torch.einsum('ncuv,nctv->nctu', x1, x3)
         return x1

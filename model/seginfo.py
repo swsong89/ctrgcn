@@ -5,21 +5,20 @@ from torch import nn
 import torch
 import math
 
-device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu") # 单GPU或者CPU
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") # 单GPU或者CPU
 # device = torch.device("cpu")
 
 # output:[bs, 128, 25, step]
 class DRJointSpa(nn.Module):
-    def __init__(self, bias=True):
+    def __init__(self, bs=128, bias=True):
         super(DRJointSpa, self).__init__()
 
         self.num_classes = 60
         self.dim1 = 256
         num_joint = 25  # NTU-RGB-D关节数为25
-        bs = 2
         seg = 64
-        self.spa = self.one_hot(bs, num_joint, seg)  # [128, 64, 25, 25]
-        self.spa = self.spa.permute(0, 3, 2, 1).to(device)  # [128, 25, 25, 64]
+        self.spa = self.one_hot(bs, num_joint, seg)  # [bs, seg, num_joint, num_joint] [128, 64, 25, 25]
+        self.spa = self.spa.permute(0, 3, 2, 1).cuda()# [128, 25, 25, 64]  [bs, num_joint, num_joint, seg] 
 
         # embed组成：正则化-》1x1卷积-》Relu激活-》1x1卷积-》Relu激活
         # self.tem_embed = embed(self.seg, 64 * 4, norm=False, bias=bias)  # seg 骨架序列数
@@ -32,8 +31,8 @@ class DRJointSpa(nn.Module):
 
         self.gcn = gcn_spa(self.dim1 // 2, self.dim1 // 4, bias=bias)  # 图卷积 (128, 128)
 
-    def forward(self, input):  # input: [bs*2, 3, step, 25]
-
+    def forward(self, input):  # input: [bs*2, 3, step, 25]  [128, 3, 25, 64
+        # print('input.shape: ', input.shape)  # [128, 3, 25, 64]
         bs, c, num_joints, step = input.size()
         # Dynamic Representation
         dif = input[:, :, :, 1:] - input[:, :, :, 0:-1]  # 动力学信息， 前一帧-后一帧
@@ -44,6 +43,8 @@ class DRJointSpa(nn.Module):
         dy = pos + dif  # 关节点信息+动力学信息 [bs, 64, 25, step]
 
         # Joint-level Module
+        # print('dy: ', dy.shape)
+        # print('spa1: ', spa1.shape)
         input = torch.cat([dy, spa1], 1)  # [bs, 128, 25, step]
 
         g = self.compute_g1(input)  # 相乘  input:[bs, 128, 25, step], g:[bs, step, 25, 25]

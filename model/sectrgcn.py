@@ -11,8 +11,7 @@ from model.ctrgc import SECTRGC
 from model.ctrgc import CTRGC
 from graph.ntu_rgb_d import Graph
 
-device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu") # 单GPU或者CPU
-# device = torch.device("cpu")
+# device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") # 单GPU或者CPU
 
 def import_class(name):
     components = name.split('.')
@@ -57,7 +56,7 @@ def weights_init(m):
             m.bias.data.fill_(0)
 
 
-class TemporalConv(nn.Module):
+class TemporalConv(nn.Module):  # CTR-GCN时间卷积部分
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, dilation=1):
         super(TemporalConv, self).__init__()
         pad = (kernel_size + (kernel_size-1) * (dilation-1) - 1) // 2
@@ -117,7 +116,7 @@ class MultiScale_TemporalConv(nn.Module):
             for ks, dilation in zip(kernel_size, dilations)
         ])
 
-        # Additional Max & 1x1 branch
+        # Additional Max & 1x1 branch  3x1 MaxPool分支
         self.branches.append(nn.Sequential(
             nn.Conv2d(in_channels, branch_channels, kernel_size=1, padding=0),
             nn.BatchNorm2d(branch_channels),
@@ -129,7 +128,7 @@ class MultiScale_TemporalConv(nn.Module):
         self.branches.append(nn.Sequential(
             nn.Conv2d(in_channels, branch_channels, kernel_size=1, padding=0, stride=(stride,1)),
             nn.BatchNorm2d(branch_channels)
-        ))
+        ))  # 右边1x1conv
 
         # Residual connection
         if not residual:
@@ -154,7 +153,7 @@ class MultiScale_TemporalConv(nn.Module):
         out += res
         return out
 
-
+# 原来这里有CTRGC，然后把这个移出去到ctrgc.py
 class unit_tcn(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size=9, stride=1):
         super(unit_tcn, self).__init__()
@@ -172,19 +171,19 @@ class unit_tcn(nn.Module):
         return x
 
 
-class unit_gcn(nn.Module):
-    def __init__(self, in_channels, out_channels, A, isFirstLayer, coff_embedding=4, adaptive=True, residual=True):
+class unit_gcn(nn.Module):  # 三个ctr-gc叠加的部分，即Figure3.(a)上部分
+    def __init__(self, in_channels, out_channels, A, isFirstLayer, coff_embedding=4, adaptive=True, bs=128, residual=True):
         super(unit_gcn, self).__init__()
         inter_channels = out_channels // coff_embedding
         self.inter_c = inter_channels
         self.out_c = out_channels
         self.in_c = in_channels
         self.adaptive = adaptive
-        self.num_subset = A.shape[0]
+        self.num_subset = A.shape[0]    # A.shape 3,25,25,所以是3个
         self.convs = nn.ModuleList()
-        for i in range(self.num_subset):
+        for i in range(self.num_subset):    # 3个ctrgc换成sectrgc
             if isFirstLayer:
-                self.convs.append(SECTRGC(in_channels, out_channels))
+                self.convs.append(SECTRGC(in_channels, out_channels, bs=bs))  # 创新点SECTRGC,整个网络有10层ctrgc，只有第一层使用了SECTRGC,别的照旧
             else:
                 self.convs.append(CTRGC(in_channels, out_channels))
 
@@ -201,7 +200,7 @@ class unit_gcn(nn.Module):
         if self.adaptive:
             self.PA = nn.Parameter(torch.from_numpy(A.astype(np.float32)))
         else:
-            self.A = Variable(torch.from_numpy(A.astype(np.float32)), requires_grad=False)
+            self.A = Variable(torch.from_numpy(A.astype(np.float32)), requires_grad=False)  # adaptive false A不进行更新, True进行更新
         self.alpha = nn.Parameter(torch.zeros(1))
         self.bn = nn.BatchNorm2d(out_channels)
         self.soft = nn.Softmax(-2)
@@ -214,7 +213,7 @@ class unit_gcn(nn.Module):
                 bn_init(m, 1)
         bn_init(self.bn, 1e-6)
 
-    def forward(self, x):
+    def forward(self, x):  # Figure3.(a)部分，先计算三个ctrgc，然后相加add,BN, 再加残差连接，再Relu,论文图是相加add,BN,Relu,再残差连接
         y = None
         if self.adaptive:
             A = self.PA
@@ -231,39 +230,38 @@ class unit_gcn(nn.Module):
         return y
 
 
-class TCN_GCN_unit(nn.Module):
-    def __init__(self, in_channels, out_channels, A, isFirstLayer=0, stride=1, pre_stride=1, residual=True, adaptive=True, kernel_size=5, dilations=[1,2]):
+class TCN_GCN_unit(nn.Module):  # CTRGCN部分 Figure3.(a)
+    def __init__(self, in_channels, out_channels, A, isFirstLayer=0, stride=1, pre_stride=1, residual=True, adaptive=True, bs=128, kernel_size=5, dilations=[1,2]):
         super(TCN_GCN_unit, self).__init__()
         self.dim1 = 256
         self.num_classes = 60
         self.seg = 64  # seg 骨架序列数
         num_joint = 25  # NTU-RGB-D关节数为25
-        bs = 2
 
-        self.tem = self.one_hot(bs, self.seg // pre_stride, num_joint)  # [bs, 25, 64, 64]
-        self.tem = self.tem.permute(0, 3, 2, 1).to(device)  # [bs, 64, 64, 25]
+        self.tem = self.one_hot(bs, self.seg // pre_stride, num_joint)  # [bs, 25, 64, 64] pre_stride前4层1,再4层2,后2层4
+        self.tem = self.tem.permute(0, 3, 2, 1).cuda()  # [bs, 64, 64, 25]
 
-        # embed组成：正则化-》1x1卷积-》Relu激活-》1x1卷积-》Relu激活
+        # embed组成：正则化-》1x1卷积-》Relu激活-》1x1卷积-》Relu激活  创新点帧信息引导的多尺度时间卷积
         self.tem_embed = embed(self.seg // pre_stride, out_channels, norm=False)  # seg 骨架序列数  input:[bs, 64, 64, 25]
 
-        self.gcn1 = unit_gcn(in_channels, out_channels, A, isFirstLayer, adaptive=adaptive)
+        self.gcn1 = unit_gcn(in_channels, out_channels, A, isFirstLayer, adaptive=adaptive, bs=bs)  # 所有都有残差连接
         self.tcn1 = MultiScale_TemporalConv(out_channels, out_channels, kernel_size=kernel_size, stride=stride, dilations=dilations,
-                                            residual=False)
+                                            residual=False)  # MultiScale_TemporalConv实际上就是ctrgcn 时间建模部分 temporal modeling
         self.relu = nn.ReLU(inplace=True)
-        if not residual:
+        if not residual:  # ctrgcn只有第一层不需要，其余9层都需要, l1, 即figure.3(a)右边残差线
             self.residual = lambda x: 0
 
-        elif (in_channels == out_channels) and (stride == 1):
+        elif (in_channels == out_channels) and (stride == 1):  # 2,3,4  6,7,  9,10
             self.residual = lambda x: x
 
-        else:
+        else:  # 5, 8
             self.residual = unit_tcn(in_channels, out_channels, kernel_size=1, stride=stride)
 
     def forward(self, x):
-        # gcn1:[bs, 64, 64, 25], tem:[bs, 64, 64, 25]
+        # gcn1:[bs, 64, 64, 25], tem:[bs, 64, 64, 25]  [2, 64, 64, 25]
         y = self.tem_embed(self.tem)
         gcn = self.gcn1(x)
-        y = y + gcn
+        y = y + gcn   # 原论文直接是gcn,加了一个y，帧信息引导
         z = self.relu(self.tcn1(y) + self.residual(x))
         return z
 
@@ -285,7 +283,7 @@ class TCN_GCN_unit(nn.Module):
 
 
 class Model(nn.Module):
-    def __init__(self, num_class=60, num_point=25, num_person=2, graph=None, graph_args=dict(), in_channels=3,
+    def __init__(self, num_class=60, num_point=25, num_person=2, batch_size=64, graph=None, graph_args=dict(), in_channels=3,
                  drop_out=0, adaptive=True):
         super(Model, self).__init__()
 
@@ -304,17 +302,17 @@ class Model(nn.Module):
         self.data_bn = nn.BatchNorm1d(num_person * in_channels * num_point)  # [2*3*25]
 
         base_channel = 64
-
-        self.l1 = TCN_GCN_unit(in_channels, base_channel, A, isFirstLayer=1, residual=False, adaptive=adaptive)
-        self.l2 = TCN_GCN_unit(base_channel, base_channel, A, adaptive=adaptive)
-        self.l3 = TCN_GCN_unit(base_channel, base_channel, A, adaptive=adaptive)
-        self.l4 = TCN_GCN_unit(base_channel, base_channel, A, adaptive=adaptive)
-        self.l5 = TCN_GCN_unit(base_channel, base_channel*2, A, stride=2, adaptive=adaptive)
-        self.l6 = TCN_GCN_unit(base_channel*2, base_channel*2, A, pre_stride=2, adaptive=adaptive)
-        self.l7 = TCN_GCN_unit(base_channel*2, base_channel*2, A, pre_stride=2, adaptive=adaptive)
-        self.l8 = TCN_GCN_unit(base_channel*2, base_channel*4, A, pre_stride=2, stride=2, adaptive=adaptive)
-        self.l9 = TCN_GCN_unit(base_channel*4, base_channel*4, A, pre_stride=4, adaptive=adaptive)
-        self.l10 = TCN_GCN_unit(base_channel*4, base_channel*4, A, pre_stride=4, adaptive=adaptive)
+        bs = batch_size*num_person
+        self.l1 = TCN_GCN_unit(in_channels, base_channel, A, isFirstLayer=1, residual=False, adaptive=adaptive, bs=bs)  # 相对于CTRGCN把第一层改成了SECTRGC,其余不变
+        self.l2 = TCN_GCN_unit(base_channel, base_channel, A, adaptive=adaptive, bs=bs)
+        self.l3 = TCN_GCN_unit(base_channel, base_channel, A, adaptive=adaptive, bs=bs)
+        self.l4 = TCN_GCN_unit(base_channel, base_channel, A, adaptive=adaptive, bs=bs)
+        self.l5 = TCN_GCN_unit(base_channel, base_channel*2, A, stride=2, adaptive=adaptive, bs=bs)
+        self.l6 = TCN_GCN_unit(base_channel*2, base_channel*2, A, pre_stride=2, adaptive=adaptive, bs=bs) # 创新点加上了密集连接
+        self.l7 = TCN_GCN_unit(base_channel*2, base_channel*2, A, pre_stride=2, adaptive=adaptive, bs=bs)
+        self.l8 = TCN_GCN_unit(base_channel*2, base_channel*4, A, pre_stride=2, stride=2, adaptive=adaptive, bs=bs)
+        self.l9 = TCN_GCN_unit(base_channel*4, base_channel*4, A, pre_stride=4, adaptive=adaptive, bs=bs)
+        self.l10 = TCN_GCN_unit(base_channel*4, base_channel*4, A, pre_stride=4, adaptive=adaptive, bs=bs)
 
         self.fc = nn.Linear(base_channel*4, num_class)
         nn.init.normal_(self.fc.weight, 0, math.sqrt(2. / num_class))
@@ -324,19 +322,19 @@ class Model(nn.Module):
         else:
             self.drop_out = lambda x: x
 
-    def forward(self, x):  # SGN输入: [bs, 3, 25, step]
-        if len(x.shape) == 3:
+    def forward(self, x):  # SGN输入: [bs, 3, 25, step]  合法的输入类型 bs,C,T,V,M [64, 3, 64, 25, 2]
+        if len(x.shape) == 3:  # 如果dims 3则表明是N, T, VC需要处理一下转成合适的格式
             N, T, VC = x.shape  # [bs, step, 25*3]
 
             # [bs, step, 25, 3] -> [bs, 3, step, 25] -> [bs, 3, step, 25, 1]
             x = x.view(N, T, self.num_point, -1).permute(0, 3, 1, 2).contiguous().unsqueeze(-1)
-        N, C, T, V, M = x.size()   # [bs, 3, step, 25, M(numperson:2)]
+        N, C, T, V, M = x.size()   # [bs, 3, step, 25, M(numperson:2)]   M(numperson:2)是什么意思？
 
         x = x.permute(0, 4, 3, 1, 2).contiguous().view(N, M * V * C, T)  # [bs, 2*25*3, step]
         x = self.data_bn(x)
         x = x.view(N, M, V, C, T).permute(0, 1, 3, 4, 2).contiguous().view(N * M, C, T, V)  # [bs*2, 3, step, 25]
 
-        x = self.l1(x)
+        x = self.l1(x)  # input x [128, 3, 64, 25]
         x = self.l2(x)
         x = self.l3(x)
         x = self.l4(x)
@@ -347,10 +345,10 @@ class Model(nn.Module):
         x = self.l9(x)
         x = self.l10(x)
 
-        # N*M,C,T,V
+        # N*M,C,T,V  M可能为1
         c_new = x.size(1)
         x = x.view(N, M, c_new, -1)
-        x = x.mean(3).mean(1)
+        x = x.mean(3).mean(1)  # N,M,c_new,TV -> N,c_new   c_new应该等于base_channel*4
         x = self.drop_out(x)
 
         return self.fc(x)

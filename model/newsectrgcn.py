@@ -179,9 +179,9 @@ class unit_gcn(nn.Module):
         self.out_c = out_channels
         self.in_c = in_channels
         self.adaptive = adaptive
-        self.num_subset = A.shape[0]
+        self.num_subset = A.shape[0]  # A.shape 3,25,25,所以是3个
         self.convs = nn.ModuleList()
-        for i in range(self.num_subset):
+        for i in range(self.num_subset):  # 3个ctrgc换成sectrgc
             if isFirstLayer:
                 self.convs.append(SECTRGC(in_channels, out_channels))
             else:

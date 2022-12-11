@@ -27,6 +27,7 @@ test_feeder_args:
 
 # model
 model: model.ctrgcn.Model
+# model: model.sectrgcn.Model
 model_args:
   num_class: 60
   num_point: 25
