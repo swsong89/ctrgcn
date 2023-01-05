@@ -308,7 +308,7 @@ class Model(nn.Module):
         self.l3 = TCN_GCN_unit(base_channel, base_channel, A, adaptive=adaptive, bs=bs)
         self.l4 = TCN_GCN_unit(base_channel, base_channel, A, adaptive=adaptive, bs=bs)
         self.l5 = TCN_GCN_unit(base_channel, base_channel*2, A, stride=2, adaptive=adaptive, bs=bs)
-        self.l6 = TCN_GCN_unit(base_channel*2, base_channel*2, A, pre_stride=2, adaptive=adaptive, bs=bs) # 创新点加上了密集连接
+        self.l6 = TCN_GCN_unit(base_channel*2, base_channel*2, A, pre_stride=2, adaptive=adaptive, bs=bs) # 创新点本来应该有密集连接
         self.l7 = TCN_GCN_unit(base_channel*2, base_channel*2, A, pre_stride=2, adaptive=adaptive, bs=bs)
         self.l8 = TCN_GCN_unit(base_channel*2, base_channel*4, A, pre_stride=2, stride=2, adaptive=adaptive, bs=bs)
         self.l9 = TCN_GCN_unit(base_channel*4, base_channel*4, A, pre_stride=4, adaptive=adaptive, bs=bs)
