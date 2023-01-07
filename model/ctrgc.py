@@ -109,8 +109,8 @@ class CTRGC(nn.Module):  #  # CTRGCN部分 Figure3.(b)
                 bn_init(m, 1)
 
     def forward(self, x, A=None, alpha=1):
-        x1, x2, x3 = self.conv1(x).mean(-2), self.conv2(x).mean(-2), self.conv3(x)  # x1是先1x1conv,再在T池化是ctr-gc中间卷积,x2是左边卷积,x3是中下1x1卷积
+        x1, x2, x3 = self.conv1(x).mean(-2), self.conv2(x).mean(-2), self.conv3(x)  # x1,x2是temporal pooling中的两个1x1conv, x3是中下1x1卷积
         x1 = self.tanh(x1.unsqueeze(-1) - x2.unsqueeze(-2))  # 原论文是有M1,M2,实际上只使用了m1,这两个实际上是替代关系
-        x1 = self.conv4(x1) * alpha + (A.unsqueeze(0).unsqueeze(0) if A is not None else 0)  # N,C,V,V  refine阶段
+        x1 = self.conv4(x1) * alpha + (A.unsqueeze(0).unsqueeze(0) if A is not None else 0)  # N,C,V,V  refine阶段  x4是refine上边的1x1卷积
         x1 = torch.einsum('ncuv,nctv->nctu', x1, x3)
         return x1

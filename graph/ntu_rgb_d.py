@@ -2,7 +2,7 @@ import sys
 import numpy as np
 
 sys.path.extend(['../'])
-from graph import tools
+from graph import tools # s如果需要生成效果图的话需要把这个注释调
 
 num_node = 25
 self_link = [(i, i) for i in range(num_node)]
@@ -27,7 +27,36 @@ class Graph:
         if labeling_mode is None:
             return self.A
         if labeling_mode == 'spatial':
-            A = tools.get_spatial_graph(num_node, self_link, inward, outward)
+            A = tools.get_spatial_graph(num_node, self_link, inward, outward)  # 本身。入度不需要标准化，出度需要标准化权重
         else:
             raise ValueError()
         return A
+
+if __name__ == '__main__':
+    import tools
+    g = Graph().A
+    import matplotlib.pyplot as plt
+    # for i, g_ in enumerate(g):
+    plt.imshow(g[0], cmap='gray')
+    cb = plt.colorbar()
+    plt.savefig('./graph_identidy.png')
+    cb.remove()
+    # plt.show()
+
+    plt.imshow(g[1], cmap='gray')
+    cb = plt.colorbar()
+    plt.savefig('./graph_inward.png')
+    cb.remove()
+    # plt.show()
+
+    plt.imshow(g[2], cmap='gray')
+    cb = plt.colorbar()
+    plt.savefig('./graph_outward.png')
+    cb.remove()
+    # plt.show()
+
+    plt.imshow(np.sum(g,0), cmap='gray')
+    cb = plt.colorbar()
+    plt.savefig('./graph_all.png')
+    cb.remove()
+    # plt.show()
