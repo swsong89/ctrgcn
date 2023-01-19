@@ -1,5 +1,5 @@
 work_dir: ./work_dir/ntu120/xsub/ctrgcn_joint
-
+num_worker: 8
 # feeder
 feeder: feeders.feeder_ntu.Feeder
 train_feeder_args:
@@ -13,8 +13,8 @@ train_feeder_args:
   normalization: False
   random_rot: True
   p_interval: [0.5, 1]
-  vel: True
-  bone: True
+  vel: False
+  bone: False
 
 test_feeder_args:
   data_path: data/ntu120/NTU120_CSub.npz
@@ -26,7 +26,7 @@ test_feeder_args:
   debug: False
 
 # model
-model: model.sectrgcn.Model
+model: model.ctrgcn.Model
 model_args:
   num_class: 120
   num_point: 25
@@ -43,8 +43,10 @@ step: [35, 55]
 warm_up_epoch: 5
 
 # training
-# device: [0]
-batch_size: 64
-test_batch_size: 32
-num_epoch: 100
+device: [3]
+batch_size: 128
+test_batch_size: 128
+num_epoch: 120
 nesterov: True
+# nohup python main.py --config config/nturgbd120-cross-subject/ctr_joint.yaml  > config/log/ctr_joint.log
+# nohup python main.py --config config/nturgbd120-cross-subject/ctr_joint.yaml  --weights work_dir/ntu120/xsub/ctrgcn_joint > config/log/ctr_joint.log

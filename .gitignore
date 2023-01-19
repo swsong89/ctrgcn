@@ -5,3 +5,5 @@ work_dir
 pretrained_model
 *.pt
 *.png
+torchlight
+*/__pycache__

@@ -25,7 +25,7 @@ import yaml
 from tensorboardX import SummaryWriter
 from tqdm import tqdm
 
-from torchlight.torchlight import DictAction
+from torchlight import DictAction
 from model.loss import FocalLoss
 
 
@@ -77,7 +77,7 @@ def get_parser():
     # processor
     parser.add_argument(
         # '--phase', default='train', help='must be train or test')
-        '--phase', default='test', help='must be train or test')
+        '--phase', default='train', help='must be train or test')
     parser.add_argument(
         '--save-score',
         type=str2bool,
@@ -100,7 +100,7 @@ def get_parser():
     parser.add_argument(
         '--save-epoch',
         type=int,
-        default=30,
+        default=0,
         help='the start epoch to save model (#iteration)')
     parser.add_argument(
         '--eval-interval',
@@ -125,7 +125,7 @@ def get_parser():
     parser.add_argument(
         '--num-worker',
         type=int,
-        default=32,
+        default=8,
         help='the number of worker for data loader')
     parser.add_argument(
         '--train-feeder-args',
@@ -147,7 +147,8 @@ def get_parser():
         help='the arguments of model')
     parser.add_argument(
         '--weights',
-        default='work_dir/ntu120/csubsectrgcnfl/runs-100-98400.pt',
+        default=None,
+        # default='work_dir/ntu120/csubsectrgcnfl/runs-100-98400.pt',
         help='the weights for network initialization')
     parser.add_argument(
         '--ignore-weights',
@@ -216,7 +217,8 @@ class Processor():
                 arg.model_saved_name = os.path.join(arg.work_dir, 'runs')
                 if os.path.isdir(arg.model_saved_name):
                     print('log_dir: ', arg.model_saved_name, 'already exist')
-                    answer = input('delete it? y/n:')
+                    # answer = input('delete it? y/n:')
+                    answer = 'n'
                     if answer == 'y':
                         shutil.rmtree(arg.model_saved_name)
                         print('Dir removed: ', arg.model_saved_name)
@@ -590,7 +592,7 @@ if __name__ == '__main__':
     # arg.device = int(arg.device)
     os.environ["CUDA_VISIBLE_DEVICES"] = str(arg.device)
     # 处理因为加了关节点信息网络创建需要指导batchsize
-    arg.model_args['batch_size'] =  arg.batch_size if arg.phase == 'train' and arg.model == 'model.sectrgcn.Model' else arg.test_batch_size
+    # arg.model_args['batch_size'] =  arg.batch_size if arg.phase == 'train' and arg.model == 'model.sectrgcn.Model' else arg.test_batch_size
     init_seed(arg.seed)
     processor = Processor(arg)
     processor.start()
