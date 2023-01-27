@@ -5,13 +5,12 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
-from model.seginfo import DRJointSpa
 from model.seginfo import embed
 from model.ctrgc import SECTRGC
 from model.ctrgc import CTRGC
 from graph.ntu_rgb_d import Graph
 
-# device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") # 单GPU或者CPU
+# device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu") # 单GPU或者CPU
 
 def import_class(name):
     components = name.split('.')
@@ -172,7 +171,7 @@ class unit_tcn(nn.Module):
 
 
 class unit_gcn(nn.Module):  # 三个ctr-gc叠加的部分，即Figure3.(a)上部分
-    def __init__(self, in_channels, out_channels, A, isFirstLayer, coff_embedding=4, adaptive=True, bs=128, residual=True):
+    def __init__(self, in_channels, out_channels, A, isFirstLayer, coff_embedding=4, adaptive=True, bs=128, residual=True, device=0):
         super(unit_gcn, self).__init__()
         inter_channels = out_channels // coff_embedding
         self.inter_c = inter_channels
@@ -183,7 +182,7 @@ class unit_gcn(nn.Module):  # 三个ctr-gc叠加的部分，即Figure3.(a)上部
         self.convs = nn.ModuleList()
         for i in range(self.num_subset):    # 3个ctrgc换成sectrgc
             if isFirstLayer:
-                self.convs.append(SECTRGC(in_channels, out_channels, bs=bs))  # 创新点SECTRGC,整个网络有10层ctrgc，只有第一层使用了SECTRGC,别的照旧
+                self.convs.append(SECTRGC(in_channels, out_channels, bs=bs, device=device))  # 创新点SECTRGC,整个网络有10层ctrgc，只有第一层使用了SECTRGC,别的照旧
             else:
                 self.convs.append(CTRGC(in_channels, out_channels))
 
@@ -231,7 +230,7 @@ class unit_gcn(nn.Module):  # 三个ctr-gc叠加的部分，即Figure3.(a)上部
 
 
 class TCN_GCN_unit(nn.Module):  # CTRGCN部分 Figure3.(a)
-    def __init__(self, in_channels, out_channels, A, isFirstLayer=0, stride=1, pre_stride=1, residual=True, adaptive=True, bs=128, kernel_size=5, dilations=[1,2]):
+    def __init__(self, in_channels, out_channels, A, isFirstLayer=0, stride=1, pre_stride=1, residual=True, adaptive=True, bs=128, kernel_size=5, dilations=[1,2], device = 0):
         super(TCN_GCN_unit, self).__init__()
         self.dim1 = 256
         self.num_classes = 60
@@ -239,12 +238,18 @@ class TCN_GCN_unit(nn.Module):  # CTRGCN部分 Figure3.(a)
         num_joint = 25  # NTU-RGB-D关节数为25
 
         self.tem = self.one_hot(bs, self.seg // pre_stride, num_joint)  # [bs, 25, 64, 64] pre_stride前4层1,再4层2,后2层4
-        self.tem = self.tem.permute(0, 3, 2, 1).cuda()  # [bs, 64, 64, 25]
+        # print('self.tem: ', device)
+        self.tem = self.tem.permute(0, 3, 2, 1).cuda(device)  # [bs, 64, 64, 25]
+
+
+        # device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") # 单GPU或者CPU
+        # self.tem = self.tem.permute(0, 3, 2, 1).to(device) # [bs, 64, 64, 25]
+
 
         # embed组成：正则化-》1x1卷积-》Relu激活-》1x1卷积-》Relu激活  创新点帧信息引导的多尺度时间卷积
         self.tem_embed = embed(self.seg // pre_stride, out_channels, norm=False)  # seg 骨架序列数  input:[bs, 64, 64, 25]
 
-        self.gcn1 = unit_gcn(in_channels, out_channels, A, isFirstLayer, adaptive=adaptive, bs=bs)  # 所有都有残差连接
+        self.gcn1 = unit_gcn(in_channels, out_channels, A, isFirstLayer, adaptive=adaptive, bs=bs, device=device)  # 所有都有残差连接
         self.tcn1 = MultiScale_TemporalConv(out_channels, out_channels, kernel_size=kernel_size, stride=stride, dilations=dilations,
                                             residual=False)  # MultiScale_TemporalConv实际上就是ctrgcn 时间建模部分 temporal modeling
         self.relu = nn.ReLU(inplace=True)
@@ -283,7 +288,7 @@ class TCN_GCN_unit(nn.Module):  # CTRGCN部分 Figure3.(a)
 
 
 class Model(nn.Module):
-    def __init__(self, num_class=60, num_point=25, num_person=2, batch_size=64, graph=None, graph_args=dict(), in_channels=3,
+    def __init__(self, num_class=60, num_point=25, num_person=2, batch_size=64, device=0, graph=None, graph_args=dict(), in_channels=3,
                  drop_out=0, adaptive=True):
         super(Model, self).__init__()
 
@@ -296,6 +301,7 @@ class Model(nn.Module):
         self.graph = Graph(**graph_args)
 
         A = self.graph.A # 3,25,25
+        # print('device: ', device)
 
         self.num_class = num_class
         self.num_point = num_point
@@ -303,16 +309,16 @@ class Model(nn.Module):
 
         base_channel = 64
         bs = batch_size*num_person
-        self.l1 = TCN_GCN_unit(in_channels, base_channel, A, isFirstLayer=1, residual=False, adaptive=adaptive, bs=bs)  # 相对于CTRGCN把第一层改成了SECTRGC,其余不变
-        self.l2 = TCN_GCN_unit(base_channel, base_channel, A, adaptive=adaptive, bs=bs)
-        self.l3 = TCN_GCN_unit(base_channel, base_channel, A, adaptive=adaptive, bs=bs)
-        self.l4 = TCN_GCN_unit(base_channel, base_channel, A, adaptive=adaptive, bs=bs)
-        self.l5 = TCN_GCN_unit(base_channel, base_channel*2, A, stride=2, adaptive=adaptive, bs=bs)
-        self.l6 = TCN_GCN_unit(base_channel*2, base_channel*2, A, pre_stride=2, adaptive=adaptive, bs=bs) # 创新点本来应该有密集连接
-        self.l7 = TCN_GCN_unit(base_channel*2, base_channel*2, A, pre_stride=2, adaptive=adaptive, bs=bs)
-        self.l8 = TCN_GCN_unit(base_channel*2, base_channel*4, A, pre_stride=2, stride=2, adaptive=adaptive, bs=bs)
-        self.l9 = TCN_GCN_unit(base_channel*4, base_channel*4, A, pre_stride=4, adaptive=adaptive, bs=bs)
-        self.l10 = TCN_GCN_unit(base_channel*4, base_channel*4, A, pre_stride=4, adaptive=adaptive, bs=bs)
+        self.l1 = TCN_GCN_unit(in_channels, base_channel, A, isFirstLayer=1, residual=False, adaptive=adaptive, bs=bs, device = device)  # 相对于CTRGCN把第一层改成了SECTRGC,其余不变
+        self.l2 = TCN_GCN_unit(base_channel, base_channel, A, adaptive=adaptive, bs=bs, device = device)
+        self.l3 = TCN_GCN_unit(base_channel, base_channel, A, adaptive=adaptive, bs=bs, device = device)
+        self.l4 = TCN_GCN_unit(base_channel, base_channel, A, adaptive=adaptive, bs=bs, device = device)
+        self.l5 = TCN_GCN_unit(base_channel, base_channel*2, A, stride=2, adaptive=adaptive, bs=bs, device = device)
+        self.l6 = TCN_GCN_unit(base_channel*2, base_channel*2, A, pre_stride=2, adaptive=adaptive, bs=bs, device = device) # 创新点加上了密集连接
+        self.l7 = TCN_GCN_unit(base_channel*2, base_channel*2, A, pre_stride=2, adaptive=adaptive, bs=bs, device = device)
+        self.l8 = TCN_GCN_unit(base_channel*2, base_channel*4, A, pre_stride=2, stride=2, adaptive=adaptive, bs=bs, device = device)
+        self.l9 = TCN_GCN_unit(base_channel*4, base_channel*4, A, pre_stride=4, adaptive=adaptive, bs=bs, device = device)
+        self.l10 = TCN_GCN_unit(base_channel*4, base_channel*4, A, pre_stride=4, adaptive=adaptive, bs=bs, device = device)
 
         self.fc = nn.Linear(base_channel*4, num_class)
         nn.init.normal_(self.fc.weight, 0, math.sqrt(2. / num_class))

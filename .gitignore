@@ -7,3 +7,4 @@ pretrained_model
 *.png
 torchlight
 */__pycache__
+*.log

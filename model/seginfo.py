@@ -5,12 +5,12 @@ from torch import nn
 import torch
 import math
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") # 单GPU或者CPU
+# device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu") # 单GPU或者CPU
 # device = torch.device("cpu")
 
 # output:[bs, 128, 25, step]
 class DRJointSpa(nn.Module):
-    def __init__(self, bs=128, bias=True):
+    def __init__(self, bs=128, bias=True, device=0):
         super(DRJointSpa, self).__init__()
 
         self.num_classes = 60
@@ -18,7 +18,8 @@ class DRJointSpa(nn.Module):
         num_joint = 25  # NTU-RGB-D关节数为25
         seg = 64
         self.spa = self.one_hot(bs, num_joint, seg)  # [bs, seg, num_joint, num_joint] [128, 64, 25, 25]
-        self.spa = self.spa.permute(0, 3, 2, 1).cuda()# [128, 25, 25, 64]  [bs, num_joint, num_joint, seg] 
+        # self.spa = self.spa.permute(0, 3, 2, 1).cuda()# [128, 25, 25, 64]  [bs, num_joint, num_joint, seg] 
+        self.spa = self.spa.permute(0, 3, 2, 1).to(device)# [128, 25, 25, 64]  [bs, num_joint, num_joint, seg] 
 
         # embed组成：正则化-》1x1卷积-》Relu激活-》1x1卷积-》Relu激活
         # self.tem_embed = embed(self.seg, 64 * 4, norm=False, bias=bias)  # seg 骨架序列数

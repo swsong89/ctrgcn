@@ -51,7 +51,7 @@ def weights_init(m):
             m.bias.data.fill_(0)
 
 class SECTRGC(nn.Module):
-    def __init__(self, in_channels, out_channels, rel_reduction=8, mid_reduction=1, bs=128):
+    def __init__(self, in_channels, out_channels, rel_reduction=8, mid_reduction=1, bs=128, device=0):
         super(SECTRGC, self).__init__()
         self.in_channels = in_channels
         self.out_channels = out_channels
@@ -72,7 +72,7 @@ class SECTRGC(nn.Module):
             elif isinstance(m, nn.BatchNorm2d):
                 bn_init(m, 1)
 
-        self.dr_joint_spa = DRJointSpa(bs=bs)
+        self.dr_joint_spa = DRJointSpa(bs=bs, device=device)
 
     def forward(self, x, A=None, alpha=1):  # x:[bs*2, 3, step, 25]  step相当于多少帧
         x1, x2 = self.conv1(x).mean(-2), self.conv2(x).mean(-2)  # x3:[bs, 64, step, 25]

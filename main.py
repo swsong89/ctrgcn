@@ -241,7 +241,7 @@ class Processor():
         self.lr = self.arg.base_lr
         self.best_acc = 0
         self.best_acc_epoch = 0
-
+        # print('self.model.cuda', self.output_device)
         self.model = self.model.cuda(self.output_device)
 
         if type(self.arg.device) is list:
@@ -280,6 +280,7 @@ class Processor():
         # print(self.model)
         # self.loss = nn.CrossEntropyLoss().cuda(output_device)
         num_class = self.model.num_class
+        # print('output_device: ', output_device)
         self.loss = FocalLoss(num_class, output_device).cuda(output_device)
 
         if self.arg.weights:
@@ -363,7 +364,7 @@ class Processor():
             str = "[ " + localtime + ' ] ' + str
         print(str)
         if self.arg.print_log:
-            with open('{}/log.txt'.format(self.arg.work_dir), 'a') as f:
+            with open('{}/{}.txt'.format(self.arg.work_dir, self.arg.log_name), 'a') as f:
                 print(str, file=f)
 
     def record_time(self):
@@ -592,7 +593,19 @@ if __name__ == '__main__':
     # arg.device = int(arg.device)
     os.environ["CUDA_VISIBLE_DEVICES"] = str(arg.device)
     # 处理因为加了关节点信息网络创建需要指导batchsize
-    # arg.model_args['batch_size'] =  arg.batch_size if arg.phase == 'train' and arg.model == 'model.sectrgcn.Model' else arg.test_batch_size
+    print('device: ', arg.device)
+    if arg.model == 'model.sectrgcn.Model':
+        if arg.phase == 'train':
+            arg.model_args['batch_size'] =  arg.batch_size
+        else:
+            arg.model_args['batch_size'] =  arg.test_batch_size
+        arg.model_args['device'] = arg.device[0]
+
+    # 将log.txt改成模型名和类型名，如1_ctrgcn_b_xsub.log
+    work_dir_split = arg.work_dir.split('/')
+    arg.log_name = '1_' + work_dir_split[-1] + '_' + work_dir_split[-2]
+    print('arg.log_name: ', arg.log_name)
+
     init_seed(arg.seed)
     processor = Processor(arg)
     processor.start()
