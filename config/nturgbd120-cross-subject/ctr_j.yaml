@@ -44,9 +44,9 @@ warm_up_epoch: 5
 
 # training
 device: [3]
-batch_size: 128
-test_batch_size: 128
-num_epoch: 120
+batch_size: 64
+test_batch_size: 64
+num_epoch: 100
 nesterov: True
 # nohup python main.py --config config/nturgbd120-cross-subject/ctr_joint.yaml  > config/log/ctr_joint.log
 # nohup python main.py --config config/nturgbd120-cross-subject/ctr_joint.yaml  --weights work_dir/ntu120/xsub/ctrgcn_joint > config/log/ctr_joint.log

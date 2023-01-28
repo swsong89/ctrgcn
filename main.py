@@ -493,6 +493,9 @@ class Processor():
                 self.print_log('\tTop{}: {:.2f}%'.format(
                     k, 100 * self.data_loader[ln].dataset.top_k(score, k)))
 
+            # 每次打印一下最好的epoch和准确度
+            self.print_log('best_epoch: {} best_acc: {:.2f}%'.format(self.best_acc_epoch, 100*self.best_acc))
+
             if save_score:
                 with open('{}/epoch{}_{}_score.pkl'.format(
                         self.arg.work_dir, epoch + 1, ln), 'wb') as f:
