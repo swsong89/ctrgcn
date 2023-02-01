@@ -25,7 +25,7 @@ import yaml
 from tensorboardX import SummaryWriter
 from tqdm import tqdm
 
-from torchlight import DictAction
+# from torchlight import DictAction
 from model.loss import FocalLoss
 
 
@@ -71,7 +71,7 @@ def get_parser():
     parser.add_argument('-model_saved_name', default='')
     parser.add_argument(
         '--config',
-        default='./config/nturgbd120-cross-subject/default.yaml',
+        default='./config/nturgbd120-cross-subject/devctr_sa_b.yaml',
         help='path to the configuration file')
 
     # processor
