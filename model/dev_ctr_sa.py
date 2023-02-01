@@ -264,7 +264,8 @@ class SA_GC(nn.Module):  # 相当于 unit_gcn
         super(SA_GC, self).__init__()
         self.out_c = out_channels  # 64
         self.in_c = in_channels  # 64
-        self.num_head= A.shape[0]  # 3
+        # self.num_head= A.shape[0]  # 3
+        self.num_head = 3
         self.shared_topology = nn.Parameter(torch.from_numpy(A.astype(np.float32)), requires_grad=True)  #  [3,25,25] 对角线矩阵
 
         self.conv_d = nn.ModuleList()
@@ -370,16 +371,17 @@ class Model(nn.Module):
         # A = self.graph.A # 3,25,25
         num_head = 3
         k = 1
+        base_channel = 64
         A = np.stack([np.eye(num_point)] * num_head, axis=0)  # A(3, 25, 25) num_point 25  num_head3  三个都是对角线
 
         print('adaptive: ', adaptive)
 
         self.num_class = num_class
         self.num_point = num_point
-        self.data_bn = nn.BatchNorm1d(num_person * in_channels * num_point)  # [2*3*25]
+        self.data_bn = nn.BatchNorm1d(num_person * base_channel * num_point)  # [2*3*25]
 
         base_channel = 64
-        self.A_vector = self.get_A(graph, k)  #  [25, 25] 对角线减入度  
+        self.A_vector = self.get_A(graph, k).type(torch.float32)  #  [25, 25] 对角线减入度  
         self.to_joint_embedding = nn.Linear(in_channels, base_channel)  # Linear(in_features=3, out_features=64, bias=True)
         self.pos_embedding = nn.Parameter(torch.randn(1, self.num_point, base_channel))  # [1, 25, 64]
 
@@ -387,7 +389,7 @@ class Model(nn.Module):
 
         # self.seginfo = SGN(self, num_classes, 64, bias=True)
 
-        self.l1 = TCN_GCN_unit(in_channels, base_channel, A, residual=False, adaptive=adaptive)
+        self.l1 = TCN_GCN_unit(base_channel, base_channel, A, residual=False, adaptive=adaptive)
         self.l2 = TCN_GCN_unit(base_channel, base_channel, A, adaptive=adaptive)
         self.l3 = TCN_GCN_unit(base_channel, base_channel, A, adaptive=adaptive)
         self.l4 = TCN_GCN_unit(base_channel, base_channel, A, adaptive=adaptive)
@@ -425,11 +427,11 @@ class Model(nn.Module):
         x = self.A_vector.to(x.device).expand(N*M*T, -1, -1) @ x  # [256, 25, 3] <- [256, 25, 25] @ X [256, 25, 3] <-  256[25,25] @ X  # *是Hadamard   @ 矩阵相乘  self.A_vector 对角线减入度
 
         x = self.to_joint_embedding(x)  # [256, 25, 64] <-  [256, 25, 3] conv2d(3,64)
-        x += self.pos_embedding[:, :self.num_point]  # [256, 25, 64] <- [256, 25, 64] + [1, :25, 64]
-        
-        x = x.permute(0, 4, 3, 1, 2).contiguous().view(N, M * V * C, T)  # [bs, 2*25*3, step]
+        x += self.pos_embedding[:, :self.num_point]  # [256, 25, 64] <- [256, 25, 64] + [1, :25, 64] [(nmt),v,c]
+
+        x = rearrange(x, '(n m t) v c -> n (m v c) t', m=M, t=T).contiguous()  # n, mvc, T [2, 3200, 64]
         x = self.data_bn(x)
-        x = x.view(N, M, V, C, T).permute(0, 1, 3, 4, 2).contiguous().view(N * M, C, T, V)  # [bs*2, 3, step, 25]
+        x = rearrange(x, 'n (m v c) t -> (n m) c t v', m=M, v=V).contiguous()  # ([4, 64, 64, 25]
         x = self.l1(x)
         x = self.l2(x)
         x = self.l3(x)

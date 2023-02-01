@@ -25,7 +25,7 @@ import yaml
 from tensorboardX import SummaryWriter
 from tqdm import tqdm
 
-# from torchlight import DictAction
+from torchlight import DictAction
 from model.loss import FocalLoss
 
 
@@ -71,7 +71,7 @@ def get_parser():
     parser.add_argument('-model_saved_name', default='')
     parser.add_argument(
         '--config',
-        default='./config/nturgbd120-cross-subject/devctr_sa_b.yaml',
+        default='./config/nturgbd120-cross-subject/dev_ctr_sa_b.yaml',
         help='path to the configuration file')
 
     # processor
@@ -241,7 +241,7 @@ class Processor():
         self.lr = self.arg.base_lr
         self.best_acc = 0
         self.best_acc_epoch = 0
-        # print('self.model.cuda', self.output_device)
+        print('self.model.cuda', self.output_device)
         self.model = self.model.cuda(self.output_device)
 
         if type(self.arg.device) is list:
@@ -278,10 +278,14 @@ class Processor():
         print(Model)
         self.model = Model(**self.arg.model_args)
         # print(self.model)
-        # self.loss = nn.CrossEntropyLoss().cuda(output_device)
         num_class = self.model.num_class
         # print('output_device: ', output_device)
         self.loss = FocalLoss(num_class, output_device).cuda(output_device)
+
+        # if self.arg.model == 'model.sectrgcn.Model':
+        #     self.loss = FocalLoss(num_class, output_device).cuda(output_device)
+        # else:
+        #     self.loss = nn.CrossEntropyLoss().cuda(output_device)
 
         if self.arg.weights:
             self.global_step = int(arg.weights[:-3].split('-')[-1])
@@ -594,9 +598,11 @@ if __name__ == '__main__':
     arg = parser.parse_args()
     # 处理gpu
     # arg.device = int(arg.device)
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(arg.device)
-    # 处理因为加了关节点信息网络创建需要指导batchsize
     print('device: ', arg.device)
+    os.environ["CUDA_VISIBLE_DEVICES"] = str(arg.device[0])
+    print('cuda: ', arg.device[0])
+    # 处理因为加了关节点信息网络创建需要指导batchsize
+    # print('device: ', arg.device)
     if arg.model == 'model.sectrgcn.Model':
         if arg.phase == 'train':
             arg.model_args['batch_size'] =  arg.batch_size

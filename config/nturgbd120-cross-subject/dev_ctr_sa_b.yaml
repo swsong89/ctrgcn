@@ -44,8 +44,8 @@ warm_up_epoch: 5
 
 # training
 device: [0]
-batch_size: 64
-test_batch_size: 64
+batch_size: 2
+test_batch_size: 2
 num_epoch: 110
 nesterov: True
 # nohup python main.py --config config/nturgbd120-cross-subject/devctr_aff_b.yaml  > config/log/devctr_aff_b.log  2>&1

@@ -2,7 +2,7 @@ import sys
 import numpy as np
 
 sys.path.extend(['../'])
-# from graph import tools # s如果需要生成效果图的话需要把这个注释调
+from graph import tools # 如果需要生成效果图的话需要把这个注释调
 
 num_node = 25
 self_link = [(i, i) for i in range(num_node)]
