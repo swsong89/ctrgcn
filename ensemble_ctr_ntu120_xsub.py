@@ -8,7 +8,8 @@ from tqdm import tqdm
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--dataset',
-                        required=True,
+                        # required=True,
+                        default = 'ntu120/xsub',
                         choices={'ntu/xsub', 'ntu/xview', 'ntu120/xsub', 'ntu120/xset', 'NW-UCLA'},
                         help='the work folder for storing results')
     parser.add_argument('--alpha',
@@ -24,8 +25,60 @@ if __name__ == "__main__":
     parser.add_argument('--bone-motion-dir', default=None)
 
     arg = parser.parse_args()
+    # 默认参数
+    epoch_j = -1
+    epoch_b = -1
+    # epoch_b = 0
+    epoch_jm = -1
+    epoch_bm = -1
 
-    dataset = arg.dataset
+
+    # 修改的参数
+
+    arg.dataset = 'ntu120/xsub'
+
+
+    model_name = 'ctr'
+
+    work_dir = 'work_dir/' + arg.dataset + '/ctr_'
+    
+    epoch_j = 74
+    epoch_b = 90
+
+    # epoch_b = 0
+    epoch_jm = 73
+    epoch_bm = 69
+
+
+    """
+j
+[ Fri Jan 20 22:16:31 2023 ] 	Top1: 84.68%
+[ Fri Jan 20 22:16:31 2023 ] 	Top5: 97.26%
+
+b
+[ Mon Jan 23 20:40:06 2023 ] 	Top1: 85.10%
+[ Mon Jan 23 20:40:06 2023 ] 	Top5: 97.20%
+
+jm
+
+[ Thu Jan 26 18:54:22 2023 ] Best accuracy: 0.8077830188679245  80.78%
+[ Thu Jan 26 18:54:22 2023 ] Epoch number: 73
+
+bm
+
+[ Mon Jan 23 04:29:25 2023 ] Eval epoch: 69
+[ Mon Jan 23 04:47:28 2023 ] 	Mean test loss of 795 batches: 0.4627398304734965.
+[ Mon Jan 23 04:47:33 2023 ] 	Top1: 80.95%
+[ Mon Jan 23 04:47:36 2023 ] 	Top5: 96.19%
+
+model_name:  ctr
+dataset:  ntu120/xsub
+j:  74  b:  90  jm:  73  bm:  69
+Top1 Acc: 88.5406%
+Top5 Acc: 98.2148%
+
+    """
+
     if 'UCLA' in arg.dataset:
         label = []
         with open('./data/' + 'NW-UCLA/' + '/val_label.pkl', 'rb') as f:
@@ -43,31 +96,47 @@ if __name__ == "__main__":
     elif 'ntu' in arg.dataset:
         if 'xsub' in arg.dataset:
             npz_data = np.load('./data/' + 'ntu/' + 'NTU60_CS.npz')
-            label = np.where(npz_data['y_test'] > 0)[1]
+            label = np.where(npz_data['y_test'] > 0)[1]  # 50919
         elif 'xview' in arg.dataset:
             npz_data = np.load('./data/' + 'ntu/' + 'NTU60_CV.npz')
             label = np.where(npz_data['y_test'] > 0)[1]
     else:
         raise NotImplementedError
 
-    with open(os.path.join(arg.joint_dir, 'epoch1_test_score.pkl'), 'rb') as r1:
-        r1 = list(pickle.load(r1).items())
 
-    with open(os.path.join(arg.bone_dir, 'epoch1_test_score.pkl'), 'rb') as r2:
-        r2 = list(pickle.load(r2).items())
+    
+    if epoch_j != -1:
+        print('load pkl: ', os.path.join(work_dir + 'j', 'epoch{}_test_score.pkl'.format(epoch_j)))
+        with open(os.path.join(work_dir + 'j', 'epoch{}_test_score.pkl'.format(epoch_j)), 'rb') as r1:  # j
+            r1 = list(pickle.load(r1).items())  # 50816
 
-    if arg.joint_motion_dir is not None:
-        with open(os.path.join(arg.joint_motion_dir, 'epoch1_test_score.pkl'), 'rb') as r3:
-            r3 = list(pickle.load(r3).items())
-    if arg.bone_motion_dir is not None:
-        with open(os.path.join(arg.bone_motion_dir, 'epoch1_test_score.pkl'), 'rb') as r4:
-            r4 = list(pickle.load(r4).items())
+    if epoch_b != -1:
+        print('load pkl: ', os.path.join(work_dir + 'b', 'epoch{}_test_score.pkl'.format(epoch_b)))
+        with open(os.path.join(work_dir + 'b', 'epoch{}_test_score.pkl'.format(epoch_b)), 'rb') as r2:  # b
+            r2 = list(pickle.load(r2).items())  # 50880
+
+    if epoch_b != -1:
+        print('load pkl: ', os.path.join(work_dir + 'jm', 'epoch{}_test_score.pkl'.format(epoch_jm)))
+        with open(os.path.join(work_dir + 'jm', 'epoch{}_test_score.pkl'.format(epoch_jm)), 'rb') as r3:  # jm
+            r3 = list(pickle.load(r3).items())  # 50880
+
+    if epoch_b != -1:
+        print('load pkl: ', os.path.join(work_dir + 'bm', 'epoch{}_test_score.pkl'.format(epoch_bm)))
+        with open(os.path.join(work_dir + 'bm', 'epoch{}_test_score.pkl'.format(epoch_bm)), 'rb') as r4:  # bm
+            r4 = list(pickle.load(r4).items())  # 50880
+    # if arg.joint_motion_dir is not None:
+    #     with open(os.path.join(arg.joint_motion_dir, 'epoch1_test_score.pkl'), 'rb') as r3:  # jm
+    #         r3 = list(pickle.load(r3).items())
+    # if arg.bone_motion_dir is not None:
+    #     with open(os.path.join(arg.bone_motion_dir, 'epoch1_test_score.pkl'), 'rb') as r4:  # bm
+    #         r4 = list(pickle.load(r4).items())
 
     right_num = total_num = right_num_5 = 0
 
-    if arg.joint_motion_dir is not None and arg.bone_motion_dir is not None:
+    if epoch_jm != -1 and epoch_bm != -1:
         arg.alpha = [0.6, 0.6, 0.4, 0.4]
         for i in tqdm(range(len(label))):
+            # print(i)  # 50816
             l = label[i]
             _, r11 = r1[i]
             _, r22 = r2[i]
@@ -81,7 +150,7 @@ if __name__ == "__main__":
             total_num += 1
         acc = right_num / total_num
         acc5 = right_num_5 / total_num
-    elif arg.joint_motion_dir is not None and arg.bone_motion_dir is None:
+    elif epoch_jm != -1 and epoch_bm == -1:
         arg.alpha = [0.6, 0.6, 0.4]
         for i in tqdm(range(len(label))):
             l = label[:, i]
@@ -110,5 +179,8 @@ if __name__ == "__main__":
         acc = right_num / total_num
         acc5 = right_num_5 / total_num
 
+    print('model_name: ', model_name)
+    print('dataset: ', arg.dataset )
+    print('j: ', epoch_j, ' b: ', epoch_b, ' jm: ', epoch_jm, ' bm: ', epoch_bm)
     print('Top1 Acc: {:.4f}%'.format(acc * 100))
     print('Top5 Acc: {:.4f}%'.format(acc5 * 100))

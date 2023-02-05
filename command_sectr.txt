@@ -1,0 +1,27 @@
+test
+
+
+ntu120 xsub 
+ctrgcn
+epoch_j = 74
+epoch_b = 90
+epoch_jm = 73
+epoch_bm = 69
+python main.py --config config/nturgbd120-cross-subject/sectr_j.yaml --work-dir work_dir/ntu120/xsub/sectr_j  --phase test  --weights work_dir/ntu120/xsub/sectr_j/runs-61-60024.pt --device 0
+
+python main.py --config config/nturgbd120-cross-subject/ctr_b.yaml --work-dir work_dir/ntu120/xsub/ctr_b --phase test  --weights work_dir/ntu120/xsub/ctr_b/runs-90-88560.pt --device 0
+
+
+python main.py --config config/nturgbd120-cross-subject/ctr_jm.yaml --work-dir work_dir/ntu120/xsub/ctr_jm --phase test  --weights work_dir/ntu120/xsub/ctr_jm/runs-73-71832.pt --device 0
+
+python main.py --config config/nturgbd120-cross-subject/ctr_bm.yaml --work-dir work_dir/ntu120/xsub/ctr_bm --phase test  --weights work_dir/ntu120/xsub/ctr_bm/runs-69-67896.pt --device 0
+
+
+
+
+
+sectrgcn cross set
+python main.py --config config/nturgbd120-cross-set/default.yaml --work-dir work_dir/ --phase test --save-score True --weights work_dir/ntu120/csubsectrgcnfl/runs-100-98400.pt
+cross subject
+python main.py --config config/nturgbd120-cross-subject/default.yaml   --weights work_dir/ntu120/csetsectrgcnfl/runs-100-85100.pt 
+tensorboard --logdir work_dir/ntu120/csubsectrgcnfl/runs

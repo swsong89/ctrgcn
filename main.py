@@ -267,7 +267,7 @@ class Processor():
             batch_size=self.arg.test_batch_size,
             shuffle=False,
             num_workers=self.arg.num_worker,
-            drop_last=True,
+            drop_last=False,  # 别的都是False, sectrgcn需要改成True,因为加了时间嵌入，后面不够batch_size的没办法加，所以需要抛弃
             worker_init_fn=init_seed)
 
     def load_model(self):
@@ -498,9 +498,11 @@ class Processor():
                     k, 100 * self.data_loader[ln].dataset.top_k(score, k)))
 
             # 每次打印一下最好的epoch和准确度
-            self.print_log('best_epoch: {} best_acc: {:.2f}%'.format(self.best_acc_epoch, 100*self.best_acc))
+            self.print_log('--------------------best_epoch: {} best_acc: {:.2f}%'.format(self.best_acc_epoch, 100*self.best_acc))
 
             if save_score:
+                print('save_score: ', '{}/epoch{}_{}_score.pkl'.format(
+                        self.arg.work_dir, epoch + 1, ln))
                 with open('{}/epoch{}_{}_score.pkl'.format(
                         self.arg.work_dir, epoch + 1, ln), 'wb') as f:
                     pickle.dump(score_dict, f)
@@ -574,10 +576,13 @@ class Processor():
 
             if self.arg.weights is None:
                 raise ValueError('Please appoint --weights.')
+            print('weights: ', arg.weights)
+            epoch_test = int(arg.weights.split('/')[-1].split('-')[1])
+            print('epoch_test: ', epoch_test)
             self.arg.print_log = False
             self.print_log('Model:   {}.'.format(self.arg.model))
             self.print_log('Weights: {}.'.format(self.arg.weights))
-            self.eval(epoch=0, save_score=self.arg.save_score, loader_name=['test'], wrong_file=wf, result_file=rf)
+            self.eval(epoch=epoch_test-1, save_score=self.arg.save_score, loader_name=['test'], wrong_file=wf, result_file=rf)
             self.print_log('Done.\n')
 
 if __name__ == '__main__':

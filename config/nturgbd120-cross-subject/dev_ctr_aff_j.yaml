@@ -1,4 +1,4 @@
-work_dir: ./work_dir/ntu120/xsub/dev_ctr_sa_b
+work_dir: ./work_dir/ntu120/xsub/dev_ctr_aff_j
 num_worker: 8
 # feeder
 feeder: feeders.feeder_ntu.Feeder
@@ -26,7 +26,7 @@ test_feeder_args:
   debug: False
 
 # model
-model: model.dev_ctr_sa.Model
+model: model.dev_ctr_aff.Model
 model_args:
   num_class: 120
   num_point: 25
@@ -44,10 +44,10 @@ warm_up_epoch: 5
 
 # training
 device: [2]
-batch_size: 64  # 11657
-test_batch_size: 64
+batch_size: 48
+test_batch_size: 48
 num_epoch: 110
 nesterov: True
-# nohup python main.py --config config/nturgbd120-cross-subject/dev_ctr_sa_b.yaml  > config/log/dev_ctr_sa_b.log  2>&1
+# nohup python main.py --config config/nturgbd120-cross-subject/dev_ctr_aff_j.yaml  > config/log/dev_ctr_aff_j.log  2>&1
 # python main.py --config config/nturgbd120-cross-subject/devctr_aff_b.yaml
 # nohup python main.py --config config/nturgbd120-cross-subject/ctr_joint.yaml  --weights work_dir/ntu120/xsub/ctrgcn_joint > config/log/ctr_joint.log

@@ -43,8 +43,8 @@ step: [35, 55]
 warm_up_epoch: 5
 
 # training
-device: [0]
-batch_size: 64  # 2 2343MiB
+device: [1]
+batch_size: 64  # 2 2343MiB  64 14195MiB
 test_batch_size: 64
 num_epoch: 110
 nesterov: True
