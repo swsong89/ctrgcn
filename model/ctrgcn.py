@@ -143,8 +143,8 @@ class MultiScale_TemporalConv(nn.Module):
             out = tempconv(x)
             branch_outs.append(out)
 
-        out = torch.cat(branch_outs, dim=1)
-        out += res
+        out = torch.cat(branch_outs, dim=1)  # Figure 3a ctrgcn中的concat步骤,即将5x1conv d=1, 5x1conv d=2, 3x1 maxpool拼接操作
+        out += res  # 
         return out
 
 
