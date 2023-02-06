@@ -250,7 +250,7 @@ class SelfAttention(nn.Module):
     def forward(self, x):  # x bs,C,T,V[4, 64, 64, 25]
         y = rearrange(x, 'n c t v -> n t v c').contiguous()  # n,T,v, C [4, 64, 25, 64]
         y = self.ln(y)
-        y = self.to_qk(y)  # [4, 64, 25, 48] <- conv2d(64,48) [4, 64, 25, 64]
+        y = self.to_qk(y)  # [4, 64, 25, 48] <- Linear(64,48) [4, 64, 25, 64]
         qk = y.chunk(2, dim=-1)  # [[4, 64, 25, 24], bs,T,V,C(hd)[4, 64, 25, 24]]
         q, k = map(lambda t: rearrange(t, 'b t v (h d) -> (b t) h v d', h=self.n_heads), qk)  # bs*T,h,v,d[256, 3, 25, 8]
 
@@ -259,14 +259,14 @@ class SelfAttention(nn.Module):
         attn = dots.softmax(dim=-1).float()  # bs*T,h,V,V[256, 3, 25, 25]  最后一个维度和为1
         return attn
 
-class SA_GC(nn.Module):  # 相当于 unit_gcn
+class SA_GC(nn.Module):  # 相当于 unit_gcn  模块来自于infogcn
     def __init__(self, in_channels, out_channels, A, adaptive=True):  #  # 64, 64,A
         super(SA_GC, self).__init__()
         self.out_c = out_channels  # 64
         self.in_c = in_channels  # 64
         # self.num_head= A.shape[0]  # 3
         self.num_head = 3
-        self.shared_topology = nn.Parameter(torch.from_numpy(A.astype(np.float32)), requires_grad=True)  #  [3,25,25] 对角线矩阵
+        self.shared_topology = nn.Parameter(torch.from_numpy(A.astype(np.float32)), requires_grad=True)  #  [3,25,25] 对角线矩阵,ctrgc中的PA
 
         self.conv_d = nn.ModuleList()
         for i in range(self.num_head):  # 类似于三个ctrgc
@@ -304,7 +304,7 @@ class SA_GC(nn.Module):  # 相当于 unit_gcn
             attn = self.attn(x)  # Figure2 右边SA(Ht)步骤 V->V softmax,权重 bs*T,h,V,V[256, 3, 25, 25]  一行和是1,该节点对其余节点的权重，出度<- conv2d(64, 48)  [4, 64, 64, 25]
         A = attn * self.shared_topology.unsqueeze(0)  # context-dependent Topology步骤 作用是对静态拓扑结构学习了一个自注意力权重，即该节点对所有节点的权重，但是相乘后即只对相连的edge其作用，bs*T,V,V[256, 3, 25, 25] <- # bs*T,hidden,V,V[256, 3, 25, 25] [1, 3, 25, 25]
         for h in range(self.num_head):    # 3
-            A_h = A[:, h, :, :] # (nt)vv  [256, 25, 25]
+            A_h = A[:, h, :, :] # (nt)vv  [256, 25, 25] <- [256, 3, 25, 25]
             feature = rearrange(x, 'n c t v -> (n t) v c')  #[256, 25, 64] <- [4, 64, 64, 25]
             z = A_h@feature  # Selft-Attention graph conv  @矩阵相乘等于A_h.matmul(feature)     bs*T,V,C[256, 25, 64] <-  bs*T,V,V[256, 25, 25]  bs*V,C[256, 25, 64]
             z = rearrange(z, '(n t) v c-> n c t v', t=T).contiguous()  # [4, 64, 64, 25]
@@ -424,6 +424,8 @@ class Model(nn.Module):
         N, C, T, V, M = x.size()   # [bs, 3, step, 25, M(numperson:2)]
 
         x = rearrange(x, 'n c t v m -> (n m t) v c', m=M, v=V).contiguous()  # [256, 25, 3]
+        # self.A_vector是对角线减入度 [25,25] A初始化是[3,25,25]对角线,需要在每次SAGC学习，
+        # ctrgcn中A是[3,25,25]分别是对角线，入度，出度,在每次CTRGC中学习
         x = self.A_vector.to(x.device).expand(N*M*T, -1, -1) @ x  # [256, 25, 3] <- [256, 25, 25] @ X [256, 25, 3] <-  256[25,25] @ X  # *是Hadamard   @ 矩阵相乘  self.A_vector 对角线减入度
 
         x = self.to_joint_embedding(x)  # [256, 25, 64] <-  [256, 25, 3] conv2d(3,64)

@@ -280,12 +280,13 @@ class Processor():
         # print(self.model)
         num_class = self.model.num_class
         # print('output_device: ', output_device)
-        self.loss = FocalLoss(num_class, output_device).cuda(output_device)
+        # self.loss = FocalLoss(num_class, output_device).cuda(output_device)
 
-        # if self.arg.model == 'model.sectrgcn.Model':
-        #     self.loss = FocalLoss(num_class, output_device).cuda(output_device)
-        # else:
-        #     self.loss = nn.CrossEntropyLoss().cuda(output_device)
+        if self.arg.model == 'model.sectrgcn.Model':
+            self.loss = FocalLoss(num_class, output_device).cuda(output_device)
+        else:
+            self.loss = nn.CrossEntropyLoss().cuda(output_device)
+            tmp_loss = FocalLoss(num_class, output_device).cuda(output_device)  # focalloss会占800显存，但是好处是可以看到程序在运行
 
         if self.arg.weights:
             self.global_step = int(arg.weights[:-3].split('-')[-1])

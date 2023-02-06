@@ -24,7 +24,7 @@ class FocalLoss(nn.Module):
     """
     def __init__(self, class_num, device, alpha=None, gamma=2, size_average=True):
         super(FocalLoss, self).__init__()
-        # print('loss cuda: ', device)
+        print('focal loss cuda: ', device)
         if alpha is None:
             self.alpha = Variable(torch.ones(class_num, 1)).cuda(device)
         else:

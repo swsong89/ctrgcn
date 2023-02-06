@@ -160,9 +160,11 @@ class CTRGC(nn.Module):
             self.rel_channels = in_channels // rel_reduction
             self.mid_channels = in_channels // mid_reduction
         self.conv1 = nn.Conv2d(self.in_channels, self.rel_channels, kernel_size=1)  # (3,8)或者 (64,8)
-        self.conv2 = nn.Conv2d(self.in_channels, self.rel_channels, kernel_size=1)  # (3,8)
-        self.conv3 = nn.Conv2d(self.in_channels, self.out_channels, kernel_size=1)  # [3,64]
-        self.conv4 = nn.Conv2d(self.rel_channels, self.out_channels, kernel_size=1)  # [8,64]
+        self.conv2 = nn.Conv2d(self.in_channels, self.rel_channels, kernel_size=1)  # (3,8, k = [1,1])
+        self.conv3 = nn.Conv2d(self.in_channels, self.out_channels, kernel_size=1)  # conv2d(3,64, k = (1,1))
+        self.conv4 = nn.Conv2d(self.rel_channels, self.out_channels, kernel_size=1)  # (8,64, k=(1,1))
+        self.conv5 = nn.Conv2d(self.in_channels, self.rel_channels, kernel_size=1)  # (3,8)或者 (64,8)
+        self.softmax = nn.Softmax(dim=-1)
         self.tanh = nn.Tanh()
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
@@ -170,11 +172,23 @@ class CTRGC(nn.Module):
             elif isinstance(m, nn.BatchNorm2d):
                 bn_init(m, 1)
 
-    def forward(self, x, A=None, alpha=1):  # x [bs*2, 3, step, 25] A [25,25]因为有三个ctrgc,所以将A分开了
-        x1, x2, x3 = self.conv1(x).mean(-2), self.conv2(x).mean(-2), self.conv3(x)  # [4,8,25]  <- mean(-2) [4,8,64,25]<- conv2d(3,8) [4,3,64,25]
-        x1 = self.tanh(x1.unsqueeze(-1) - x2.unsqueeze(-2))  #[4,3,25,25] <-[4,3,25,1] - [4,3,1,25]相当于是自相关性系数
+    def forward(self, x, A=None, alpha=1):  # x [bs*2, 3, step, 25] [4,3,64,25] A v,v [25,25]因为有三个ctrgc,所以将A分开了
+        N,C,T,V = x.size()  # [4,3,64,25]
+        # [4,3,64,25] -> [4,3,25] conv2d(3,8, k=(1,1)) -> [4,8,25]
+        # x1, x2, x3 = self.conv1(x).mean(-2), self.conv2(x).mean(-2), self.conv3(x) # [4,8,25] <- conv2d(3,8) [4,3,25]
+        x1 = self.conv1(x)  # x1 = [4,8,64,25] <- conv2d(3,8, k = (1,1)) [4,3,64,25]
+        x2 = self.conv2(x)  # x1 = [4,8,64,25] <- conv2d(3,8) [4,3,64,25]
+        x3 = self.conv3(x)  #  [4,64,64, 25]<- conv2d(3,64, k = (1,1)) [4,3,64,25]
+        x1 = x1.view(-1, T, V).permute(0, 2, 1)  #  bsC,T,V -> bs,V,T
+        x2 = x2.view(-1, T, V) #  bsC,T,V
+        x1 = torch.matmul(x1, x2)  # bsC,V,V
+        x1 = self.softmax(x1)  # bsC,V,V
+        x1 = x1.view(N, -1, V, V)  # bs, C,V,V
+
+
+        x1 = self.tanh(x1)  #[4,8,25,25] <-[4,8,25,1] - [4,8,1,25]相当于是自相关性系数
         x1 = self.conv4(x1) * alpha + (A.unsqueeze(0).unsqueeze(0) if A is not None else 0)  # N,C,V,V, x1是通道拓扑细化，A是静态拓扑 [4,64,25,25] <-conv2d(8,64) [4,8,25,25] 
-        x1 = torch.einsum('ncuv,nctv->nctu', x1, x3)  #   bs,C,T,V [4,64,64,25] <- x3 bs,C,T,V[4,64,64,25]  x1bs,C,V,V[4,64,25,25] 通道细化后的节点自相关性
+        x1 = torch.einsum('ncuv,nctv->nctu', x1, x3)  #   bs,C,T,V [4,64,64,25] <- bs,C,T,V[4,64,64,25]  bs,C,V,V[4,64,25,25] 通道细化后的节点自相关性
         return x1
 
 class unit_tcn(nn.Module):
