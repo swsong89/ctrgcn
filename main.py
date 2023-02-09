@@ -71,7 +71,7 @@ def get_parser():
     parser.add_argument('-model_saved_name', default='')
     parser.add_argument(
         '--config',
-        default='./config/nturgbd120-cross-subject/dev_ctr_aff_k3d4_b.yaml',
+        default='./config/nturgbd120-cross-subject/dev_ctr_sa1_b.yaml',
         help='path to the configuration file')
 
     # processor
@@ -148,7 +148,7 @@ def get_parser():
     parser.add_argument(
         '--weights',
         default=None,
-        # default='work_dir/ntu120/csubsectrgcnfl/runs-100-98400.pt',
+        # default='work_dir/ntu120/xsub/dev_ctr_sa1_b/runs-30-29520.pt',
         help='the weights for network initialization')
     parser.add_argument(
         '--ignore-weights',
@@ -272,6 +272,9 @@ class Processor():
 
     def load_model(self):
         output_device = self.arg.device[0] if type(self.arg.device) is list else self.arg.device
+        if self.arg.weights != None:
+            print('output_device: ', output_device, '-> 0')
+            output_device = 0  #  --weights,断点续存的话需要改成0，否则会报错, 解决RuntimeError: CUDA error: invalid device ordinal
         self.output_device = output_device
         Model = import_class(self.arg.model)
         shutil.copy2(inspect.getfile(Model), self.arg.work_dir)
@@ -279,14 +282,14 @@ class Processor():
         self.model = Model(**self.arg.model_args)
         # print(self.model)
         num_class = self.model.num_class
-        # print('output_device: ', output_device)
+        print('output_device: ', output_device)
         # self.loss = FocalLoss(num_class, output_device).cuda(output_device)
 
         if self.arg.model == 'model.sectrgcn.Model':
             self.loss = FocalLoss(num_class, output_device).cuda(output_device)
         else:
             self.loss = nn.CrossEntropyLoss().cuda(output_device)
-            tmp_loss = FocalLoss(num_class, output_device).cuda(output_device)  # focalloss会占800显存，但是好处是可以看到程序在运行
+            # tmp_loss = FocalLoss(num_class, output_device).cuda(output_device)  # focalloss会占800显存，但是好处是可以看到程序在运行
 
         if self.arg.weights:
             self.global_step = int(arg.weights[:-3].split('-')[-1])
@@ -297,6 +300,7 @@ class Processor():
             else:
                 weights = torch.load(self.arg.weights)
 
+            # print('weights output_device: ', output_device)
             weights = OrderedDict([[k.split('module.')[-1], v.cuda(output_device)] for k, v in weights.items()])
 
             keys = list(weights.keys())
@@ -620,6 +624,13 @@ if __name__ == '__main__':
     work_dir_split = arg.work_dir.split('/')
     arg.log_name = '1_' + work_dir_split[-1] + '_' + work_dir_split[-2]
     print('arg.log_name: ', arg.log_name)
+    if arg.weights == None:
+        print('no weights')
+    else:
+        print('weights: ', arg.weights)
+        start_epoch = arg.weights.split('/')[-1].split('-')[1]
+        arg.start_epoch = start_epoch
+        print('arg.start_epoch', arg.start_epoch)
 
     init_seed(arg.seed)
     processor = Processor(arg)

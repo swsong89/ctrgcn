@@ -1,0 +1,14 @@
+自己复现ctrgcn_xusb_b
+[ Mon Jan 23 10:33:46 2023 ] Eval epoch: 78
+[ Mon Jan 23 10:52:52 2023 ] 	Mean test loss of 795 batches: 0.3558117835776611.
+[ Mon Jan 23 10:52:54 2023 ] 	Top1: 85.11%
+[ Mon Jan 23 10:52:56 2023 ] 	Top5: 97.25%
+tca-gcn中作者说ctrgcn有 ctrgcn 85.7 tcagcn 86.8
+
+Stream CTRGCN tcagcn  自自己复现ctrgcn xsub   自己复现sectr       自己复现hdgcn  自己复现tcagcn
+B        85.7 86.8     epoch: 78 85.11       epoch: 94 85.57%   150  86.71%     80 86.41%
+J        84.9 85.1      epoch: 74 84.68      epoch: 61 84.42%
+Bm       81.2 81.7     epoch: 74 81.00       epoch: 71 80.60%
+Jm       81.4 81.6    epoch: 73   80.78      epoch: 92 80.73%
+Top1     88.9             88.5406%                88.4277%
+

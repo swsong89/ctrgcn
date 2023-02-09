@@ -51,3 +51,4 @@ nesterov: True
 # nohup python main.py --config config/nturgbd120-cross-subject/devctr_aff_b.yaml  > config/log/devctr_aff_b.log  2>&1
 # python main.py --config config/nturgbd120-cross-subject/devctr_aff_b.yaml
 # nohup python main.py --config config/nturgbd120-cross-subject/ctr_joint.yaml  --weights work_dir/ntu120/xsub/ctrgcn_joint > config/log/ctr_joint.log
+# 实验结果  [ Mon Jan 30 11:11:06 2023 ] best_epoch: 97 best_acc: 85.23%

@@ -238,11 +238,14 @@ class RouteFuncMLP(nn.Module):
        # print('rf1',g.shape)
         x = self.avgpool(x)  # bs,C,T,1 [4, 3, 64, 1] 在V维度进行平均池化， 剩下的是时间帧通道的关系
        # print('rf2',x.shape,(x+self.g(g)).shape)  下面是利用上下文信息校准时间维度上的权重，进行时间维度上特征聚合
+       # 下面x bs,C,T,1 [4, 3, 64, 1]是在V上进行平均池化了，留下的是通道和T的信息,V的平均值，即T每一帧的权重。 self.g(g)得到的事[4,3,1,1]即通道的信息，T的平均值,即T所有帧的平均值。
         x = self.a(x + self.g(g))  #  bs,C,T,1 [4, 1, 64, 1] <- 在T维度卷积 Conv2d(3, 1, kernel_size=(3, 1), ) [4,3,64,1] <- ([4, 3, 64, 1] + conv2d(3,3) [4, 3, 1, 1])
+        # 上面x bs,C,T,1 [4, 1, 64, 1]把通道C和顶点V的信息压缩了，只剩下T之间的权重了。
         x = self.bn(x)  # 
         x = self.relu(x)  # [4, 1, 64, 1]
+        # self.b(x)是将[4, 1, 64, 1] 变成  [4, 64, 64, 1],即学习了64个通道，每个通道之间的T之间权重
         x = self.b(x) + 1  # [4, 64, 64, 1] <- 增加维度,以及学习前后帧权重关系，conv2d(1, 64, kernel_size=(3, 1), stride=(1, 1), padding=(1, 0) [4, 1, 64, 1]
-        return x  # # bs,C‘,T,1 [4, 64, 64, 1] 得到的是G(') ,即学了64个通道，每个通道都有T的相互关系权重，1是类似于MPS增加前后帧的相关性，因为MPS说了自注意力会关注距离比较远的帧，所以需要+1来平衡
+        return x  # # bs,C‘,T,1 [4, 64, 64, 1] 得到的是G(') ,即学了64个通道，每个通道都有T的相互关系权重，+1是类似于MPS增加前后帧的相关性，因为MPS说了自注意力会关注距离比较远的帧，所以需要+1来平衡
 
 class TAdaAggregation(nn.Module):
   
@@ -294,7 +297,7 @@ class TAdaAggregation(nn.Module):
         c_out, c_in,_, kh = self.weight.size()   # [64, 3, 1, 1] C',C,1,1 initial weights
         b, c_in, t, h = x.size()  # bs,C,T,V [4, 3, 64, 25]
 
-
+        # self.weight C',C,1,1[64, 3, 1, 1]是输出通道和输入通道的权重关系，bs,C',1, T,1 [4, 64, 1, 64, 1]中1是输入通道，由于routefuncMLP将输入通道压缩了，只剩下通道之前的权重了，所以现在需要根据输入通道学习输出通道的T之前权重。
         weight = (alpha.unsqueeze(2) * self.weight)  # W(')操作 bs,C',C,T,1[4, 64, 3, 64, 1] <- bs,C',1, T,1 [4, 64, 1, 64, 1] * C',C,1,1[64, 3, 1, 1]
 
 
@@ -303,8 +306,9 @@ class TAdaAggregation(nn.Module):
    
             bias = self.bias.repeat(b, t, 1).reshape(-1)
         # 下面的转换关系可以类似于nctv,nuct(transpose)-> (nt)c3v25, (nt)u64c3右乘左,-> ntuv-> nutv，即对通道其作用(64,3) (3,25)->(64,25),T在对通道其作用的时候相乘了
+        # weight.squeeze(-1)变成bs,C'输出通道,C输入通道,T时间[4, 64, 3, 64]
         output = torch.einsum('nctv,nuct->nutv', x,weight.squeeze(-1) )  #  bs,u(c'),T,V [4, 64, 64, 25] <-bs,C,T,V [4, 3, 64, 25], bs,u(c'),C,T[4, 64, 3, 64]实际上是nt(uc)*nt(cv)->ntu(c')v  实际是[4,64,(64,3)] * [4,64,(3,25)]
-        return output  #  bs,u(c'),T,V [4, 64, 64, 25]  bs,c',T,V实际上这个的作用包括对通道其作用把C=3变成C‘=64,对T起加权作用
+        return output  #  bs,u(c'),T,V [4, 64, 64, 25]  bs,c',T,V实际上这个的作用包括对通道其作用把C=3变成C‘=64,对T起加权作用, 即对输入x将通道由输入通道转到输出通道，再根据学习的T之前关系相乘，即Figure 1中前后帧的节点大小不一样，即权重不一样
         
     def __repr__(self):
         return f"TAdaAggregation({self.in_channels}, {self.out_channels}, kernel_size={self.kernel_size}, " +\
@@ -352,6 +356,7 @@ class CTRGC(nn.Module):
 
     def forward(self, x, A=None, alpha=1):  # bs,C,T,V[4, 3, 64, 25] [25, 25]  channel-wise
         x1, x2 = self.conv1(x).mean(-2), self.conv2(x).mean(-2)  # bs,C,V[4, 8, 25]  [4, 8, 25]
+        #  x3 bs,u(c'),T,V [4, 64, 64, 25], Figure 1中，前后帧节点大小不一样，权重不一样。 self.conv_rf(x) 是bs,C',T,1 [4,64,64,1], T之间的权重，self.conv即根据学习的前后帧不同权重大小与x相乘，得到如Figure 1中的图像
         x3= self.conv(x, self.conv_rf(x))  #  #  类似于ctrgc中的conv1x1时间维度, bs,c',T,V [4, 64, 64, 25]  <-时间聚合TAdaAggregation (下面x特征[4, 3, 64, 25] ,上边W(') bs,C',T,1 [4, 64, 64, 1] )
         x1 = self.tanh(x1.unsqueeze(-1) - x2.unsqueeze(-2))  # K(')  # 学习了自相关性,当前节点与其他节点的距离，即边,即类似于A,所以叫通道拓扑，之前的A是静态拓扑[4, 8, 25, 25] <- conv2d(8,64)  ([4, 8, 25, 1] -[4,8,1,25] )
         x1 = self.conv4(x1) * alpha + (A.unsqueeze(0).unsqueeze(0) if A is not None else 0) #  refine A操作 [4, 64, 25, 25] <- [4, 8, 25, 25]  +  [1,1,25,25]

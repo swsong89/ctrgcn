@@ -50,3 +50,4 @@ num_epoch: 120
 nesterov: True
 # nohup python main.py --config config/nturgbd120-cross-subject/ctr_bone.yaml  > config/log/ctr_bone.log
 # nohup python main.py --config config/nturgbd120-cross-subject/ctr_joint.yaml  --weights work_dir/ntu120/xsub/ctrgcn_joint > config/log/ctr_joint.log
+# [ Mon Jan 23 20:29:10 2023 ] best epoch: 90 85.10%

@@ -8,4 +8,5 @@ pretrained_model
 torchlight
 */__pycache__
 *.log
+data1
 
