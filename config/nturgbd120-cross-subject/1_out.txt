@@ -12,3 +12,12 @@ Bm       81.2 81.7     epoch: 74 81.00       epoch: 71 80.60%
 Jm       81.4 81.6    epoch: 73   80.78      epoch: 92 80.73%
 Top1     88.9             88.5406%                88.4277%
 
+做的ctr实验
+
+Stream CTRGCN tcagcn  自自己复现ctrgcn xsub        sa1           aff      sa1_aff     sa1_aff_ta
+B        85.7 86.8     epoch: 78 85.11         76 85.81%     97 85.23%    64 86.28%   85.36%
+J        84.9 85.1      epoch: 74 84.68         59 84.44%   
+Bm       81.2 81.7     epoch: 74 81.00       
+Jm       81.4 81.6    epoch: 73   80.78      
+Top1     88.9
+

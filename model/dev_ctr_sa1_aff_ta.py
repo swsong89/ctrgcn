@@ -328,7 +328,7 @@ class CTRGC(nn.Module):
             self.mid_channels = in_channels // mid_reduction
         self.conv1 = nn.Conv2d(self.in_channels, self.rel_channels, kernel_size=1)  # (3,8)或者 (64,8)
         self.conv2 = nn.Conv2d(self.in_channels, self.rel_channels, kernel_size=1)  # (3,8, k = [1,1])
-        self.conv3 = nn.Conv2d(self.in_channels, self.out_channels, kernel_size=1)  # conv2d(3,64, k = (1,1))
+        # self.conv3 = nn.Conv2d(self.in_channels, self.out_channels, kernel_size=1)  # conv2d(3,64, k = (1,1))
         self.conv4 = nn.Conv2d(self.rel_channels, self.out_channels, kernel_size=1)  # (8,64, k=(1,1))
         # self.conv5 = nn.Conv2d(self.in_channels, self.rel_channels, kernel_size=1)  # (3,8)或者 (64,8)
         self.softmax = nn.Softmax(dim=-1)

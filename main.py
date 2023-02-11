@@ -285,11 +285,12 @@ class Processor():
         print('output_device: ', output_device)
         # self.loss = FocalLoss(num_class, output_device).cuda(output_device)
 
-        if self.arg.model == 'model.sectrgcn.Model':
+        if self.arg.loss == 'cross_entropy':
+            self.loss = nn.CrossEntropyLoss().cuda(output_device)
+        elif self.arg.loss == 'focal_loss':
             self.loss = FocalLoss(num_class, output_device).cuda(output_device)
         else:
-            self.loss = nn.CrossEntropyLoss().cuda(output_device)
-            # tmp_loss = FocalLoss(num_class, output_device).cuda(output_device)  # focalloss会占800显存，但是好处是可以看到程序在运行
+            print('unknown loss: ' + self.arg.loss)
 
         if self.arg.weights:
             self.global_step = int(arg.weights[:-3].split('-')[-1])
@@ -631,6 +632,13 @@ if __name__ == '__main__':
         start_epoch = arg.weights.split('/')[-1].split('-')[1]
         arg.start_epoch = start_epoch
         print('arg.start_epoch', arg.start_epoch)
+    
+    try:
+        loss = arg.loss
+        print('loss: ' + loss)
+    except Exception as e:
+        arg.loss = 'cross_entropy'
+        print('default loss: ' + arg.loss)
 
     init_seed(arg.seed)
     processor = Processor(arg)
