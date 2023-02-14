@@ -38,54 +38,52 @@ if __name__ == "__main__":
     arg.dataset = 'ntu120/xsub'
 
 
-    model_name = 'ctr'
+    model_name = 'dev_ctr_sa1_aff'
 
-    work_dir = 'work_dir/' + arg.dataset + '/ctr_'
+    work_dir = 'work_dir/' + arg.dataset + '/' + model_name + '_'
     
-    epoch_j = 74
-    epoch_b = 90
+    epoch_j = 70
+    epoch_b = 64
 
     # epoch_b = 0
-    epoch_jm = 73
-    epoch_bm = 69
+    epoch_jm = 58
+    epoch_bm = 60
 
 
     """
 j
-[ Fri Jan 20 22:16:31 2023 ] 	Top1: 84.68%
-[ Fri Jan 20 22:16:31 2023 ] 	Top5: 97.26%
+[ Tue Feb 14 07:58:28 2023 ] --------------------best_epoch: 70 best_acc: 84.09%
 
 b
-[ Mon Jan 23 20:40:06 2023 ] 	Top1: 85.10%
-[ Mon Jan 23 20:40:06 2023 ] 	Top5: 97.20%
+[ Sat Feb 11 19:11:31 2023 ] --------------------best_epoch: 64 best_acc: 86.28%
 
 jm
 
-[ Thu Jan 26 18:54:22 2023 ] Best accuracy: 0.8077830188679245  80.78%
-[ Thu Jan 26 18:54:22 2023 ] Epoch number: 73
+[ Mon Feb 13 11:53:13 2023 ] --------------------best_epoch: 58 best_acc: 81.11%
 
 bm
 
-[ Mon Jan 23 04:29:25 2023 ] Eval epoch: 69
-[ Mon Jan 23 04:47:28 2023 ] 	Mean test loss of 795 batches: 0.4627398304734965.
-[ Mon Jan 23 04:47:33 2023 ] 	Top1: 80.95%
-[ Mon Jan 23 04:47:36 2023 ] 	Top5: 96.19%
+[ Tue Feb 14 08:12:15 2023 ] --------------------best_epoch: 60 best_acc: 81.04%
 
-model_name:  ctr
+test_num:  50919
+total_num:  50919
+model_name:  dev_ctr_sa1_aff
 dataset:  ntu120/xsub
-j:  74  b:  90  jm:  73  bm:  69
-arg.alpha = [0.6, 0.6, 0.4, 0.4]
-
-Top1 Acc: 88.5406%
-Top5 Acc: 98.2148%
-
-model_name:  ctr
-dataset:  ntu120/xsub
-j:  74  b:  90  jm:  73  bm:  69
+j:  70  b:  64  jm:  58  bm:  60
 arg.alpha:  [0.6, 0.75, 0.3, 0.15]
-Top1 Acc: 88.7076%
-Top5 Acc: 98.1716%
-提升0.166%
+Top1 Acc: 89.2791%  ctr 88.7076% 提升0.5715%
+Top5 Acc: 98.2600%
+
+test_num:  50919
+total_num:  50919
+model_name:  dev_ctr_sa1_aff
+dataset:  ntu120/xsub
+j:  70  b:  64  jm:  58  bm:  60
+arg.alpha:  [0.6, 0.6, 0.4, 0.4]
+Top1 Acc: 88.9943%  ctr  88.5406%  提升0.45%
+Top5 Acc: 98.2286%
+提升0.2848%
+
     """
 
     if 'UCLA' in arg.dataset:
@@ -146,18 +144,24 @@ Top5 Acc: 98.1716%
         # arg.alpha = [0.6, 0.6, 0.4, 0.4]
         arg.alpha = [0.6, 0.75, 0.3, 0.15]
         for i in tqdm(range(len(label))):
-            # print(i)  # 50816
-            l = label[i]
-            _, r11 = r1[i]
-            _, r22 = r2[i]
-            _, r33 = r3[i]
-            _, r44 = r4[i]
-            r = r11 * arg.alpha[0] + r22 * arg.alpha[1] + r33 * arg.alpha[2] + r44 * arg.alpha[3]
-            rank_5 = r.argsort()[-5:]
-            right_num_5 += int(int(l) in rank_5)
-            r = np.argmax(r)
-            right_num += int(r == int(l))
-            total_num += 1
+            try:
+                # print(i)  # 50816
+                l = label[i]
+                _, r11 = r1[i]
+                _, r22 = r2[i]
+                _, r33 = r3[i]
+                _, r44 = r4[i]
+                r = r11 * arg.alpha[0] + r22 * arg.alpha[1] + r33 * arg.alpha[2] + r44 * arg.alpha[3]
+                rank_5 = r.argsort()[-5:]
+                right_num_5 += int(int(l) in rank_5)
+                r = np.argmax(r)
+                right_num += int(r == int(l))
+                total_num += 1
+            except Exception as e:
+                a = 1
+                # print(i)
+        print('test_num: ', total_num)
+        print('total_num: ', len(label))
         acc = right_num / total_num
         acc5 = right_num_5 / total_num
     elif epoch_jm != -1 and epoch_bm == -1:

@@ -83,7 +83,7 @@ class AFF(nn.Module):  # TCA-GCN模块
 
     def forward(self, x, residual):  #   bs,C',T,V [4, 64, 64, 25]  Attentional Feature Fusion 输入是类似于三个ctrgc+残差连接的结果，输出就是特征聚合
         xa = x + residual
-        xl = self.local_att(xa)  # [4, 64, 64, 25] <- conv2d(64,64), conv2d(64,64), [4, 64, 64, 25]
+        xl = self.local_att(xa)  # [4, 64, 64, 25] <- conv2d(64,64), conv2d(64,64), [4, 64, 64, 25],仅仅是通道的学习
         xg = self.global_att(xa)  # 在T,V上进行了avgpool, bs,C',T,V,[4, 64, 1, 1] <-  conv2d(64,64) ,conv2d(64,64), [4, 64, 1, 1] <- AdaptiveAvgPool2d [4, 64, 64, 25]
         xlg = xl + xg  #   bs,C',T,V [4, 64, 64, 25] xg是C维度的信息，在T,V进行了平均
         wei = self.sigmoid(xlg)  # Attentional Feature Fusion.pdf

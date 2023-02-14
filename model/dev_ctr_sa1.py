@@ -179,14 +179,15 @@ class CTRGC(nn.Module):
         x1 = self.conv1(x)  # x1 = [4,8,64,25] <- conv2d(3,8, k = (1,1)) [4,3,64,25]
         x2 = self.conv2(x)  # x1 = [4,8,64,25] <- conv2d(3,8) [4,3,64,25]
         x3 = self.conv3(x)  #  [4,64,64, 25]<- conv2d(3,64, k = (1,1)) [4,3,64,25]
+
+        # 下面是自己想的self attention，作用就是ctrgc中的通道拓扑建模，x1.unsqueeze(-1) - x2.unsqueeze(-2)
         x1 = x1.view(-1, T, V).permute(0, 2, 1)  #  bsC,T,V -> bs,V,T
         x2 = x2.view(-1, T, V) #  bsC,T,V
-        x1 = torch.matmul(x1, x2)  # bsC,V,V
+        x1 = torch.matmul(x1, x2)  # bsC,V,V <= [bsC,V,T] [bsC,T,V]
         x1 = self.softmax(x1)  # bsC,V,V
         x1 = x1.view(N, -1, V, V)  # bs, C,V,V
-
-
         x1 = self.tanh(x1)  #[4,8,25,25] <-[4,8,25,1] - [4,8,1,25]相当于是自相关性系数
+
         x1 = self.conv4(x1) * alpha + (A.unsqueeze(0).unsqueeze(0) if A is not None else 0)  # N,C,V,V, x1是通道拓扑细化，A是静态拓扑 [4,64,25,25] <-conv2d(8,64) [4,8,25,25] 
         x1 = torch.einsum('ncuv,nctv->nctu', x1, x3)  #   bs,C,T,V [4,64,64,25] <- bs,C,T,V[4,64,64,25]  bs,C,V,V[4,64,25,25] 通道细化后的节点自相关性
         return x1

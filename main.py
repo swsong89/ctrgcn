@@ -96,12 +96,12 @@ def get_parser():
         '--save-interval',
         type=int,
         default=1,
-        help='the interval for storing models (#iteration)')
+        help='the interval for storing models (#iteration)')  # <save-epoch的时候间隔保存模型
     parser.add_argument(
         '--save-epoch',
         type=int,
-        default=0,
-        help='the start epoch to save model (#iteration)')
+        default=50,
+        help='the start epoch to save model (#iteration)')  # 大于的时候每次都保存
     parser.add_argument(
         '--eval-interval',
         type=int,
@@ -140,6 +140,9 @@ def get_parser():
 
     # model
     parser.add_argument('--model', default=None, help='the model will be used')
+    parser.add_argument('--loss', default='cross_entropy', help='the model will be used')
+    parser.add_argument('--data', default=None, help='the model will be used')
+
     parser.add_argument(
         '--model-args',
         action=DictAction,
@@ -272,9 +275,10 @@ class Processor():
 
     def load_model(self):
         output_device = self.arg.device[0] if type(self.arg.device) is list else self.arg.device
-        if self.arg.weights != None:
-            print('output_device: ', output_device, '-> 0')
-            output_device = 0  #  --weights,断点续存的话需要改成0，否则会报错, 解决RuntimeError: CUDA error: invalid device ordinal
+        # if self.arg.weights != None:
+        #     print('output_device: ', output_device, '-> 0')
+        #     output_device = 0  #  --weights,断点续存的话需要改成0，否则会报错, 解决RuntimeError: CUDA error: invalid device ordinal
+        # output_device = 0   # 如果训练时候保存的weights和继续训练的gpu不是一个的话，output_device需要改成0,否则报错解决RuntimeError
         self.output_device = output_device
         Model = import_class(self.arg.model)
         shutil.copy2(inspect.getfile(Model), self.arg.work_dir)
@@ -286,8 +290,10 @@ class Processor():
         # self.loss = FocalLoss(num_class, output_device).cuda(output_device)
 
         if self.arg.loss == 'cross_entropy':
+            print(' loss: ' + self.arg.loss)
             self.loss = nn.CrossEntropyLoss().cuda(output_device)
         elif self.arg.loss == 'focal_loss':
+            print(' loss: ' + self.arg.loss)
             self.loss = FocalLoss(num_class, output_device).cuda(output_device)
         else:
             print('unknown loss: ' + self.arg.loss)
@@ -543,12 +549,12 @@ class Processor():
                 return sum(p.numel() for p in model.parameters() if p.requires_grad)
             self.print_log(f'# Parameters: {count_parameters(self.model)}')
             for epoch in range(self.arg.start_epoch, self.arg.num_epoch):
-                save_model = (((epoch + 1) % self.arg.save_interval == 0) or (
-                        epoch + 1 == self.arg.num_epoch)) and (epoch+1) > self.arg.save_epoch
-
-                self.train(epoch, save_model=save_model)
-
-                self.eval(epoch, save_score=self.arg.save_score, loader_name=['test'])
+                save_model = ((epoch + 1) % self.arg.save_interval == 0) or ((epoch+1) > self.arg.save_epoch)  # epoch + 1 == self.arg.num_epoch最后一个epoch了
+                #  小于save_epoch的时候,save_interval间隔保存模型，大于的时候每次都保存，且每次都eval
+                # print('epoch: ', epoch, ' save_model: ', save_model)
+                self.train(epoch, save_model=save_model)  # save_model是否保存模型，True False
+                if epoch >= arg.save_epoch:  # 如果epoch大于了再进行eval,从而节省时间，eval是训练的一半时间
+                    self.eval(epoch, save_score=self.arg.save_score, loader_name=['test'])
 
             # test the best model
             weights_path = glob.glob(os.path.join(self.arg.work_dir, 'runs-'+str(self.best_acc_epoch)+'*'))[0]
@@ -599,7 +605,7 @@ if __name__ == '__main__':
     if p.config is not None:
         with open(p.config, 'r') as f:
             default_arg = yaml.load(f, Loader=yaml.FullLoader)
-        key = vars(p).keys()
+        key = vars(p).keys()  # key就是main默认的参数
         for k in default_arg.keys():
             if k not in key:
                 print('WRONG ARG: {}'.format(k))
@@ -629,16 +635,24 @@ if __name__ == '__main__':
         print('no weights')
     else:
         print('weights: ', arg.weights)
-        start_epoch = arg.weights.split('/')[-1].split('-')[1]
+        start_epoch = int(arg.weights.split('/')[-1].split('-')[1])
         arg.start_epoch = start_epoch
         print('arg.start_epoch', arg.start_epoch)
-    
+
+    if arg.data == None:
+        print('data_path: ', arg.train_feeder_args['data_path'])
+    else:
+        data_file = '/ntu120/NTU120_CSub.npz'
+        arg.train_feeder_args['data_path'] = arg.data + data_file
+        arg.test_feeder_args['data_path'] = arg.data + data_file
+        print('data_path: ', arg.train_feeder_args['data_path'])
     try:
         loss = arg.loss
         print('loss: ' + loss)
     except Exception as e:
         arg.loss = 'cross_entropy'
         print('default loss: ' + arg.loss)
+    
 
     init_seed(arg.seed)
     processor = Processor(arg)

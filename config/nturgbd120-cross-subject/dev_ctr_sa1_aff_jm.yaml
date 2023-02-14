@@ -1,11 +1,10 @@
-work_dir: ./work_dir/ntu120/xsub/dev_ctr_sa1_aff_b
+work_dir: ./work_dir/ntu120/xsub/dev_ctr_sa1_aff_jm
 num_worker: 8
 # feeder
 feeder: feeders.feeder_ntu.Feeder
 train_feeder_args:
-  data_path: data/ntu120/NTU120_CSub.npz
+  data_path: data2/ntu120/NTU120_CSub.npz
   split: train
-  debug: False
   random_choose: False
   random_shift: False
   random_move: False
@@ -13,16 +12,17 @@ train_feeder_args:
   normalization: False
   random_rot: True
   p_interval: [0.5, 1]
-  vel: False
-  bone: True
+  vel: True
+  bone: False
+  debug: False
 
 test_feeder_args:
-  data_path: data/ntu120/NTU120_CSub.npz
+  data_path: data2/ntu120/NTU120_CSub.npz
   split: test
   window_size: 64
   p_interval: [0.95]
-  vel: False
-  bone: True
+  vel: True
+  bone: False
   debug: False
 
 # model
@@ -44,10 +44,10 @@ warm_up_epoch: 5
 
 # training
 device: [3]
-batch_size: 64  # 11657
-test_batch_size: 64
+batch_size: 96  # 64 14721MiB   96 21305MiB
+test_batch_size: 96
 num_epoch: 120
 nesterov: True
-# nohup python main.py --config config/nturgbd120-cross-subject/dev_ctr_sa1_aff_b.yaml  > config/log/dev_ctr_sa1_aff_b.log  2>&1
+# nohup python main.py --config config/nturgbd120-cross-subject/dev_ctr_sa1_aff_jm.yaml  --data data2 > config/log/dev_ctr_sa1_aff_jm.log  2>&1
 # python main.py --config config/nturgbd120-cross-subject/devctr_aff_b.yaml
 # nohup python main.py --config config/nturgbd120-cross-subject/ctr_joint.yaml  --weights work_dir/ntu120/xsub/ctrgcn_joint > config/log/ctr_joint.log

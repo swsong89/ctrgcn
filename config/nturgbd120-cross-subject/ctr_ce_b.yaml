@@ -1,9 +1,9 @@
-work_dir: ./work_dir/ntu120/xsub/dev_ctr_sa1_aff_b
+work_dir: ./work_dir/ntu120/xsub/ctr_ce_b  # cross entropy
 num_worker: 8
 # feeder
 feeder: feeders.feeder_ntu.Feeder
 train_feeder_args:
-  data_path: data/ntu120/NTU120_CSub.npz
+  data_path: data2/ntu120/NTU120_CSub.npz
   split: train
   debug: False
   random_choose: False
@@ -17,7 +17,7 @@ train_feeder_args:
   bone: True
 
 test_feeder_args:
-  data_path: data/ntu120/NTU120_CSub.npz
+  data_path: data2/ntu120/NTU120_CSub.npz
   split: test
   window_size: 64
   p_interval: [0.95]
@@ -26,7 +26,7 @@ test_feeder_args:
   debug: False
 
 # model
-model: model.dev_ctr_sa1_aff.Model
+model: model.ctrgcn.Model
 model_args:
   num_class: 120
   num_point: 25
@@ -39,15 +39,15 @@ model_args:
 weight_decay: 0.0004
 base_lr: 0.1
 lr_decay_rate: 0.1
-step: [35, 55, 85]
+step: [35, 55]
 warm_up_epoch: 5
 
 # training
-device: [3]
-batch_size: 64  # 11657
+device: [2]
+batch_size: 64
 test_batch_size: 64
 num_epoch: 120
 nesterov: True
-# nohup python main.py --config config/nturgbd120-cross-subject/dev_ctr_sa1_aff_b.yaml  > config/log/dev_ctr_sa1_aff_b.log  2>&1
-# python main.py --config config/nturgbd120-cross-subject/devctr_aff_b.yaml
+# nohup python main.py --config config/nturgbd120-cross-subject/ctr_ce_b.yaml  > config/log/ctr_ce_b.log 2>&1
 # nohup python main.py --config config/nturgbd120-cross-subject/ctr_joint.yaml  --weights work_dir/ntu120/xsub/ctrgcn_joint > config/log/ctr_joint.log
+# [ Mon Jan 23 20:29:10 2023 ] best epoch: 90 85.10%

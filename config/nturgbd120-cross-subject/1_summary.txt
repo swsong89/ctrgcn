@@ -17,4 +17,6 @@ dev_ctr_sa_b
 
 dev_ctr_sa1_b 有效
 [ Thu Feb  9 10:44:15 2023 ] best_epoch: 76 best_acc: 85.81%
-
+dev_ctr_sa1_aff_bm  data1 device: [2]
+dev_ctr_sa1_aff_j   data   device: [1]
+ 

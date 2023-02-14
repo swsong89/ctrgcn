@@ -76,6 +76,13 @@ j:  61  b:  94  jm:  92  bm:  71
 Top1 Acc: 88.4277%
 Top5 Acc: 98.2410%
 
+model_name:  ctr
+dataset:  ntu120/xsub
+j:  74  b:  90  jm:  73  bm:  69
+arg.alpha:  [0.6, 0.75, 0.3, 0.15]
+Top1 Acc: 88.7076%
+Top5 Acc: 98.1716%
+提升0.28%
     """
 
     if 'UCLA' in arg.dataset:
@@ -133,7 +140,8 @@ Top5 Acc: 98.2410%
     right_num = total_num = right_num_5 = 0
 
     if epoch_jm != -1 and epoch_bm != -1:
-        arg.alpha = [0.6, 0.6, 0.4, 0.4]
+        # arg.alpha = [0.6, 0.6, 0.4, 0.4]
+        arg.alpha = [0.6, 0.75, 0.3, 0.15]
         for i in tqdm(range(len(label))):
             try:
                 # print(i)  # 50816
@@ -187,5 +195,6 @@ Top5 Acc: 98.2410%
     print('model_name: ', model_name)
     print('dataset: ', arg.dataset )
     print('j: ', epoch_j, ' b: ', epoch_b, ' jm: ', epoch_jm, ' bm: ', epoch_bm)
+    print('arg.alpha: ', arg.alpha)
     print('Top1 Acc: {:.4f}%'.format(acc * 100))
     print('Top5 Acc: {:.4f}%'.format(acc5 * 100))
