@@ -1,0 +1,797 @@
+=================================================================================================
+                                              Kernel Shape      Output Shape  \
+Layer                                                                          
+0_data_bn                                            [150]      [1, 150, 64]   
+1_l1.gcn1.convs.0.Conv2d_conv1                [3, 8, 1, 1]    [2, 8, 64, 25]   
+2_l1.gcn1.convs.0.Conv2d_conv2                [3, 8, 1, 1]    [2, 8, 64, 25]   
+3_l1.gcn1.convs.0.Conv2d_conv3               [3, 64, 1, 1]   [2, 64, 64, 25]   
+4_l1.gcn1.convs.0.Softmax_softmax                        -      [16, 25, 25]   
+5_l1.gcn1.convs.0.Tanh_tanh                              -    [2, 8, 25, 25]   
+6_l1.gcn1.convs.0.Conv2d_conv4               [8, 64, 1, 1]   [2, 64, 25, 25]   
+7_l1.gcn1.convs.1.Conv2d_conv1                [3, 8, 1, 1]    [2, 8, 64, 25]   
+8_l1.gcn1.convs.1.Conv2d_conv2                [3, 8, 1, 1]    [2, 8, 64, 25]   
+9_l1.gcn1.convs.1.Conv2d_conv3               [3, 64, 1, 1]   [2, 64, 64, 25]   
+10_l1.gcn1.convs.1.Softmax_softmax                       -      [16, 25, 25]   
+11_l1.gcn1.convs.1.Tanh_tanh                             -    [2, 8, 25, 25]   
+12_l1.gcn1.convs.1.Conv2d_conv4              [8, 64, 1, 1]   [2, 64, 25, 25]   
+13_l1.gcn1.convs.2.Conv2d_conv1               [3, 8, 1, 1]    [2, 8, 64, 25]   
+14_l1.gcn1.convs.2.Conv2d_conv2               [3, 8, 1, 1]    [2, 8, 64, 25]   
+15_l1.gcn1.convs.2.Conv2d_conv3              [3, 64, 1, 1]   [2, 64, 64, 25]   
+16_l1.gcn1.convs.2.Softmax_softmax                       -      [16, 25, 25]   
+17_l1.gcn1.convs.2.Tanh_tanh                             -    [2, 8, 25, 25]   
+18_l1.gcn1.convs.2.Conv2d_conv4              [8, 64, 1, 1]   [2, 64, 25, 25]   
+19_l1.gcn1.BatchNorm2d_bn                             [64]   [2, 64, 64, 25]   
+20_l1.gcn1.down.Conv2d_0                     [3, 64, 1, 1]   [2, 64, 64, 25]   
+21_l1.gcn1.down.BatchNorm2d_1                         [64]   [2, 64, 64, 25]   
+22_l1.gcn1.ReLU_relu                                     -   [2, 64, 64, 25]   
+23_l1.tcn1.branches.0.Conv2d_0              [64, 16, 1, 1]   [2, 16, 64, 25]   
+24_l1.tcn1.branches.0.BatchNorm2d_1                   [16]   [2, 16, 64, 25]   
+25_l1.tcn1.branches.0.ReLU_2                             -   [2, 16, 64, 25]   
+26_l1.tcn1.branches.0.3.Conv2d_conv         [16, 16, 5, 1]   [2, 16, 64, 25]   
+27_l1.tcn1.branches.0.3.BatchNorm2d_bn                [16]   [2, 16, 64, 25]   
+28_l1.tcn1.branches.1.Conv2d_0              [64, 16, 1, 1]   [2, 16, 64, 25]   
+29_l1.tcn1.branches.1.BatchNorm2d_1                   [16]   [2, 16, 64, 25]   
+30_l1.tcn1.branches.1.ReLU_2                             -   [2, 16, 64, 25]   
+31_l1.tcn1.branches.1.3.Conv2d_conv         [16, 16, 5, 1]   [2, 16, 64, 25]   
+32_l1.tcn1.branches.1.3.BatchNorm2d_bn                [16]   [2, 16, 64, 25]   
+33_l1.tcn1.branches.2.Conv2d_0              [64, 16, 1, 1]   [2, 16, 64, 25]   
+34_l1.tcn1.branches.2.BatchNorm2d_1                   [16]   [2, 16, 64, 25]   
+35_l1.tcn1.branches.2.ReLU_2                             -   [2, 16, 64, 25]   
+36_l1.tcn1.branches.2.MaxPool2d_3                        -   [2, 16, 64, 25]   
+37_l1.tcn1.branches.2.BatchNorm2d_4                   [16]   [2, 16, 64, 25]   
+38_l1.tcn1.branches.3.Conv2d_0              [64, 16, 1, 1]   [2, 16, 64, 25]   
+39_l1.tcn1.branches.3.BatchNorm2d_1                   [16]   [2, 16, 64, 25]   
+40_l1.ReLU_relu                                          -   [2, 64, 64, 25]   
+41_l2.gcn1.convs.0.Conv2d_conv1              [64, 8, 1, 1]    [2, 8, 64, 25]   
+42_l2.gcn1.convs.0.Conv2d_conv2              [64, 8, 1, 1]    [2, 8, 64, 25]   
+43_l2.gcn1.convs.0.Conv2d_conv3             [64, 64, 1, 1]   [2, 64, 64, 25]   
+44_l2.gcn1.convs.0.Softmax_softmax                       -      [16, 25, 25]   
+45_l2.gcn1.convs.0.Tanh_tanh                             -    [2, 8, 25, 25]   
+46_l2.gcn1.convs.0.Conv2d_conv4              [8, 64, 1, 1]   [2, 64, 25, 25]   
+47_l2.gcn1.convs.1.Conv2d_conv1              [64, 8, 1, 1]    [2, 8, 64, 25]   
+48_l2.gcn1.convs.1.Conv2d_conv2              [64, 8, 1, 1]    [2, 8, 64, 25]   
+49_l2.gcn1.convs.1.Conv2d_conv3             [64, 64, 1, 1]   [2, 64, 64, 25]   
+50_l2.gcn1.convs.1.Softmax_softmax                       -      [16, 25, 25]   
+51_l2.gcn1.convs.1.Tanh_tanh                             -    [2, 8, 25, 25]   
+52_l2.gcn1.convs.1.Conv2d_conv4              [8, 64, 1, 1]   [2, 64, 25, 25]   
+53_l2.gcn1.convs.2.Conv2d_conv1              [64, 8, 1, 1]    [2, 8, 64, 25]   
+54_l2.gcn1.convs.2.Conv2d_conv2              [64, 8, 1, 1]    [2, 8, 64, 25]   
+55_l2.gcn1.convs.2.Conv2d_conv3             [64, 64, 1, 1]   [2, 64, 64, 25]   
+56_l2.gcn1.convs.2.Softmax_softmax                       -      [16, 25, 25]   
+57_l2.gcn1.convs.2.Tanh_tanh                             -    [2, 8, 25, 25]   
+58_l2.gcn1.convs.2.Conv2d_conv4              [8, 64, 1, 1]   [2, 64, 25, 25]   
+59_l2.gcn1.BatchNorm2d_bn                             [64]   [2, 64, 64, 25]   
+60_l2.gcn1.ReLU_relu                                     -   [2, 64, 64, 25]   
+61_l2.tcn1.branches.0.Conv2d_0              [64, 16, 1, 1]   [2, 16, 64, 25]   
+62_l2.tcn1.branches.0.BatchNorm2d_1                   [16]   [2, 16, 64, 25]   
+63_l2.tcn1.branches.0.ReLU_2                             -   [2, 16, 64, 25]   
+64_l2.tcn1.branches.0.3.Conv2d_conv         [16, 16, 5, 1]   [2, 16, 64, 25]   
+65_l2.tcn1.branches.0.3.BatchNorm2d_bn                [16]   [2, 16, 64, 25]   
+66_l2.tcn1.branches.1.Conv2d_0              [64, 16, 1, 1]   [2, 16, 64, 25]   
+67_l2.tcn1.branches.1.BatchNorm2d_1                   [16]   [2, 16, 64, 25]   
+68_l2.tcn1.branches.1.ReLU_2                             -   [2, 16, 64, 25]   
+69_l2.tcn1.branches.1.3.Conv2d_conv         [16, 16, 5, 1]   [2, 16, 64, 25]   
+70_l2.tcn1.branches.1.3.BatchNorm2d_bn                [16]   [2, 16, 64, 25]   
+71_l2.tcn1.branches.2.Conv2d_0              [64, 16, 1, 1]   [2, 16, 64, 25]   
+72_l2.tcn1.branches.2.BatchNorm2d_1                   [16]   [2, 16, 64, 25]   
+73_l2.tcn1.branches.2.ReLU_2                             -   [2, 16, 64, 25]   
+74_l2.tcn1.branches.2.MaxPool2d_3                        -   [2, 16, 64, 25]   
+75_l2.tcn1.branches.2.BatchNorm2d_4                   [16]   [2, 16, 64, 25]   
+76_l2.tcn1.branches.3.Conv2d_0              [64, 16, 1, 1]   [2, 16, 64, 25]   
+77_l2.tcn1.branches.3.BatchNorm2d_1                   [16]   [2, 16, 64, 25]   
+78_l2.ReLU_relu                                          -   [2, 64, 64, 25]   
+79_l3.gcn1.convs.0.Conv2d_conv1              [64, 8, 1, 1]    [2, 8, 64, 25]   
+80_l3.gcn1.convs.0.Conv2d_conv2              [64, 8, 1, 1]    [2, 8, 64, 25]   
+81_l3.gcn1.convs.0.Conv2d_conv3             [64, 64, 1, 1]   [2, 64, 64, 25]   
+82_l3.gcn1.convs.0.Softmax_softmax                       -      [16, 25, 25]   
+83_l3.gcn1.convs.0.Tanh_tanh                             -    [2, 8, 25, 25]   
+84_l3.gcn1.convs.0.Conv2d_conv4              [8, 64, 1, 1]   [2, 64, 25, 25]   
+85_l3.gcn1.convs.1.Conv2d_conv1              [64, 8, 1, 1]    [2, 8, 64, 25]   
+86_l3.gcn1.convs.1.Conv2d_conv2              [64, 8, 1, 1]    [2, 8, 64, 25]   
+87_l3.gcn1.convs.1.Conv2d_conv3             [64, 64, 1, 1]   [2, 64, 64, 25]   
+88_l3.gcn1.convs.1.Softmax_softmax                       -      [16, 25, 25]   
+89_l3.gcn1.convs.1.Tanh_tanh                             -    [2, 8, 25, 25]   
+90_l3.gcn1.convs.1.Conv2d_conv4              [8, 64, 1, 1]   [2, 64, 25, 25]   
+91_l3.gcn1.convs.2.Conv2d_conv1              [64, 8, 1, 1]    [2, 8, 64, 25]   
+92_l3.gcn1.convs.2.Conv2d_conv2              [64, 8, 1, 1]    [2, 8, 64, 25]   
+93_l3.gcn1.convs.2.Conv2d_conv3             [64, 64, 1, 1]   [2, 64, 64, 25]   
+94_l3.gcn1.convs.2.Softmax_softmax                       -      [16, 25, 25]   
+95_l3.gcn1.convs.2.Tanh_tanh                             -    [2, 8, 25, 25]   
+96_l3.gcn1.convs.2.Conv2d_conv4              [8, 64, 1, 1]   [2, 64, 25, 25]   
+97_l3.gcn1.BatchNorm2d_bn                             [64]   [2, 64, 64, 25]   
+98_l3.gcn1.ReLU_relu                                     -   [2, 64, 64, 25]   
+99_l3.tcn1.branches.0.Conv2d_0              [64, 16, 1, 1]   [2, 16, 64, 25]   
+100_l3.tcn1.branches.0.BatchNorm2d_1                  [16]   [2, 16, 64, 25]   
+101_l3.tcn1.branches.0.ReLU_2                            -   [2, 16, 64, 25]   
+102_l3.tcn1.branches.0.3.Conv2d_conv        [16, 16, 5, 1]   [2, 16, 64, 25]   
+103_l3.tcn1.branches.0.3.BatchNorm2d_bn               [16]   [2, 16, 64, 25]   
+104_l3.tcn1.branches.1.Conv2d_0             [64, 16, 1, 1]   [2, 16, 64, 25]   
+105_l3.tcn1.branches.1.BatchNorm2d_1                  [16]   [2, 16, 64, 25]   
+106_l3.tcn1.branches.1.ReLU_2                            -   [2, 16, 64, 25]   
+107_l3.tcn1.branches.1.3.Conv2d_conv        [16, 16, 5, 1]   [2, 16, 64, 25]   
+108_l3.tcn1.branches.1.3.BatchNorm2d_bn               [16]   [2, 16, 64, 25]   
+109_l3.tcn1.branches.2.Conv2d_0             [64, 16, 1, 1]   [2, 16, 64, 25]   
+110_l3.tcn1.branches.2.BatchNorm2d_1                  [16]   [2, 16, 64, 25]   
+111_l3.tcn1.branches.2.ReLU_2                            -   [2, 16, 64, 25]   
+112_l3.tcn1.branches.2.MaxPool2d_3                       -   [2, 16, 64, 25]   
+113_l3.tcn1.branches.2.BatchNorm2d_4                  [16]   [2, 16, 64, 25]   
+114_l3.tcn1.branches.3.Conv2d_0             [64, 16, 1, 1]   [2, 16, 64, 25]   
+115_l3.tcn1.branches.3.BatchNorm2d_1                  [16]   [2, 16, 64, 25]   
+116_l3.ReLU_relu                                         -   [2, 64, 64, 25]   
+117_l4.gcn1.convs.0.Conv2d_conv1             [64, 8, 1, 1]    [2, 8, 64, 25]   
+118_l4.gcn1.convs.0.Conv2d_conv2             [64, 8, 1, 1]    [2, 8, 64, 25]   
+119_l4.gcn1.convs.0.Conv2d_conv3            [64, 64, 1, 1]   [2, 64, 64, 25]   
+120_l4.gcn1.convs.0.Softmax_softmax                      -      [16, 25, 25]   
+121_l4.gcn1.convs.0.Tanh_tanh                            -    [2, 8, 25, 25]   
+122_l4.gcn1.convs.0.Conv2d_conv4             [8, 64, 1, 1]   [2, 64, 25, 25]   
+123_l4.gcn1.convs.1.Conv2d_conv1             [64, 8, 1, 1]    [2, 8, 64, 25]   
+124_l4.gcn1.convs.1.Conv2d_conv2             [64, 8, 1, 1]    [2, 8, 64, 25]   
+125_l4.gcn1.convs.1.Conv2d_conv3            [64, 64, 1, 1]   [2, 64, 64, 25]   
+126_l4.gcn1.convs.1.Softmax_softmax                      -      [16, 25, 25]   
+127_l4.gcn1.convs.1.Tanh_tanh                            -    [2, 8, 25, 25]   
+128_l4.gcn1.convs.1.Conv2d_conv4             [8, 64, 1, 1]   [2, 64, 25, 25]   
+129_l4.gcn1.convs.2.Conv2d_conv1             [64, 8, 1, 1]    [2, 8, 64, 25]   
+130_l4.gcn1.convs.2.Conv2d_conv2             [64, 8, 1, 1]    [2, 8, 64, 25]   
+131_l4.gcn1.convs.2.Conv2d_conv3            [64, 64, 1, 1]   [2, 64, 64, 25]   
+132_l4.gcn1.convs.2.Softmax_softmax                      -      [16, 25, 25]   
+133_l4.gcn1.convs.2.Tanh_tanh                            -    [2, 8, 25, 25]   
+134_l4.gcn1.convs.2.Conv2d_conv4             [8, 64, 1, 1]   [2, 64, 25, 25]   
+135_l4.gcn1.BatchNorm2d_bn                            [64]   [2, 64, 64, 25]   
+136_l4.gcn1.ReLU_relu                                    -   [2, 64, 64, 25]   
+137_l4.tcn1.branches.0.Conv2d_0             [64, 16, 1, 1]   [2, 16, 64, 25]   
+138_l4.tcn1.branches.0.BatchNorm2d_1                  [16]   [2, 16, 64, 25]   
+139_l4.tcn1.branches.0.ReLU_2                            -   [2, 16, 64, 25]   
+140_l4.tcn1.branches.0.3.Conv2d_conv        [16, 16, 5, 1]   [2, 16, 64, 25]   
+141_l4.tcn1.branches.0.3.BatchNorm2d_bn               [16]   [2, 16, 64, 25]   
+142_l4.tcn1.branches.1.Conv2d_0             [64, 16, 1, 1]   [2, 16, 64, 25]   
+143_l4.tcn1.branches.1.BatchNorm2d_1                  [16]   [2, 16, 64, 25]   
+144_l4.tcn1.branches.1.ReLU_2                            -   [2, 16, 64, 25]   
+145_l4.tcn1.branches.1.3.Conv2d_conv        [16, 16, 5, 1]   [2, 16, 64, 25]   
+146_l4.tcn1.branches.1.3.BatchNorm2d_bn               [16]   [2, 16, 64, 25]   
+147_l4.tcn1.branches.2.Conv2d_0             [64, 16, 1, 1]   [2, 16, 64, 25]   
+148_l4.tcn1.branches.2.BatchNorm2d_1                  [16]   [2, 16, 64, 25]   
+149_l4.tcn1.branches.2.ReLU_2                            -   [2, 16, 64, 25]   
+150_l4.tcn1.branches.2.MaxPool2d_3                       -   [2, 16, 64, 25]   
+151_l4.tcn1.branches.2.BatchNorm2d_4                  [16]   [2, 16, 64, 25]   
+152_l4.tcn1.branches.3.Conv2d_0             [64, 16, 1, 1]   [2, 16, 64, 25]   
+153_l4.tcn1.branches.3.BatchNorm2d_1                  [16]   [2, 16, 64, 25]   
+154_l4.ReLU_relu                                         -   [2, 64, 64, 25]   
+155_l5.gcn1.convs.0.Conv2d_conv1             [64, 8, 1, 1]    [2, 8, 64, 25]   
+156_l5.gcn1.convs.0.Conv2d_conv2             [64, 8, 1, 1]    [2, 8, 64, 25]   
+157_l5.gcn1.convs.0.Conv2d_conv3           [64, 128, 1, 1]  [2, 128, 64, 25]   
+158_l5.gcn1.convs.0.Softmax_softmax                      -      [16, 25, 25]   
+159_l5.gcn1.convs.0.Tanh_tanh                            -    [2, 8, 25, 25]   
+160_l5.gcn1.convs.0.Conv2d_conv4            [8, 128, 1, 1]  [2, 128, 25, 25]   
+161_l5.gcn1.convs.1.Conv2d_conv1             [64, 8, 1, 1]    [2, 8, 64, 25]   
+162_l5.gcn1.convs.1.Conv2d_conv2             [64, 8, 1, 1]    [2, 8, 64, 25]   
+163_l5.gcn1.convs.1.Conv2d_conv3           [64, 128, 1, 1]  [2, 128, 64, 25]   
+164_l5.gcn1.convs.1.Softmax_softmax                      -      [16, 25, 25]   
+165_l5.gcn1.convs.1.Tanh_tanh                            -    [2, 8, 25, 25]   
+166_l5.gcn1.convs.1.Conv2d_conv4            [8, 128, 1, 1]  [2, 128, 25, 25]   
+167_l5.gcn1.convs.2.Conv2d_conv1             [64, 8, 1, 1]    [2, 8, 64, 25]   
+168_l5.gcn1.convs.2.Conv2d_conv2             [64, 8, 1, 1]    [2, 8, 64, 25]   
+169_l5.gcn1.convs.2.Conv2d_conv3           [64, 128, 1, 1]  [2, 128, 64, 25]   
+170_l5.gcn1.convs.2.Softmax_softmax                      -      [16, 25, 25]   
+171_l5.gcn1.convs.2.Tanh_tanh                            -    [2, 8, 25, 25]   
+172_l5.gcn1.convs.2.Conv2d_conv4            [8, 128, 1, 1]  [2, 128, 25, 25]   
+173_l5.gcn1.BatchNorm2d_bn                           [128]  [2, 128, 64, 25]   
+174_l5.gcn1.down.Conv2d_0                  [64, 128, 1, 1]  [2, 128, 64, 25]   
+175_l5.gcn1.down.BatchNorm2d_1                       [128]  [2, 128, 64, 25]   
+176_l5.gcn1.ReLU_relu                                    -  [2, 128, 64, 25]   
+177_l5.tcn1.branches.0.Conv2d_0            [128, 32, 1, 1]   [2, 32, 64, 25]   
+178_l5.tcn1.branches.0.BatchNorm2d_1                  [32]   [2, 32, 64, 25]   
+179_l5.tcn1.branches.0.ReLU_2                            -   [2, 32, 64, 25]   
+180_l5.tcn1.branches.0.3.Conv2d_conv        [32, 32, 5, 1]   [2, 32, 32, 25]   
+181_l5.tcn1.branches.0.3.BatchNorm2d_bn               [32]   [2, 32, 32, 25]   
+182_l5.tcn1.branches.1.Conv2d_0            [128, 32, 1, 1]   [2, 32, 64, 25]   
+183_l5.tcn1.branches.1.BatchNorm2d_1                  [32]   [2, 32, 64, 25]   
+184_l5.tcn1.branches.1.ReLU_2                            -   [2, 32, 64, 25]   
+185_l5.tcn1.branches.1.3.Conv2d_conv        [32, 32, 5, 1]   [2, 32, 32, 25]   
+186_l5.tcn1.branches.1.3.BatchNorm2d_bn               [32]   [2, 32, 32, 25]   
+187_l5.tcn1.branches.2.Conv2d_0            [128, 32, 1, 1]   [2, 32, 64, 25]   
+188_l5.tcn1.branches.2.BatchNorm2d_1                  [32]   [2, 32, 64, 25]   
+189_l5.tcn1.branches.2.ReLU_2                            -   [2, 32, 64, 25]   
+190_l5.tcn1.branches.2.MaxPool2d_3                       -   [2, 32, 32, 25]   
+191_l5.tcn1.branches.2.BatchNorm2d_4                  [32]   [2, 32, 32, 25]   
+192_l5.tcn1.branches.3.Conv2d_0            [128, 32, 1, 1]   [2, 32, 32, 25]   
+193_l5.tcn1.branches.3.BatchNorm2d_1                  [32]   [2, 32, 32, 25]   
+194_l5.residual.Conv2d_conv                [64, 128, 1, 1]  [2, 128, 32, 25]   
+195_l5.residual.BatchNorm2d_bn                       [128]  [2, 128, 32, 25]   
+196_l5.ReLU_relu                                         -  [2, 128, 32, 25]   
+197_l6.gcn1.convs.0.Conv2d_conv1           [128, 16, 1, 1]   [2, 16, 32, 25]   
+198_l6.gcn1.convs.0.Conv2d_conv2           [128, 16, 1, 1]   [2, 16, 32, 25]   
+199_l6.gcn1.convs.0.Conv2d_conv3          [128, 128, 1, 1]  [2, 128, 32, 25]   
+200_l6.gcn1.convs.0.Softmax_softmax                      -      [32, 25, 25]   
+201_l6.gcn1.convs.0.Tanh_tanh                            -   [2, 16, 25, 25]   
+202_l6.gcn1.convs.0.Conv2d_conv4           [16, 128, 1, 1]  [2, 128, 25, 25]   
+203_l6.gcn1.convs.1.Conv2d_conv1           [128, 16, 1, 1]   [2, 16, 32, 25]   
+204_l6.gcn1.convs.1.Conv2d_conv2           [128, 16, 1, 1]   [2, 16, 32, 25]   
+205_l6.gcn1.convs.1.Conv2d_conv3          [128, 128, 1, 1]  [2, 128, 32, 25]   
+206_l6.gcn1.convs.1.Softmax_softmax                      -      [32, 25, 25]   
+207_l6.gcn1.convs.1.Tanh_tanh                            -   [2, 16, 25, 25]   
+208_l6.gcn1.convs.1.Conv2d_conv4           [16, 128, 1, 1]  [2, 128, 25, 25]   
+209_l6.gcn1.convs.2.Conv2d_conv1           [128, 16, 1, 1]   [2, 16, 32, 25]   
+210_l6.gcn1.convs.2.Conv2d_conv2           [128, 16, 1, 1]   [2, 16, 32, 25]   
+211_l6.gcn1.convs.2.Conv2d_conv3          [128, 128, 1, 1]  [2, 128, 32, 25]   
+212_l6.gcn1.convs.2.Softmax_softmax                      -      [32, 25, 25]   
+213_l6.gcn1.convs.2.Tanh_tanh                            -   [2, 16, 25, 25]   
+214_l6.gcn1.convs.2.Conv2d_conv4           [16, 128, 1, 1]  [2, 128, 25, 25]   
+215_l6.gcn1.BatchNorm2d_bn                           [128]  [2, 128, 32, 25]   
+216_l6.gcn1.ReLU_relu                                    -  [2, 128, 32, 25]   
+217_l6.tcn1.branches.0.Conv2d_0            [128, 32, 1, 1]   [2, 32, 32, 25]   
+218_l6.tcn1.branches.0.BatchNorm2d_1                  [32]   [2, 32, 32, 25]   
+219_l6.tcn1.branches.0.ReLU_2                            -   [2, 32, 32, 25]   
+220_l6.tcn1.branches.0.3.Conv2d_conv        [32, 32, 5, 1]   [2, 32, 32, 25]   
+221_l6.tcn1.branches.0.3.BatchNorm2d_bn               [32]   [2, 32, 32, 25]   
+222_l6.tcn1.branches.1.Conv2d_0            [128, 32, 1, 1]   [2, 32, 32, 25]   
+223_l6.tcn1.branches.1.BatchNorm2d_1                  [32]   [2, 32, 32, 25]   
+224_l6.tcn1.branches.1.ReLU_2                            -   [2, 32, 32, 25]   
+225_l6.tcn1.branches.1.3.Conv2d_conv        [32, 32, 5, 1]   [2, 32, 32, 25]   
+226_l6.tcn1.branches.1.3.BatchNorm2d_bn               [32]   [2, 32, 32, 25]   
+227_l6.tcn1.branches.2.Conv2d_0            [128, 32, 1, 1]   [2, 32, 32, 25]   
+228_l6.tcn1.branches.2.BatchNorm2d_1                  [32]   [2, 32, 32, 25]   
+229_l6.tcn1.branches.2.ReLU_2                            -   [2, 32, 32, 25]   
+230_l6.tcn1.branches.2.MaxPool2d_3                       -   [2, 32, 32, 25]   
+231_l6.tcn1.branches.2.BatchNorm2d_4                  [32]   [2, 32, 32, 25]   
+232_l6.tcn1.branches.3.Conv2d_0            [128, 32, 1, 1]   [2, 32, 32, 25]   
+233_l6.tcn1.branches.3.BatchNorm2d_1                  [32]   [2, 32, 32, 25]   
+234_l6.ReLU_relu                                         -  [2, 128, 32, 25]   
+235_l7.gcn1.convs.0.Conv2d_conv1           [128, 16, 1, 1]   [2, 16, 32, 25]   
+236_l7.gcn1.convs.0.Conv2d_conv2           [128, 16, 1, 1]   [2, 16, 32, 25]   
+237_l7.gcn1.convs.0.Conv2d_conv3          [128, 128, 1, 1]  [2, 128, 32, 25]   
+238_l7.gcn1.convs.0.Softmax_softmax                      -      [32, 25, 25]   
+239_l7.gcn1.convs.0.Tanh_tanh                            -   [2, 16, 25, 25]   
+240_l7.gcn1.convs.0.Conv2d_conv4           [16, 128, 1, 1]  [2, 128, 25, 25]   
+241_l7.gcn1.convs.1.Conv2d_conv1           [128, 16, 1, 1]   [2, 16, 32, 25]   
+242_l7.gcn1.convs.1.Conv2d_conv2           [128, 16, 1, 1]   [2, 16, 32, 25]   
+243_l7.gcn1.convs.1.Conv2d_conv3          [128, 128, 1, 1]  [2, 128, 32, 25]   
+244_l7.gcn1.convs.1.Softmax_softmax                      -      [32, 25, 25]   
+245_l7.gcn1.convs.1.Tanh_tanh                            -   [2, 16, 25, 25]   
+246_l7.gcn1.convs.1.Conv2d_conv4           [16, 128, 1, 1]  [2, 128, 25, 25]   
+247_l7.gcn1.convs.2.Conv2d_conv1           [128, 16, 1, 1]   [2, 16, 32, 25]   
+248_l7.gcn1.convs.2.Conv2d_conv2           [128, 16, 1, 1]   [2, 16, 32, 25]   
+249_l7.gcn1.convs.2.Conv2d_conv3          [128, 128, 1, 1]  [2, 128, 32, 25]   
+250_l7.gcn1.convs.2.Softmax_softmax                      -      [32, 25, 25]   
+251_l7.gcn1.convs.2.Tanh_tanh                            -   [2, 16, 25, 25]   
+252_l7.gcn1.convs.2.Conv2d_conv4           [16, 128, 1, 1]  [2, 128, 25, 25]   
+253_l7.gcn1.BatchNorm2d_bn                           [128]  [2, 128, 32, 25]   
+254_l7.gcn1.ReLU_relu                                    -  [2, 128, 32, 25]   
+255_l7.tcn1.branches.0.Conv2d_0            [128, 32, 1, 1]   [2, 32, 32, 25]   
+256_l7.tcn1.branches.0.BatchNorm2d_1                  [32]   [2, 32, 32, 25]   
+257_l7.tcn1.branches.0.ReLU_2                            -   [2, 32, 32, 25]   
+258_l7.tcn1.branches.0.3.Conv2d_conv        [32, 32, 5, 1]   [2, 32, 32, 25]   
+259_l7.tcn1.branches.0.3.BatchNorm2d_bn               [32]   [2, 32, 32, 25]   
+260_l7.tcn1.branches.1.Conv2d_0            [128, 32, 1, 1]   [2, 32, 32, 25]   
+261_l7.tcn1.branches.1.BatchNorm2d_1                  [32]   [2, 32, 32, 25]   
+262_l7.tcn1.branches.1.ReLU_2                            -   [2, 32, 32, 25]   
+263_l7.tcn1.branches.1.3.Conv2d_conv        [32, 32, 5, 1]   [2, 32, 32, 25]   
+264_l7.tcn1.branches.1.3.BatchNorm2d_bn               [32]   [2, 32, 32, 25]   
+265_l7.tcn1.branches.2.Conv2d_0            [128, 32, 1, 1]   [2, 32, 32, 25]   
+266_l7.tcn1.branches.2.BatchNorm2d_1                  [32]   [2, 32, 32, 25]   
+267_l7.tcn1.branches.2.ReLU_2                            -   [2, 32, 32, 25]   
+268_l7.tcn1.branches.2.MaxPool2d_3                       -   [2, 32, 32, 25]   
+269_l7.tcn1.branches.2.BatchNorm2d_4                  [32]   [2, 32, 32, 25]   
+270_l7.tcn1.branches.3.Conv2d_0            [128, 32, 1, 1]   [2, 32, 32, 25]   
+271_l7.tcn1.branches.3.BatchNorm2d_1                  [32]   [2, 32, 32, 25]   
+272_l7.ReLU_relu                                         -  [2, 128, 32, 25]   
+273_l8.gcn1.convs.0.Conv2d_conv1           [128, 16, 1, 1]   [2, 16, 32, 25]   
+274_l8.gcn1.convs.0.Conv2d_conv2           [128, 16, 1, 1]   [2, 16, 32, 25]   
+275_l8.gcn1.convs.0.Conv2d_conv3          [128, 256, 1, 1]  [2, 256, 32, 25]   
+276_l8.gcn1.convs.0.Softmax_softmax                      -      [32, 25, 25]   
+277_l8.gcn1.convs.0.Tanh_tanh                            -   [2, 16, 25, 25]   
+278_l8.gcn1.convs.0.Conv2d_conv4           [16, 256, 1, 1]  [2, 256, 25, 25]   
+279_l8.gcn1.convs.1.Conv2d_conv1           [128, 16, 1, 1]   [2, 16, 32, 25]   
+280_l8.gcn1.convs.1.Conv2d_conv2           [128, 16, 1, 1]   [2, 16, 32, 25]   
+281_l8.gcn1.convs.1.Conv2d_conv3          [128, 256, 1, 1]  [2, 256, 32, 25]   
+282_l8.gcn1.convs.1.Softmax_softmax                      -      [32, 25, 25]   
+283_l8.gcn1.convs.1.Tanh_tanh                            -   [2, 16, 25, 25]   
+284_l8.gcn1.convs.1.Conv2d_conv4           [16, 256, 1, 1]  [2, 256, 25, 25]   
+285_l8.gcn1.convs.2.Conv2d_conv1           [128, 16, 1, 1]   [2, 16, 32, 25]   
+286_l8.gcn1.convs.2.Conv2d_conv2           [128, 16, 1, 1]   [2, 16, 32, 25]   
+287_l8.gcn1.convs.2.Conv2d_conv3          [128, 256, 1, 1]  [2, 256, 32, 25]   
+288_l8.gcn1.convs.2.Softmax_softmax                      -      [32, 25, 25]   
+289_l8.gcn1.convs.2.Tanh_tanh                            -   [2, 16, 25, 25]   
+290_l8.gcn1.convs.2.Conv2d_conv4           [16, 256, 1, 1]  [2, 256, 25, 25]   
+291_l8.gcn1.BatchNorm2d_bn                           [256]  [2, 256, 32, 25]   
+292_l8.gcn1.down.Conv2d_0                 [128, 256, 1, 1]  [2, 256, 32, 25]   
+293_l8.gcn1.down.BatchNorm2d_1                       [256]  [2, 256, 32, 25]   
+294_l8.gcn1.ReLU_relu                                    -  [2, 256, 32, 25]   
+295_l8.tcn1.branches.0.Conv2d_0            [256, 64, 1, 1]   [2, 64, 32, 25]   
+296_l8.tcn1.branches.0.BatchNorm2d_1                  [64]   [2, 64, 32, 25]   
+297_l8.tcn1.branches.0.ReLU_2                            -   [2, 64, 32, 25]   
+298_l8.tcn1.branches.0.3.Conv2d_conv        [64, 64, 5, 1]   [2, 64, 16, 25]   
+299_l8.tcn1.branches.0.3.BatchNorm2d_bn               [64]   [2, 64, 16, 25]   
+300_l8.tcn1.branches.1.Conv2d_0            [256, 64, 1, 1]   [2, 64, 32, 25]   
+301_l8.tcn1.branches.1.BatchNorm2d_1                  [64]   [2, 64, 32, 25]   
+302_l8.tcn1.branches.1.ReLU_2                            -   [2, 64, 32, 25]   
+303_l8.tcn1.branches.1.3.Conv2d_conv        [64, 64, 5, 1]   [2, 64, 16, 25]   
+304_l8.tcn1.branches.1.3.BatchNorm2d_bn               [64]   [2, 64, 16, 25]   
+305_l8.tcn1.branches.2.Conv2d_0            [256, 64, 1, 1]   [2, 64, 32, 25]   
+306_l8.tcn1.branches.2.BatchNorm2d_1                  [64]   [2, 64, 32, 25]   
+307_l8.tcn1.branches.2.ReLU_2                            -   [2, 64, 32, 25]   
+308_l8.tcn1.branches.2.MaxPool2d_3                       -   [2, 64, 16, 25]   
+309_l8.tcn1.branches.2.BatchNorm2d_4                  [64]   [2, 64, 16, 25]   
+310_l8.tcn1.branches.3.Conv2d_0            [256, 64, 1, 1]   [2, 64, 16, 25]   
+311_l8.tcn1.branches.3.BatchNorm2d_1                  [64]   [2, 64, 16, 25]   
+312_l8.residual.Conv2d_conv               [128, 256, 1, 1]  [2, 256, 16, 25]   
+313_l8.residual.BatchNorm2d_bn                       [256]  [2, 256, 16, 25]   
+314_l8.ReLU_relu                                         -  [2, 256, 16, 25]   
+315_l9.gcn1.convs.0.Conv2d_conv1           [256, 32, 1, 1]   [2, 32, 16, 25]   
+316_l9.gcn1.convs.0.Conv2d_conv2           [256, 32, 1, 1]   [2, 32, 16, 25]   
+317_l9.gcn1.convs.0.Conv2d_conv3          [256, 256, 1, 1]  [2, 256, 16, 25]   
+318_l9.gcn1.convs.0.Softmax_softmax                      -      [64, 25, 25]   
+319_l9.gcn1.convs.0.Tanh_tanh                            -   [2, 32, 25, 25]   
+320_l9.gcn1.convs.0.Conv2d_conv4           [32, 256, 1, 1]  [2, 256, 25, 25]   
+321_l9.gcn1.convs.1.Conv2d_conv1           [256, 32, 1, 1]   [2, 32, 16, 25]   
+322_l9.gcn1.convs.1.Conv2d_conv2           [256, 32, 1, 1]   [2, 32, 16, 25]   
+323_l9.gcn1.convs.1.Conv2d_conv3          [256, 256, 1, 1]  [2, 256, 16, 25]   
+324_l9.gcn1.convs.1.Softmax_softmax                      -      [64, 25, 25]   
+325_l9.gcn1.convs.1.Tanh_tanh                            -   [2, 32, 25, 25]   
+326_l9.gcn1.convs.1.Conv2d_conv4           [32, 256, 1, 1]  [2, 256, 25, 25]   
+327_l9.gcn1.convs.2.Conv2d_conv1           [256, 32, 1, 1]   [2, 32, 16, 25]   
+328_l9.gcn1.convs.2.Conv2d_conv2           [256, 32, 1, 1]   [2, 32, 16, 25]   
+329_l9.gcn1.convs.2.Conv2d_conv3          [256, 256, 1, 1]  [2, 256, 16, 25]   
+330_l9.gcn1.convs.2.Softmax_softmax                      -      [64, 25, 25]   
+331_l9.gcn1.convs.2.Tanh_tanh                            -   [2, 32, 25, 25]   
+332_l9.gcn1.convs.2.Conv2d_conv4           [32, 256, 1, 1]  [2, 256, 25, 25]   
+333_l9.gcn1.BatchNorm2d_bn                           [256]  [2, 256, 16, 25]   
+334_l9.gcn1.ReLU_relu                                    -  [2, 256, 16, 25]   
+335_l9.tcn1.branches.0.Conv2d_0            [256, 64, 1, 1]   [2, 64, 16, 25]   
+336_l9.tcn1.branches.0.BatchNorm2d_1                  [64]   [2, 64, 16, 25]   
+337_l9.tcn1.branches.0.ReLU_2                            -   [2, 64, 16, 25]   
+338_l9.tcn1.branches.0.3.Conv2d_conv        [64, 64, 5, 1]   [2, 64, 16, 25]   
+339_l9.tcn1.branches.0.3.BatchNorm2d_bn               [64]   [2, 64, 16, 25]   
+340_l9.tcn1.branches.1.Conv2d_0            [256, 64, 1, 1]   [2, 64, 16, 25]   
+341_l9.tcn1.branches.1.BatchNorm2d_1                  [64]   [2, 64, 16, 25]   
+342_l9.tcn1.branches.1.ReLU_2                            -   [2, 64, 16, 25]   
+343_l9.tcn1.branches.1.3.Conv2d_conv        [64, 64, 5, 1]   [2, 64, 16, 25]   
+344_l9.tcn1.branches.1.3.BatchNorm2d_bn               [64]   [2, 64, 16, 25]   
+345_l9.tcn1.branches.2.Conv2d_0            [256, 64, 1, 1]   [2, 64, 16, 25]   
+346_l9.tcn1.branches.2.BatchNorm2d_1                  [64]   [2, 64, 16, 25]   
+347_l9.tcn1.branches.2.ReLU_2                            -   [2, 64, 16, 25]   
+348_l9.tcn1.branches.2.MaxPool2d_3                       -   [2, 64, 16, 25]   
+349_l9.tcn1.branches.2.BatchNorm2d_4                  [64]   [2, 64, 16, 25]   
+350_l9.tcn1.branches.3.Conv2d_0            [256, 64, 1, 1]   [2, 64, 16, 25]   
+351_l9.tcn1.branches.3.BatchNorm2d_1                  [64]   [2, 64, 16, 25]   
+352_l9.ReLU_relu                                         -  [2, 256, 16, 25]   
+353_l10.gcn1.convs.0.Conv2d_conv1          [256, 32, 1, 1]   [2, 32, 16, 25]   
+354_l10.gcn1.convs.0.Conv2d_conv2          [256, 32, 1, 1]   [2, 32, 16, 25]   
+355_l10.gcn1.convs.0.Conv2d_conv3         [256, 256, 1, 1]  [2, 256, 16, 25]   
+356_l10.gcn1.convs.0.Softmax_softmax                     -      [64, 25, 25]   
+357_l10.gcn1.convs.0.Tanh_tanh                           -   [2, 32, 25, 25]   
+358_l10.gcn1.convs.0.Conv2d_conv4          [32, 256, 1, 1]  [2, 256, 25, 25]   
+359_l10.gcn1.convs.1.Conv2d_conv1          [256, 32, 1, 1]   [2, 32, 16, 25]   
+360_l10.gcn1.convs.1.Conv2d_conv2          [256, 32, 1, 1]   [2, 32, 16, 25]   
+361_l10.gcn1.convs.1.Conv2d_conv3         [256, 256, 1, 1]  [2, 256, 16, 25]   
+362_l10.gcn1.convs.1.Softmax_softmax                     -      [64, 25, 25]   
+363_l10.gcn1.convs.1.Tanh_tanh                           -   [2, 32, 25, 25]   
+364_l10.gcn1.convs.1.Conv2d_conv4          [32, 256, 1, 1]  [2, 256, 25, 25]   
+365_l10.gcn1.convs.2.Conv2d_conv1          [256, 32, 1, 1]   [2, 32, 16, 25]   
+366_l10.gcn1.convs.2.Conv2d_conv2          [256, 32, 1, 1]   [2, 32, 16, 25]   
+367_l10.gcn1.convs.2.Conv2d_conv3         [256, 256, 1, 1]  [2, 256, 16, 25]   
+368_l10.gcn1.convs.2.Softmax_softmax                     -      [64, 25, 25]   
+369_l10.gcn1.convs.2.Tanh_tanh                           -   [2, 32, 25, 25]   
+370_l10.gcn1.convs.2.Conv2d_conv4          [32, 256, 1, 1]  [2, 256, 25, 25]   
+371_l10.gcn1.BatchNorm2d_bn                          [256]  [2, 256, 16, 25]   
+372_l10.gcn1.ReLU_relu                                   -  [2, 256, 16, 25]   
+373_l10.tcn1.branches.0.Conv2d_0           [256, 64, 1, 1]   [2, 64, 16, 25]   
+374_l10.tcn1.branches.0.BatchNorm2d_1                 [64]   [2, 64, 16, 25]   
+375_l10.tcn1.branches.0.ReLU_2                           -   [2, 64, 16, 25]   
+376_l10.tcn1.branches.0.3.Conv2d_conv       [64, 64, 5, 1]   [2, 64, 16, 25]   
+377_l10.tcn1.branches.0.3.BatchNorm2d_bn              [64]   [2, 64, 16, 25]   
+378_l10.tcn1.branches.1.Conv2d_0           [256, 64, 1, 1]   [2, 64, 16, 25]   
+379_l10.tcn1.branches.1.BatchNorm2d_1                 [64]   [2, 64, 16, 25]   
+380_l10.tcn1.branches.1.ReLU_2                           -   [2, 64, 16, 25]   
+381_l10.tcn1.branches.1.3.Conv2d_conv       [64, 64, 5, 1]   [2, 64, 16, 25]   
+382_l10.tcn1.branches.1.3.BatchNorm2d_bn              [64]   [2, 64, 16, 25]   
+383_l10.tcn1.branches.2.Conv2d_0           [256, 64, 1, 1]   [2, 64, 16, 25]   
+384_l10.tcn1.branches.2.BatchNorm2d_1                 [64]   [2, 64, 16, 25]   
+385_l10.tcn1.branches.2.ReLU_2                           -   [2, 64, 16, 25]   
+386_l10.tcn1.branches.2.MaxPool2d_3                      -   [2, 64, 16, 25]   
+387_l10.tcn1.branches.2.BatchNorm2d_4                 [64]   [2, 64, 16, 25]   
+388_l10.tcn1.branches.3.Conv2d_0           [256, 64, 1, 1]   [2, 64, 16, 25]   
+389_l10.tcn1.branches.3.BatchNorm2d_1                 [64]   [2, 64, 16, 25]   
+390_l10.ReLU_relu                                        -  [2, 256, 16, 25]   
+391_fc                                           [256, 60]           [1, 60]   
+
+                                           Params Mult-Adds  
+Layer                                                        
+0_data_bn                                   300.0     150.0  
+1_l1.gcn1.convs.0.Conv2d_conv1               32.0     38.4k  
+2_l1.gcn1.convs.0.Conv2d_conv2               32.0     38.4k  
+3_l1.gcn1.convs.0.Conv2d_conv3              256.0    307.2k  
+4_l1.gcn1.convs.0.Softmax_softmax               -         -  
+5_l1.gcn1.convs.0.Tanh_tanh                     -         -  
+6_l1.gcn1.convs.0.Conv2d_conv4              576.0    320.0k  
+7_l1.gcn1.convs.1.Conv2d_conv1               32.0     38.4k  
+8_l1.gcn1.convs.1.Conv2d_conv2               32.0     38.4k  
+9_l1.gcn1.convs.1.Conv2d_conv3              256.0    307.2k  
+10_l1.gcn1.convs.1.Softmax_softmax              -         -  
+11_l1.gcn1.convs.1.Tanh_tanh                    -         -  
+12_l1.gcn1.convs.1.Conv2d_conv4             576.0    320.0k  
+13_l1.gcn1.convs.2.Conv2d_conv1              32.0     38.4k  
+14_l1.gcn1.convs.2.Conv2d_conv2              32.0     38.4k  
+15_l1.gcn1.convs.2.Conv2d_conv3             256.0    307.2k  
+16_l1.gcn1.convs.2.Softmax_softmax              -         -  
+17_l1.gcn1.convs.2.Tanh_tanh                    -         -  
+18_l1.gcn1.convs.2.Conv2d_conv4             576.0    320.0k  
+19_l1.gcn1.BatchNorm2d_bn                   128.0      64.0  
+20_l1.gcn1.down.Conv2d_0                    256.0    307.2k  
+21_l1.gcn1.down.BatchNorm2d_1               128.0      64.0  
+22_l1.gcn1.ReLU_relu                            -         -  
+23_l1.tcn1.branches.0.Conv2d_0              1.04k   1.6384M  
+24_l1.tcn1.branches.0.BatchNorm2d_1          32.0      16.0  
+25_l1.tcn1.branches.0.ReLU_2                    -         -  
+26_l1.tcn1.branches.0.3.Conv2d_conv        1.296k    2.048M  
+27_l1.tcn1.branches.0.3.BatchNorm2d_bn       32.0      16.0  
+28_l1.tcn1.branches.1.Conv2d_0              1.04k   1.6384M  
+29_l1.tcn1.branches.1.BatchNorm2d_1          32.0      16.0  
+30_l1.tcn1.branches.1.ReLU_2                    -         -  
+31_l1.tcn1.branches.1.3.Conv2d_conv        1.296k    2.048M  
+32_l1.tcn1.branches.1.3.BatchNorm2d_bn       32.0      16.0  
+33_l1.tcn1.branches.2.Conv2d_0              1.04k   1.6384M  
+34_l1.tcn1.branches.2.BatchNorm2d_1          32.0      16.0  
+35_l1.tcn1.branches.2.ReLU_2                    -         -  
+36_l1.tcn1.branches.2.MaxPool2d_3               -         -  
+37_l1.tcn1.branches.2.BatchNorm2d_4          32.0      16.0  
+38_l1.tcn1.branches.3.Conv2d_0              1.04k   1.6384M  
+39_l1.tcn1.branches.3.BatchNorm2d_1          32.0      16.0  
+40_l1.ReLU_relu                                 -         -  
+41_l2.gcn1.convs.0.Conv2d_conv1             520.0    819.2k  
+42_l2.gcn1.convs.0.Conv2d_conv2             520.0    819.2k  
+43_l2.gcn1.convs.0.Conv2d_conv3             4.16k   6.5536M  
+44_l2.gcn1.convs.0.Softmax_softmax              -         -  
+45_l2.gcn1.convs.0.Tanh_tanh                    -         -  
+46_l2.gcn1.convs.0.Conv2d_conv4             576.0    320.0k  
+47_l2.gcn1.convs.1.Conv2d_conv1             520.0    819.2k  
+48_l2.gcn1.convs.1.Conv2d_conv2             520.0    819.2k  
+49_l2.gcn1.convs.1.Conv2d_conv3             4.16k   6.5536M  
+50_l2.gcn1.convs.1.Softmax_softmax              -         -  
+51_l2.gcn1.convs.1.Tanh_tanh                    -         -  
+52_l2.gcn1.convs.1.Conv2d_conv4             576.0    320.0k  
+53_l2.gcn1.convs.2.Conv2d_conv1             520.0    819.2k  
+54_l2.gcn1.convs.2.Conv2d_conv2             520.0    819.2k  
+55_l2.gcn1.convs.2.Conv2d_conv3             4.16k   6.5536M  
+56_l2.gcn1.convs.2.Softmax_softmax              -         -  
+57_l2.gcn1.convs.2.Tanh_tanh                    -         -  
+58_l2.gcn1.convs.2.Conv2d_conv4             576.0    320.0k  
+59_l2.gcn1.BatchNorm2d_bn                   128.0      64.0  
+60_l2.gcn1.ReLU_relu                            -         -  
+61_l2.tcn1.branches.0.Conv2d_0              1.04k   1.6384M  
+62_l2.tcn1.branches.0.BatchNorm2d_1          32.0      16.0  
+63_l2.tcn1.branches.0.ReLU_2                    -         -  
+64_l2.tcn1.branches.0.3.Conv2d_conv        1.296k    2.048M  
+65_l2.tcn1.branches.0.3.BatchNorm2d_bn       32.0      16.0  
+66_l2.tcn1.branches.1.Conv2d_0              1.04k   1.6384M  
+67_l2.tcn1.branches.1.BatchNorm2d_1          32.0      16.0  
+68_l2.tcn1.branches.1.ReLU_2                    -         -  
+69_l2.tcn1.branches.1.3.Conv2d_conv        1.296k    2.048M  
+70_l2.tcn1.branches.1.3.BatchNorm2d_bn       32.0      16.0  
+71_l2.tcn1.branches.2.Conv2d_0              1.04k   1.6384M  
+72_l2.tcn1.branches.2.BatchNorm2d_1          32.0      16.0  
+73_l2.tcn1.branches.2.ReLU_2                    -         -  
+74_l2.tcn1.branches.2.MaxPool2d_3               -         -  
+75_l2.tcn1.branches.2.BatchNorm2d_4          32.0      16.0  
+76_l2.tcn1.branches.3.Conv2d_0              1.04k   1.6384M  
+77_l2.tcn1.branches.3.BatchNorm2d_1          32.0      16.0  
+78_l2.ReLU_relu                                 -         -  
+79_l3.gcn1.convs.0.Conv2d_conv1             520.0    819.2k  
+80_l3.gcn1.convs.0.Conv2d_conv2             520.0    819.2k  
+81_l3.gcn1.convs.0.Conv2d_conv3             4.16k   6.5536M  
+82_l3.gcn1.convs.0.Softmax_softmax              -         -  
+83_l3.gcn1.convs.0.Tanh_tanh                    -         -  
+84_l3.gcn1.convs.0.Conv2d_conv4             576.0    320.0k  
+85_l3.gcn1.convs.1.Conv2d_conv1             520.0    819.2k  
+86_l3.gcn1.convs.1.Conv2d_conv2             520.0    819.2k  
+87_l3.gcn1.convs.1.Conv2d_conv3             4.16k   6.5536M  
+88_l3.gcn1.convs.1.Softmax_softmax              -         -  
+89_l3.gcn1.convs.1.Tanh_tanh                    -         -  
+90_l3.gcn1.convs.1.Conv2d_conv4             576.0    320.0k  
+91_l3.gcn1.convs.2.Conv2d_conv1             520.0    819.2k  
+92_l3.gcn1.convs.2.Conv2d_conv2             520.0    819.2k  
+93_l3.gcn1.convs.2.Conv2d_conv3             4.16k   6.5536M  
+94_l3.gcn1.convs.2.Softmax_softmax              -         -  
+95_l3.gcn1.convs.2.Tanh_tanh                    -         -  
+96_l3.gcn1.convs.2.Conv2d_conv4             576.0    320.0k  
+97_l3.gcn1.BatchNorm2d_bn                   128.0      64.0  
+98_l3.gcn1.ReLU_relu                            -         -  
+99_l3.tcn1.branches.0.Conv2d_0              1.04k   1.6384M  
+100_l3.tcn1.branches.0.BatchNorm2d_1         32.0      16.0  
+101_l3.tcn1.branches.0.ReLU_2                   -         -  
+102_l3.tcn1.branches.0.3.Conv2d_conv       1.296k    2.048M  
+103_l3.tcn1.branches.0.3.BatchNorm2d_bn      32.0      16.0  
+104_l3.tcn1.branches.1.Conv2d_0             1.04k   1.6384M  
+105_l3.tcn1.branches.1.BatchNorm2d_1         32.0      16.0  
+106_l3.tcn1.branches.1.ReLU_2                   -         -  
+107_l3.tcn1.branches.1.3.Conv2d_conv       1.296k    2.048M  
+108_l3.tcn1.branches.1.3.BatchNorm2d_bn      32.0      16.0  
+109_l3.tcn1.branches.2.Conv2d_0             1.04k   1.6384M  
+110_l3.tcn1.branches.2.BatchNorm2d_1         32.0      16.0  
+111_l3.tcn1.branches.2.ReLU_2                   -         -  
+112_l3.tcn1.branches.2.MaxPool2d_3              -         -  
+113_l3.tcn1.branches.2.BatchNorm2d_4         32.0      16.0  
+114_l3.tcn1.branches.3.Conv2d_0             1.04k   1.6384M  
+115_l3.tcn1.branches.3.BatchNorm2d_1         32.0      16.0  
+116_l3.ReLU_relu                                -         -  
+117_l4.gcn1.convs.0.Conv2d_conv1            520.0    819.2k  
+118_l4.gcn1.convs.0.Conv2d_conv2            520.0    819.2k  
+119_l4.gcn1.convs.0.Conv2d_conv3            4.16k   6.5536M  
+120_l4.gcn1.convs.0.Softmax_softmax             -         -  
+121_l4.gcn1.convs.0.Tanh_tanh                   -         -  
+122_l4.gcn1.convs.0.Conv2d_conv4            576.0    320.0k  
+123_l4.gcn1.convs.1.Conv2d_conv1            520.0    819.2k  
+124_l4.gcn1.convs.1.Conv2d_conv2            520.0    819.2k  
+125_l4.gcn1.convs.1.Conv2d_conv3            4.16k   6.5536M  
+126_l4.gcn1.convs.1.Softmax_softmax             -         -  
+127_l4.gcn1.convs.1.Tanh_tanh                   -         -  
+128_l4.gcn1.convs.1.Conv2d_conv4            576.0    320.0k  
+129_l4.gcn1.convs.2.Conv2d_conv1            520.0    819.2k  
+130_l4.gcn1.convs.2.Conv2d_conv2            520.0    819.2k  
+131_l4.gcn1.convs.2.Conv2d_conv3            4.16k   6.5536M  
+132_l4.gcn1.convs.2.Softmax_softmax             -         -  
+133_l4.gcn1.convs.2.Tanh_tanh                   -         -  
+134_l4.gcn1.convs.2.Conv2d_conv4            576.0    320.0k  
+135_l4.gcn1.BatchNorm2d_bn                  128.0      64.0  
+136_l4.gcn1.ReLU_relu                           -         -  
+137_l4.tcn1.branches.0.Conv2d_0             1.04k   1.6384M  
+138_l4.tcn1.branches.0.BatchNorm2d_1         32.0      16.0  
+139_l4.tcn1.branches.0.ReLU_2                   -         -  
+140_l4.tcn1.branches.0.3.Conv2d_conv       1.296k    2.048M  
+141_l4.tcn1.branches.0.3.BatchNorm2d_bn      32.0      16.0  
+142_l4.tcn1.branches.1.Conv2d_0             1.04k   1.6384M  
+143_l4.tcn1.branches.1.BatchNorm2d_1         32.0      16.0  
+144_l4.tcn1.branches.1.ReLU_2                   -         -  
+145_l4.tcn1.branches.1.3.Conv2d_conv       1.296k    2.048M  
+146_l4.tcn1.branches.1.3.BatchNorm2d_bn      32.0      16.0  
+147_l4.tcn1.branches.2.Conv2d_0             1.04k   1.6384M  
+148_l4.tcn1.branches.2.BatchNorm2d_1         32.0      16.0  
+149_l4.tcn1.branches.2.ReLU_2                   -         -  
+150_l4.tcn1.branches.2.MaxPool2d_3              -         -  
+151_l4.tcn1.branches.2.BatchNorm2d_4         32.0      16.0  
+152_l4.tcn1.branches.3.Conv2d_0             1.04k   1.6384M  
+153_l4.tcn1.branches.3.BatchNorm2d_1         32.0      16.0  
+154_l4.ReLU_relu                                -         -  
+155_l5.gcn1.convs.0.Conv2d_conv1            520.0    819.2k  
+156_l5.gcn1.convs.0.Conv2d_conv2            520.0    819.2k  
+157_l5.gcn1.convs.0.Conv2d_conv3            8.32k  13.1072M  
+158_l5.gcn1.convs.0.Softmax_softmax             -         -  
+159_l5.gcn1.convs.0.Tanh_tanh                   -         -  
+160_l5.gcn1.convs.0.Conv2d_conv4           1.152k    640.0k  
+161_l5.gcn1.convs.1.Conv2d_conv1            520.0    819.2k  
+162_l5.gcn1.convs.1.Conv2d_conv2            520.0    819.2k  
+163_l5.gcn1.convs.1.Conv2d_conv3            8.32k  13.1072M  
+164_l5.gcn1.convs.1.Softmax_softmax             -         -  
+165_l5.gcn1.convs.1.Tanh_tanh                   -         -  
+166_l5.gcn1.convs.1.Conv2d_conv4           1.152k    640.0k  
+167_l5.gcn1.convs.2.Conv2d_conv1            520.0    819.2k  
+168_l5.gcn1.convs.2.Conv2d_conv2            520.0    819.2k  
+169_l5.gcn1.convs.2.Conv2d_conv3            8.32k  13.1072M  
+170_l5.gcn1.convs.2.Softmax_softmax             -         -  
+171_l5.gcn1.convs.2.Tanh_tanh                   -         -  
+172_l5.gcn1.convs.2.Conv2d_conv4           1.152k    640.0k  
+173_l5.gcn1.BatchNorm2d_bn                  256.0     128.0  
+174_l5.gcn1.down.Conv2d_0                   8.32k  13.1072M  
+175_l5.gcn1.down.BatchNorm2d_1              256.0     128.0  
+176_l5.gcn1.ReLU_relu                           -         -  
+177_l5.tcn1.branches.0.Conv2d_0            4.128k   6.5536M  
+178_l5.tcn1.branches.0.BatchNorm2d_1         64.0      32.0  
+179_l5.tcn1.branches.0.ReLU_2                   -         -  
+180_l5.tcn1.branches.0.3.Conv2d_conv       5.152k    4.096M  
+181_l5.tcn1.branches.0.3.BatchNorm2d_bn      64.0      32.0  
+182_l5.tcn1.branches.1.Conv2d_0            4.128k   6.5536M  
+183_l5.tcn1.branches.1.BatchNorm2d_1         64.0      32.0  
+184_l5.tcn1.branches.1.ReLU_2                   -         -  
+185_l5.tcn1.branches.1.3.Conv2d_conv       5.152k    4.096M  
+186_l5.tcn1.branches.1.3.BatchNorm2d_bn      64.0      32.0  
+187_l5.tcn1.branches.2.Conv2d_0            4.128k   6.5536M  
+188_l5.tcn1.branches.2.BatchNorm2d_1         64.0      32.0  
+189_l5.tcn1.branches.2.ReLU_2                   -         -  
+190_l5.tcn1.branches.2.MaxPool2d_3              -         -  
+191_l5.tcn1.branches.2.BatchNorm2d_4         64.0      32.0  
+192_l5.tcn1.branches.3.Conv2d_0            4.128k   3.2768M  
+193_l5.tcn1.branches.3.BatchNorm2d_1         64.0      32.0  
+194_l5.residual.Conv2d_conv                 8.32k   6.5536M  
+195_l5.residual.BatchNorm2d_bn              256.0     128.0  
+196_l5.ReLU_relu                                -         -  
+197_l6.gcn1.convs.0.Conv2d_conv1           2.064k   1.6384M  
+198_l6.gcn1.convs.0.Conv2d_conv2           2.064k   1.6384M  
+199_l6.gcn1.convs.0.Conv2d_conv3          16.512k  13.1072M  
+200_l6.gcn1.convs.0.Softmax_softmax             -         -  
+201_l6.gcn1.convs.0.Tanh_tanh                   -         -  
+202_l6.gcn1.convs.0.Conv2d_conv4           2.176k     1.28M  
+203_l6.gcn1.convs.1.Conv2d_conv1           2.064k   1.6384M  
+204_l6.gcn1.convs.1.Conv2d_conv2           2.064k   1.6384M  
+205_l6.gcn1.convs.1.Conv2d_conv3          16.512k  13.1072M  
+206_l6.gcn1.convs.1.Softmax_softmax             -         -  
+207_l6.gcn1.convs.1.Tanh_tanh                   -         -  
+208_l6.gcn1.convs.1.Conv2d_conv4           2.176k     1.28M  
+209_l6.gcn1.convs.2.Conv2d_conv1           2.064k   1.6384M  
+210_l6.gcn1.convs.2.Conv2d_conv2           2.064k   1.6384M  
+211_l6.gcn1.convs.2.Conv2d_conv3          16.512k  13.1072M  
+212_l6.gcn1.convs.2.Softmax_softmax             -         -  
+213_l6.gcn1.convs.2.Tanh_tanh                   -         -  
+214_l6.gcn1.convs.2.Conv2d_conv4           2.176k     1.28M  
+215_l6.gcn1.BatchNorm2d_bn                  256.0     128.0  
+216_l6.gcn1.ReLU_relu                           -         -  
+217_l6.tcn1.branches.0.Conv2d_0            4.128k   3.2768M  
+218_l6.tcn1.branches.0.BatchNorm2d_1         64.0      32.0  
+219_l6.tcn1.branches.0.ReLU_2                   -         -  
+220_l6.tcn1.branches.0.3.Conv2d_conv       5.152k    4.096M  
+221_l6.tcn1.branches.0.3.BatchNorm2d_bn      64.0      32.0  
+222_l6.tcn1.branches.1.Conv2d_0            4.128k   3.2768M  
+223_l6.tcn1.branches.1.BatchNorm2d_1         64.0      32.0  
+224_l6.tcn1.branches.1.ReLU_2                   -         -  
+225_l6.tcn1.branches.1.3.Conv2d_conv       5.152k    4.096M  
+226_l6.tcn1.branches.1.3.BatchNorm2d_bn      64.0      32.0  
+227_l6.tcn1.branches.2.Conv2d_0            4.128k   3.2768M  
+228_l6.tcn1.branches.2.BatchNorm2d_1         64.0      32.0  
+229_l6.tcn1.branches.2.ReLU_2                   -         -  
+230_l6.tcn1.branches.2.MaxPool2d_3              -         -  
+231_l6.tcn1.branches.2.BatchNorm2d_4         64.0      32.0  
+232_l6.tcn1.branches.3.Conv2d_0            4.128k   3.2768M  
+233_l6.tcn1.branches.3.BatchNorm2d_1         64.0      32.0  
+234_l6.ReLU_relu                                -         -  
+235_l7.gcn1.convs.0.Conv2d_conv1           2.064k   1.6384M  
+236_l7.gcn1.convs.0.Conv2d_conv2           2.064k   1.6384M  
+237_l7.gcn1.convs.0.Conv2d_conv3          16.512k  13.1072M  
+238_l7.gcn1.convs.0.Softmax_softmax             -         -  
+239_l7.gcn1.convs.0.Tanh_tanh                   -         -  
+240_l7.gcn1.convs.0.Conv2d_conv4           2.176k     1.28M  
+241_l7.gcn1.convs.1.Conv2d_conv1           2.064k   1.6384M  
+242_l7.gcn1.convs.1.Conv2d_conv2           2.064k   1.6384M  
+243_l7.gcn1.convs.1.Conv2d_conv3          16.512k  13.1072M  
+244_l7.gcn1.convs.1.Softmax_softmax             -         -  
+245_l7.gcn1.convs.1.Tanh_tanh                   -         -  
+246_l7.gcn1.convs.1.Conv2d_conv4           2.176k     1.28M  
+247_l7.gcn1.convs.2.Conv2d_conv1           2.064k   1.6384M  
+248_l7.gcn1.convs.2.Conv2d_conv2           2.064k   1.6384M  
+249_l7.gcn1.convs.2.Conv2d_conv3          16.512k  13.1072M  
+250_l7.gcn1.convs.2.Softmax_softmax             -         -  
+251_l7.gcn1.convs.2.Tanh_tanh                   -         -  
+252_l7.gcn1.convs.2.Conv2d_conv4           2.176k     1.28M  
+253_l7.gcn1.BatchNorm2d_bn                  256.0     128.0  
+254_l7.gcn1.ReLU_relu                           -         -  
+255_l7.tcn1.branches.0.Conv2d_0            4.128k   3.2768M  
+256_l7.tcn1.branches.0.BatchNorm2d_1         64.0      32.0  
+257_l7.tcn1.branches.0.ReLU_2                   -         -  
+258_l7.tcn1.branches.0.3.Conv2d_conv       5.152k    4.096M  
+259_l7.tcn1.branches.0.3.BatchNorm2d_bn      64.0      32.0  
+260_l7.tcn1.branches.1.Conv2d_0            4.128k   3.2768M  
+261_l7.tcn1.branches.1.BatchNorm2d_1         64.0      32.0  
+262_l7.tcn1.branches.1.ReLU_2                   -         -  
+263_l7.tcn1.branches.1.3.Conv2d_conv       5.152k    4.096M  
+264_l7.tcn1.branches.1.3.BatchNorm2d_bn      64.0      32.0  
+265_l7.tcn1.branches.2.Conv2d_0            4.128k   3.2768M  
+266_l7.tcn1.branches.2.BatchNorm2d_1         64.0      32.0  
+267_l7.tcn1.branches.2.ReLU_2                   -         -  
+268_l7.tcn1.branches.2.MaxPool2d_3              -         -  
+269_l7.tcn1.branches.2.BatchNorm2d_4         64.0      32.0  
+270_l7.tcn1.branches.3.Conv2d_0            4.128k   3.2768M  
+271_l7.tcn1.branches.3.BatchNorm2d_1         64.0      32.0  
+272_l7.ReLU_relu                                -         -  
+273_l8.gcn1.convs.0.Conv2d_conv1           2.064k   1.6384M  
+274_l8.gcn1.convs.0.Conv2d_conv2           2.064k   1.6384M  
+275_l8.gcn1.convs.0.Conv2d_conv3          33.024k  26.2144M  
+276_l8.gcn1.convs.0.Softmax_softmax             -         -  
+277_l8.gcn1.convs.0.Tanh_tanh                   -         -  
+278_l8.gcn1.convs.0.Conv2d_conv4           4.352k     2.56M  
+279_l8.gcn1.convs.1.Conv2d_conv1           2.064k   1.6384M  
+280_l8.gcn1.convs.1.Conv2d_conv2           2.064k   1.6384M  
+281_l8.gcn1.convs.1.Conv2d_conv3          33.024k  26.2144M  
+282_l8.gcn1.convs.1.Softmax_softmax             -         -  
+283_l8.gcn1.convs.1.Tanh_tanh                   -         -  
+284_l8.gcn1.convs.1.Conv2d_conv4           4.352k     2.56M  
+285_l8.gcn1.convs.2.Conv2d_conv1           2.064k   1.6384M  
+286_l8.gcn1.convs.2.Conv2d_conv2           2.064k   1.6384M  
+287_l8.gcn1.convs.2.Conv2d_conv3          33.024k  26.2144M  
+288_l8.gcn1.convs.2.Softmax_softmax             -         -  
+289_l8.gcn1.convs.2.Tanh_tanh                   -         -  
+290_l8.gcn1.convs.2.Conv2d_conv4           4.352k     2.56M  
+291_l8.gcn1.BatchNorm2d_bn                  512.0     256.0  
+292_l8.gcn1.down.Conv2d_0                 33.024k  26.2144M  
+293_l8.gcn1.down.BatchNorm2d_1              512.0     256.0  
+294_l8.gcn1.ReLU_relu                           -         -  
+295_l8.tcn1.branches.0.Conv2d_0           16.448k  13.1072M  
+296_l8.tcn1.branches.0.BatchNorm2d_1        128.0      64.0  
+297_l8.tcn1.branches.0.ReLU_2                   -         -  
+298_l8.tcn1.branches.0.3.Conv2d_conv      20.544k    8.192M  
+299_l8.tcn1.branches.0.3.BatchNorm2d_bn     128.0      64.0  
+300_l8.tcn1.branches.1.Conv2d_0           16.448k  13.1072M  
+301_l8.tcn1.branches.1.BatchNorm2d_1        128.0      64.0  
+302_l8.tcn1.branches.1.ReLU_2                   -         -  
+303_l8.tcn1.branches.1.3.Conv2d_conv      20.544k    8.192M  
+304_l8.tcn1.branches.1.3.BatchNorm2d_bn     128.0      64.0  
+305_l8.tcn1.branches.2.Conv2d_0           16.448k  13.1072M  
+306_l8.tcn1.branches.2.BatchNorm2d_1        128.0      64.0  
+307_l8.tcn1.branches.2.ReLU_2                   -         -  
+308_l8.tcn1.branches.2.MaxPool2d_3              -         -  
+309_l8.tcn1.branches.2.BatchNorm2d_4        128.0      64.0  
+310_l8.tcn1.branches.3.Conv2d_0           16.448k   6.5536M  
+311_l8.tcn1.branches.3.BatchNorm2d_1        128.0      64.0  
+312_l8.residual.Conv2d_conv               33.024k  13.1072M  
+313_l8.residual.BatchNorm2d_bn              512.0     256.0  
+314_l8.ReLU_relu                                -         -  
+315_l9.gcn1.convs.0.Conv2d_conv1           8.224k   3.2768M  
+316_l9.gcn1.convs.0.Conv2d_conv2           8.224k   3.2768M  
+317_l9.gcn1.convs.0.Conv2d_conv3          65.792k  26.2144M  
+318_l9.gcn1.convs.0.Softmax_softmax             -         -  
+319_l9.gcn1.convs.0.Tanh_tanh                   -         -  
+320_l9.gcn1.convs.0.Conv2d_conv4           8.448k     5.12M  
+321_l9.gcn1.convs.1.Conv2d_conv1           8.224k   3.2768M  
+322_l9.gcn1.convs.1.Conv2d_conv2           8.224k   3.2768M  
+323_l9.gcn1.convs.1.Conv2d_conv3          65.792k  26.2144M  
+324_l9.gcn1.convs.1.Softmax_softmax             -         -  
+325_l9.gcn1.convs.1.Tanh_tanh                   -         -  
+326_l9.gcn1.convs.1.Conv2d_conv4           8.448k     5.12M  
+327_l9.gcn1.convs.2.Conv2d_conv1           8.224k   3.2768M  
+328_l9.gcn1.convs.2.Conv2d_conv2           8.224k   3.2768M  
+329_l9.gcn1.convs.2.Conv2d_conv3          65.792k  26.2144M  
+330_l9.gcn1.convs.2.Softmax_softmax             -         -  
+331_l9.gcn1.convs.2.Tanh_tanh                   -         -  
+332_l9.gcn1.convs.2.Conv2d_conv4           8.448k     5.12M  
+333_l9.gcn1.BatchNorm2d_bn                  512.0     256.0  
+334_l9.gcn1.ReLU_relu                           -         -  
+335_l9.tcn1.branches.0.Conv2d_0           16.448k   6.5536M  
+336_l9.tcn1.branches.0.BatchNorm2d_1        128.0      64.0  
+337_l9.tcn1.branches.0.ReLU_2                   -         -  
+338_l9.tcn1.branches.0.3.Conv2d_conv      20.544k    8.192M  
+339_l9.tcn1.branches.0.3.BatchNorm2d_bn     128.0      64.0  
+340_l9.tcn1.branches.1.Conv2d_0           16.448k   6.5536M  
+341_l9.tcn1.branches.1.BatchNorm2d_1        128.0      64.0  
+342_l9.tcn1.branches.1.ReLU_2                   -         -  
+343_l9.tcn1.branches.1.3.Conv2d_conv      20.544k    8.192M  
+344_l9.tcn1.branches.1.3.BatchNorm2d_bn     128.0      64.0  
+345_l9.tcn1.branches.2.Conv2d_0           16.448k   6.5536M  
+346_l9.tcn1.branches.2.BatchNorm2d_1        128.0      64.0  
+347_l9.tcn1.branches.2.ReLU_2                   -         -  
+348_l9.tcn1.branches.2.MaxPool2d_3              -         -  
+349_l9.tcn1.branches.2.BatchNorm2d_4        128.0      64.0  
+350_l9.tcn1.branches.3.Conv2d_0           16.448k   6.5536M  
+351_l9.tcn1.branches.3.BatchNorm2d_1        128.0      64.0  
+352_l9.ReLU_relu                                -         -  
+353_l10.gcn1.convs.0.Conv2d_conv1          8.224k   3.2768M  
+354_l10.gcn1.convs.0.Conv2d_conv2          8.224k   3.2768M  
+355_l10.gcn1.convs.0.Conv2d_conv3         65.792k  26.2144M  
+356_l10.gcn1.convs.0.Softmax_softmax            -         -  
+357_l10.gcn1.convs.0.Tanh_tanh                  -         -  
+358_l10.gcn1.convs.0.Conv2d_conv4          8.448k     5.12M  
+359_l10.gcn1.convs.1.Conv2d_conv1          8.224k   3.2768M  
+360_l10.gcn1.convs.1.Conv2d_conv2          8.224k   3.2768M  
+361_l10.gcn1.convs.1.Conv2d_conv3         65.792k  26.2144M  
+362_l10.gcn1.convs.1.Softmax_softmax            -         -  
+363_l10.gcn1.convs.1.Tanh_tanh                  -         -  
+364_l10.gcn1.convs.1.Conv2d_conv4          8.448k     5.12M  
+365_l10.gcn1.convs.2.Conv2d_conv1          8.224k   3.2768M  
+366_l10.gcn1.convs.2.Conv2d_conv2          8.224k   3.2768M  
+367_l10.gcn1.convs.2.Conv2d_conv3         65.792k  26.2144M  
+368_l10.gcn1.convs.2.Softmax_softmax            -         -  
+369_l10.gcn1.convs.2.Tanh_tanh                  -         -  
+370_l10.gcn1.convs.2.Conv2d_conv4          8.448k     5.12M  
+371_l10.gcn1.BatchNorm2d_bn                 512.0     256.0  
+372_l10.gcn1.ReLU_relu                          -         -  
+373_l10.tcn1.branches.0.Conv2d_0          16.448k   6.5536M  
+374_l10.tcn1.branches.0.BatchNorm2d_1       128.0      64.0  
+375_l10.tcn1.branches.0.ReLU_2                  -         -  
+376_l10.tcn1.branches.0.3.Conv2d_conv     20.544k    8.192M  
+377_l10.tcn1.branches.0.3.BatchNorm2d_bn    128.0      64.0  
+378_l10.tcn1.branches.1.Conv2d_0          16.448k   6.5536M  
+379_l10.tcn1.branches.1.BatchNorm2d_1       128.0      64.0  
+380_l10.tcn1.branches.1.ReLU_2                  -         -  
+381_l10.tcn1.branches.1.3.Conv2d_conv     20.544k    8.192M  
+382_l10.tcn1.branches.1.3.BatchNorm2d_bn    128.0      64.0  
+383_l10.tcn1.branches.2.Conv2d_0          16.448k   6.5536M  
+384_l10.tcn1.branches.2.BatchNorm2d_1       128.0      64.0  
+385_l10.tcn1.branches.2.ReLU_2                  -         -  
+386_l10.tcn1.branches.2.MaxPool2d_3             -         -  
+387_l10.tcn1.branches.2.BatchNorm2d_4       128.0      64.0  
+388_l10.tcn1.branches.3.Conv2d_0          16.448k   6.5536M  
+389_l10.tcn1.branches.3.BatchNorm2d_1       128.0      64.0  
+390_l10.ReLU_relu                               -         -  
+391_fc                                     15.42k    15.36k  
+-------------------------------------------------------------------------------------------------
+                           Totals
+Total params            1.427912M
+Trainable params        1.427912M
+Non-trainable params          0.0
+Mult-Adds             877.434614M
+=================================================================================================

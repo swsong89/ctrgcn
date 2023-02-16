@@ -383,6 +383,10 @@ class Processor():
             with open('{}/{}.txt'.format(self.arg.work_dir, self.arg.log_name), 'a') as f:
                 print(str, file=f)
 
+            # 在config/txt里面也打印一下，这样就容易找了
+            with open('{}/{}.txt'.format('config/txt/ntu120/', self.arg.log_name), 'a') as f:
+                print(str, file=f)
+
     def record_time(self):
         self.cur_time = time.time()
         return self.cur_time
@@ -510,7 +514,7 @@ class Processor():
                     k, 100 * self.data_loader[ln].dataset.top_k(score, k)))
 
             # 每次打印一下最好的epoch和准确度
-            self.print_log('--------------------best_epoch: {} best_acc: {:.2f}%'.format(self.best_acc_epoch, 100*self.best_acc))
+            self.print_log('--------------------best epoch acc: {}  {:.2f}%'.format(self.best_acc_epoch, 100*self.best_acc))
 
             if save_score:
                 print('save_score: ', '{}/epoch{}_{}_score.pkl'.format(

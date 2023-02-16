@@ -2,3 +2,18 @@
 4.2.3多了语义引导的的特征转换DR,JT,来自于SGGCN里面的东西
 4.2.4帧信息引导的多尺度时间卷积也是SGGCN里面的
 总结仅是将SGGCN里面的加到了ctrgcn里面
+
+ctr conv3                                            input [2,256,16,25]
+436_l10.gcn1.convs.0.Conv2d_conv3                 kernel[256, 256, 1, 1] 输入通道，输出通道，卷积大小
+436_l10.gcn1.convs.0.Conv2d_conv3               output [2, 256, 16, 25] parmas 65.792k  参数量计算(输出通道256+1)*输入通道256*1*1
+436_l10.gcn1.convs.0.Conv2d_conv3               flops 26.2144M   # 输出特征图*输入通道*输出通道=（16*25）*256*256
+
+tca 将conv3换成了trf, 大大降低了运算量，但是增加了参数
+517_l10.gcn1.convs.0.conv_rf.AdaptiveAvgPool2d_...          -  
+518_l10.gcn1.convs.0.conv_rf.AdaptiveAvgPool2d_...          -  
+519_l10.gcn1.convs.0.conv_rf.Conv2d_g                 65.536k  
+520_l10.gcn1.convs.0.conv_rf.Conv2d_a               1.572864M  
+521_l10.gcn1.convs.0.conv_rf.BatchNorm2d_bn             128.0  
+522_l10.gcn1.convs.0.conv_rf.ReLU_relu                      -  
+523_l10.gcn1.convs.0.conv_rf.Conv2d_b               1.572864M  
+524_l10.gcn1.convs.0.TAdaAggregation_conv             65.536k  

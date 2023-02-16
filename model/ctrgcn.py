@@ -281,7 +281,7 @@ class Model(nn.Module):
         #else:
         #    Graph = import_class(graph)
         #    self.graph = Graph(**graph_args)
-
+        print('graph_args: ', graph_args)
         self.graph = Graph(**graph_args)
 
         A = self.graph.A # 3,25,25

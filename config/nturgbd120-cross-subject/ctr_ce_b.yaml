@@ -3,7 +3,7 @@ num_worker: 8
 # feeder
 feeder: feeders.feeder_ntu.Feeder
 train_feeder_args:
-  data_path: data2/ntu120/NTU120_CSub.npz
+  data_path: data1/ntu120/NTU120_CSub.npz
   split: train
   debug: False
   random_choose: False
@@ -17,7 +17,7 @@ train_feeder_args:
   bone: True
 
 test_feeder_args:
-  data_path: data2/ntu120/NTU120_CSub.npz
+  data_path: data1/ntu120/NTU120_CSub.npz
   split: test
   window_size: 64
   p_interval: [0.95]
@@ -43,11 +43,28 @@ step: [35, 55]
 warm_up_epoch: 5
 
 # training
-device: [2]
+device: [3]
 batch_size: 64
 test_batch_size: 64
 num_epoch: 120
 nesterov: True
 # nohup python main.py --config config/nturgbd120-cross-subject/ctr_ce_b.yaml  > config/log/ctr_ce_b.log 2>&1
 # nohup python main.py --config config/nturgbd120-cross-subject/ctr_joint.yaml  --weights work_dir/ntu120/xsub/ctrgcn_joint > config/log/ctr_joint.log
-# [ Mon Jan 23 20:29:10 2023 ] best epoch: 90 85.10%
+# [ Mon Jan 23 20:29:10 2023 ] best epoch: 90 85.10%  focal loss
+# [ Wed Feb 15 15:29:46 2023 ] best epoch acc: 65  86.14%  cross entropy
+# 使用focal loss虽然训练的损失函数值会更低点，但是Top1是下降的，Top5是提高的
+# [ Mon Jan 23 23:11:29 2023 ] Training epoch: 96
+# [ Mon Jan 23 23:29:02 2023 ] 	Mean training loss: 0.0149.  Mean training acc: 99.36%.
+# [ Mon Jan 23 23:29:02 2023 ] 	Time consumption: [Data]01%, [Network]99%
+# [ Mon Jan 23 23:29:02 2023 ] Eval epoch: 96
+# [ Mon Jan 23 23:39:35 2023 ] 	Mean test loss of 795 batches: 0.3662290355635795.
+# [ Mon Jan 23 23:39:35 2023 ] 	Top1: 84.91%
+# [ Mon Jan 23 23:39:35 2023 ] 	Top5: 97.15%
+
+# [ Wed Feb 15 14:30:43 2023 ] Training epoch: 96
+# [ Wed Feb 15 14:48:02 2023 ] 	Mean training loss: 0.0253.  Mean training acc: 99.70%.
+# [ Wed Feb 15 14:48:02 2023 ] 	Time consumption: [Data]00%, [Network]99%
+# [ Wed Feb 15 14:48:03 2023 ] Eval epoch: 96
+# [ Wed Feb 15 14:59:10 2023 ] 	Mean test loss of 796 batches: 0.564281813837775.
+# [ Wed Feb 15 14:59:10 2023 ] 	Top1: 85.78%
+# [ Wed Feb 15 14:59:11 2023 ] 	Top5: 96.88%

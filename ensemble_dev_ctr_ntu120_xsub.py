@@ -53,6 +53,7 @@ if __name__ == "__main__":
     """
 j
 [ Tue Feb 14 07:58:28 2023 ] --------------------best_epoch: 70 best_acc: 84.09%
+[ Tue Feb 14 15:34:37 2023 ] --------------------best_epoch: 95 best_acc: 84.16%
 
 b
 [ Sat Feb 11 19:11:31 2023 ] --------------------best_epoch: 64 best_acc: 86.28%

@@ -1,0 +1,31 @@
+[ Thu Feb  2 00:20:22 2023 ] using warm up, epoch: 5
+[ Thu Feb  2 01:02:28 2023 ] Parameters:
+{'work_dir': './work_dir/ntu120/xsub/dev_ctr_aff_j', 'model_saved_name': './work_dir/ntu120/xsub/dev_ctr_aff_j/runs', 'config': 'config/nturgbd120-cross-subject/dev_ctr_aff_j.yaml', 'phase': 'train', 'save_score': True, 'seed': 1, 'log_interval': 100, 'save_interval': 1, 'save_epoch': 0, 'eval_interval': 1, 'print_log': True, 'show_topk': [1, 5], 'feeder': 'feeders.feeder_ntu.Feeder', 'num_worker': 8, 'train_feeder_args': {'data_path': 'data/ntu120/NTU120_CSub.npz', 'split': 'train', 'debug': False, 'random_choose': False, 'random_shift': False, 'random_move': False, 'window_size': 64, 'normalization': False, 'random_rot': True, 'p_interval': [0.5, 1], 'vel': False, 'bone': True}, 'test_feeder_args': {'data_path': 'data/ntu120/NTU120_CSub.npz', 'split': 'test', 'window_size': 64, 'p_interval': [0.95], 'vel': False, 'bone': True, 'debug': False}, 'model': 'model.dev_ctr_aff.Model', 'model_args': {'num_class': 120, 'num_point': 25, 'num_person': 2, 'graph': 'graph.ntu_rgb_d.Graph', 'graph_args': {'labeling_mode': 'spatial'}}, 'weights': None, 'ignore_weights': [], 'base_lr': 0.1, 'step': [35, 55], 'device': [2], 'optimizer': 'SGD', 'nesterov': True, 'batch_size': 64, 'test_batch_size': 64, 'start_epoch': 0, 'num_epoch': 110, 'weight_decay': 0.0004, 'lr_decay_rate': 0.1, 'warm_up_epoch': 5, 'log_name': '1_dev_ctr_aff_j_xsub'}
+
+[ Thu Feb  2 01:02:28 2023 ] # Parameters: 2527564
+[ Thu Feb  2 01:02:28 2023 ] Training epoch: 1
+[ Thu Feb  2 11:32:08 2023 ] using warm up, epoch: 5
+[ Thu Feb  2 12:01:21 2023 ] Parameters:
+{'work_dir': './work_dir/ntu120/xsub/dev_ctr_aff_j', 'model_saved_name': './work_dir/ntu120/xsub/dev_ctr_aff_j/runs', 'config': 'config/nturgbd120-cross-subject/dev_ctr_aff_j.yaml', 'phase': 'train', 'save_score': True, 'seed': 1, 'log_interval': 100, 'save_interval': 1, 'save_epoch': 0, 'eval_interval': 1, 'print_log': True, 'show_topk': [1, 5], 'feeder': 'feeders.feeder_ntu.Feeder', 'num_worker': 8, 'train_feeder_args': {'data_path': 'data/ntu120/NTU120_CSub.npz', 'split': 'train', 'debug': False, 'random_choose': False, 'random_shift': False, 'random_move': False, 'window_size': 64, 'normalization': False, 'random_rot': True, 'p_interval': [0.5, 1], 'vel': False, 'bone': True}, 'test_feeder_args': {'data_path': 'data/ntu120/NTU120_CSub.npz', 'split': 'test', 'window_size': 64, 'p_interval': [0.95], 'vel': False, 'bone': True, 'debug': False}, 'model': 'model.dev_ctr_aff.Model', 'model_args': {'num_class': 120, 'num_point': 25, 'num_person': 2, 'graph': 'graph.ntu_rgb_d.Graph', 'graph_args': {'labeling_mode': 'spatial'}}, 'weights': None, 'ignore_weights': [], 'base_lr': 0.1, 'step': [35, 55], 'device': [2], 'optimizer': 'SGD', 'nesterov': True, 'batch_size': 48, 'test_batch_size': 48, 'start_epoch': 0, 'num_epoch': 110, 'weight_decay': 0.0004, 'lr_decay_rate': 0.1, 'warm_up_epoch': 5, 'log_name': '1_dev_ctr_aff_j_xsub'}
+
+[ Thu Feb  2 12:01:21 2023 ] # Parameters: 2527564
+[ Thu Feb  2 12:01:21 2023 ] Training epoch: 1
+[ Thu Feb  2 13:41:29 2023 ] 	Mean training loss: 3.0150.  Mean training acc: 18.82%.
+[ Thu Feb  2 13:41:29 2023 ] 	Time consumption: [Data]00%, [Network]100%
+[ Thu Feb  2 13:41:29 2023 ] Eval epoch: 1
+[ Thu Feb  2 14:57:19 2023 ] 	Mean test loss of 1060 batches: 1.9809750906701358.
+[ Thu Feb  2 14:57:19 2023 ] 	Top1: 33.88%
+[ Thu Feb  2 14:57:23 2023 ] 	Top5: 70.66%
+[ Thu Feb  2 14:57:23 2023 ] best_epoch: 1 best_acc: 33.88%
+[ Thu Feb  2 14:57:23 2023 ] Training epoch: 2
+[ Thu Feb  2 16:35:19 2023 ] 	Mean training loss: 1.6544.  Mean training acc: 42.86%.
+[ Thu Feb  2 16:35:19 2023 ] 	Time consumption: [Data]00%, [Network]100%
+[ Thu Feb  2 16:35:19 2023 ] Eval epoch: 2
+[ Thu Feb  2 17:50:38 2023 ] 	Mean test loss of 1060 batches: 1.2898260909993693.
+[ Thu Feb  2 17:50:41 2023 ] 	Top1: 50.97%
+[ Thu Feb  2 17:50:42 2023 ] 	Top5: 85.33%
+[ Thu Feb  2 17:50:42 2023 ] best_epoch: 2 best_acc: 50.97%
+[ Thu Feb  2 17:50:42 2023 ] Training epoch: 3
+[ Thu Feb  2 19:28:15 2023 ] 	Mean training loss: 1.2099.  Mean training acc: 54.14%.
+[ Thu Feb  2 19:28:15 2023 ] 	Time consumption: [Data]00%, [Network]100%
+[ Thu Feb  2 19:28:15 2023 ] Eval epoch: 3

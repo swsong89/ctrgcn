@@ -7,6 +7,8 @@ import torch.nn as nn
 from torch.autograd import Variable
 import torch.nn.functional as F
 from torch.nn.modules.utils import _triple
+from graph.ntu_rgb_d import Graph
+
 #Our whole project is based on the use of CTR-GCN(https://github.com/Uason-Chen/CTR-GCN), but also other models such as Attentional Feature Fusion(https://github.com/YimianDai/open-aff), TAdaConv(https://tadaconv-iclr2022.github.io/), etc. We are very grateful for their work.
 def import_class(name):
     components = name.split('.')
@@ -462,13 +464,13 @@ class Model(nn.Module):
                  drop_out=0, adaptive=True):
         super(Model, self).__init__()
 
-        if graph is None:
+        # if graph is None:
             
-            raise ValueError()
+        #     raise ValueError()
 
-        else:
-            Graph = import_class(graph)
-            self.graph = Graph(**graph_args)
+        # else:
+        # Graph = import_class(graph) # 为了测试flops这里改成了默认了，如果跑ncla等数据集需要改一下
+        self.graph = Graph(**graph_args)
            
         A = self.graph.A 
         

@@ -147,7 +147,57 @@ class MultiScale_TemporalConv(nn.Module):
         out += res  # 
         return out
 
+class RouteFuncMLP(nn.Module):
+    """
+    The routing function for generating the calibration weights.
+    """
 
+    def __init__(self, c_in,out_channels, ratio, kernels, bn_eps=1e-5, bn_mmt=0.1):
+        """
+        Args:
+            c_in (int): number of input channels.
+            ratio (int): reduction ratio for the routing function.
+            kernels (list): temporal kernel size of the stacked 1D convolutions
+        """
+        super(RouteFuncMLP, self).__init__()
+        self.c_in = c_in
+        self.avgpool = nn.AdaptiveAvgPool2d((None,1))  # initial weights操作
+        self.globalpool = nn.AdaptiveAvgPool2d(1)  # x到G(')操作
+        self.g = nn.Conv2d(
+            in_channels=c_in,
+            out_channels=c_in,
+            kernel_size=1,
+            padding=0,
+        )  # conv2d(3,3, kernel_size=(1, 1),)  [4, 3, 1, 1]， 学习通道之间的关系
+        self.a = nn.Conv2d(
+            in_channels=c_in,
+            out_channels=int(c_in//ratio),
+            kernel_size=[kernels[0],1],
+            padding=[kernels[0]//2,0],
+        )  # Conv2d(3, 1, kernel_size=(3, 1), stride=(1, 1), padding=(1, 0)) [4, 3, 64, 1] -> bs,C,T,1 [4, 1, 64, 1] 将通道信息进行压缩，只剩下bs,T信息
+        self.bn = nn.BatchNorm2d(int(c_in//ratio), eps=bn_eps, momentum=bn_mmt)  # bs,C,T,1 [4, 1, 64, 1] 对C维度进行标准化，相当于是对bs,T进行标准化,增加数据的稳定性
+        self.relu = nn.ReLU(inplace=True)
+        self.b = nn.Conv2d(
+            in_channels=int(c_in//ratio),
+            out_channels=out_channels,
+            kernel_size=[kernels[1],1],
+            padding=[kernels[1]//2,0],
+            bias=False
+        )  # Conv2d(1, 64, kernel_size=(3, 1), stride=(1, 1), padding=(1, 0), bias=False)，作用是对bs,C,T,1 [4, 1, 64, 1]相当于对T维度的权重学习64个通道-> [4,64,64,1]
+        self.b.skip_init=True
+        self.b.weight.data.zero_() 
+        
+    def forward(self, x):  # bs,C,T,V[4, 3, 64, 25] 
+       # print('rf',x.shape)
+        g = self.globalpool(x)  # C'Cx1x1 bs,C,1,1[4, 3, 1, 1] 在T,V维度进行平均池化,剩下的是通道的关系
+       # print('rf1',g.shape)
+        x = self.avgpool(x)  # bs,C,T,1 [4, 3, 64, 1] 在V维度进行平均池化， 剩下的是时间帧通道的关系
+       # print('rf2',x.shape,(x+self.g(g)).shape)  下面是利用上下文信息校准时间维度上的权重，进行时间维度上特征聚合
+        x = self.a(x + self.g(g))  #  bs,C,T,1 [4, 1, 64, 1] <- 在T维度卷积 Conv2d(3, 1, kernel_size=(3, 1), ) [4,3,64,1] <- ([4, 3, 64, 1] + conv2d(3,3) [4, 3, 1, 1])
+        x = self.bn(x)  # 
+        x = self.relu(x)  # [4, 1, 64, 1]
+        x = self.b(x) + 1  # [4, 64, 64, 1] <- 增加维度,以及学习前后帧权重关系，conv2d(1, 64, kernel_size=(3, 1), stride=(1, 1), padding=(1, 0) [4, 1, 64, 1]
+        return x  # # bs,C‘,T,1 [4, 64, 64, 1] 得到的是G(') ,即学了64个通道，每个通道都有T的相互关系权重，1是类似于MPS增加前后帧的相关性，因为MPS说了自注意力会关注距离比较远的帧，所以需要+1来平衡
 
 
 class CTRGC(nn.Module):
@@ -163,24 +213,26 @@ class CTRGC(nn.Module):
             self.mid_channels = in_channels // mid_reduction
         self.conv1 = nn.Conv2d(self.in_channels, self.rel_channels, kernel_size=1)  # 将维减少计算量
         self.conv2 = nn.Conv2d(self.in_channels, self.rel_channels, kernel_size=1)
-        self.conv3 = nn.Conv2d(self.in_channels, self.out_channels, kernel_size=1)
+        self.conv3 = nn.Conv2d(self.rel_channels, self.out_channels, kernel_size=1)  # # conv2d(3,64, k = (1,1))
         self.conv4 = nn.Conv2d(self.rel_channels, self.out_channels, kernel_size=1)
+        self.conv5 = nn.Conv2d(self.in_channels, self.rel_channels, kernel_size=1)  # 将维减少计算量
+
         self.tanh = nn.Tanh()
         
-        self.conv_rf = RouteFuncMLP(c_in= in_channels,  out_channels=out_channels,          # number of input filters
-                    ratio=2,            # reduction ratio for MLP
+        self.conv_rf = RouteFuncMLP(c_in= self.rel_channels,  out_channels= self.rel_channels,          # number of input filters
+                    ratio=1,            # reduction ratio for MLP
                     kernels=[3,3],      # list of temporal kernel sizes
         )  # bs,C‘,T,1 [4, 64, 64, 1] 论文中G(')生成T维度之间的权重
-        self.conv = TAdaAggregation(
-                    in_channels     =in_channels,
-                    out_channels    =out_channels,
-                    kernel_size     = 1, 
-                    stride          = 1, 
-                    padding         = 0, 
-                    bias            = False,
+        # self.conv = TAdaAggregation(
+        #             in_channels     =in_channels,
+        #             out_channels    =out_channels,
+        #             kernel_size     = 1, 
+        #             stride          = 1, 
+        #             padding         = 0, 
+        #             bias            = False,
                     
-                )  # Temporal Aggregation   输入x和self.conv_rf(x) bs,C',T,1 [4, 64, 64, 1]
-        #self.gc1 = Graphsn_GCN(in_channels, out_channels)
+        #         )  # Temporal Aggregation   输入x和self.conv_rf(x) bs,C',T,1 [4, 64, 64, 1]
+        # #self.gc1 = Graphsn_GCN(in_channels, out_channels)
         
         
         for m in self.modules():
@@ -191,12 +243,36 @@ class CTRGC(nn.Module):
 
     def forward(self, x, A=None, alpha=1):  # bs,C,T,V[4, 3, 64, 25] [25, 25]  channel-wise
         x1, x2 = self.conv1(x).mean(-2), self.conv2(x).mean(-2)  # bs,C,V[4, 8, 25]  [4, 8, 25]
-        x3= self.conv(x, self.conv_rf(x))  #  #  类似于ctrgc中的conv1x1时间维度, bs,c',T,V [4, 64, 64, 25]  <-时间聚合TAdaAggregation (下面x特征[4, 3, 64, 25] ,上边W(') bs,C',T,1 [4, 64, 64, 1] )
+
+
+        x3 = self.conv5(x)  # [4,8,64,25]
+        # a_x3 = self.conv_rf(x)  # [4,8,64,1]
+        x3 = x3 * self.conv_rf(x3)  # [4,8,64,25] <-[4,8,64,25] * [4,8,64,1]
+        x3 = self.conv3(x3)  # bs,C,T,V [4,64,64,25] <- conv2d(64, 8) [4,8,64,25]
+
+
+
+        # x3= self.conv(x, self.conv_rf(x))  #  #  类似于ctrgc中的conv1x1时间维度, bs,c',T,V [4, 64, 64, 25]  <-时间聚合TAdaAggregation (下面x特征[4, 3, 64, 25] ,上边W(') bs,C',T,1 [4, 64, 64, 1] )
         x1 = self.tanh(x1.unsqueeze(-1) - x2.unsqueeze(-2))  # K(')  # 学习了自相关性,当前节点与其他节点的距离，即边,即类似于A,所以叫通道拓扑，之前的A是静态拓扑[4, 8, 25, 25] <- conv2d(8,64)  ([4, 8, 25, 1] -[4,8,1,25] )
         x1 = self.conv4(x1) * alpha + (A.unsqueeze(0).unsqueeze(0) if A is not None else 0) #  refine A操作 [4, 64, 25, 25] <- [4, 8, 25, 25]  +  [1,1,25,25]
         x1 = torch.einsum('ncuv,nctv->nctu', x1, x3)  # channel aggregation bs,C',T,V [4, 64, 64, 25] <- bs,C',V,V[4, 64, 25, 25]  bs,C',T,V [4, 64, 64, 25]
         return x1  # bs,C',T,V [4, 64, 64, 25]
 
+class unit_tcn(nn.Module):  # 只是起到了一个残差连接的作用，是Figure 3 (a) add+的右边项
+    def __init__(self, in_channels, out_channels, kernel_size=9, stride=1):
+        super(unit_tcn, self).__init__()
+        pad = int((kernel_size - 1) / 2)
+        self.conv = nn.Conv2d(in_channels, out_channels, kernel_size=(kernel_size, 1), padding=(pad, 0),
+                              stride=(stride, 1))
+
+        self.bn = nn.BatchNorm2d(out_channels)
+        self.relu = nn.ReLU(inplace=True)
+        conv_init(self.conv)
+        bn_init(self.bn, 1)
+
+    def forward(self, x):
+        x = self.bn(self.conv(x))
+        return x
 
 class unit_gcn(nn.Module):
     def __init__(self, in_channels, out_channels, A, coff_embedding=4, adaptive=True, residual=True):
