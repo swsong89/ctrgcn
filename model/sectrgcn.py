@@ -233,7 +233,7 @@ class TCN_GCN_unit(nn.Module):  # CTRGCN部分 Figure3.(a)
     def __init__(self, in_channels, out_channels, A, isFirstLayer=0, stride=1, pre_stride=1, residual=True, adaptive=True, bs=128, kernel_size=5, dilations=[1,2], device = 0):
         super(TCN_GCN_unit, self).__init__()
         self.dim1 = 256
-        self.num_classes = 60
+        # self.num_classes = 60
         self.seg = 64  # seg 骨架序列数
         num_joint = 25  # NTU-RGB-D关节数为25
 

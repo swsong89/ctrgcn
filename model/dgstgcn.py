@@ -46,8 +46,8 @@ class DGBlock(nn.Module):
         return self.relu(x)  #  [4, 64, 100, 25]
 
 
-@BACKBONES.register_module()
-class DGSTGCN(nn.Module):
+# @BACKBONES.register_module()
+class Model(nn.Module):
 
     def __init__(self,
                  graph_cfg,

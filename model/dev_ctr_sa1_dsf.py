@@ -6,7 +6,6 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 from graph.ntu_rgb_d import Graph
-# from model.module import AFF
 
 def import_class(name):
     components = name.split('.')
@@ -50,7 +49,6 @@ def weights_init(m):
         if hasattr(m, 'bias') and m.bias is not None:
             m.bias.data.fill_(0)
 
-
 # AFF是ctrgcn中时间卷积后得到的四个分支concat,再进行通道注意力
 # AFF模块类似于 # Figure 3a ctrgcn中的concat步骤,即将5x1conv d=1, 5x1conv d=2, 3x1 maxpool拼接操作,不过将直接concat变成了
 class AFF(nn.Module):  # TCA-GCN模块
@@ -85,7 +83,7 @@ class AFF(nn.Module):  # TCA-GCN模块
 
     def forward(self, x, residual):  #   bs,C',T,V [4, 64, 64, 25]  Attentional Feature Fusion 输入是类似于三个ctrgc+残差连接的结果，输出就是特征聚合
         xa = x + residual
-        xl = self.local_att(xa)  # [4, 64, 64, 25] <- conv2d(64,64), conv2d(64,64), [4, 64, 64, 25],仅仅是通道的学习
+        xl = self.local_att(xa)  # [4, 64, 64, 25] <- conv2d(64,64), conv2d(64,64), [4, 64, 64, 25]
         xg = self.global_att(xa)  # 在T,V上进行了avgpool, bs,C',T,V,[4, 64, 1, 1] <-  conv2d(64,64) ,conv2d(64,64), [4, 64, 1, 1] <- AdaptiveAvgPool2d [4, 64, 64, 25]
         xlg = xl + xg  #   bs,C',T,V [4, 64, 64, 25] xg是C维度的信息，在T,V进行了平均
         wei = self.sigmoid(xlg)  # Attentional Feature Fusion.pdf
@@ -93,6 +91,7 @@ class AFF(nn.Module):  # TCA-GCN模块
         xo = 2 * x * wei + 2 * residual * (1 - wei)  # 2 * residual * (1 - wei)为空，没有进行残差连接 residual 0 
        
         return xo  # [4, 64, 64, 25]
+
 
 class TemporalConv(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, dilation=1):
@@ -130,6 +129,10 @@ class MultiScale_TemporalConv(nn.Module):
         # Multiple branches of temporal convolution
         self.num_branches = len(dilations) + 2
         branch_channels = out_channels // self.num_branches
+        self.num_joints = 25
+        # the size of add_coeff can be smaller than the actual num_joints
+        self.add_coeff = nn.Parameter(torch.zeros(self.num_joints))  #Figure 4 D-JSF gama系数y
+
         if type(kernel_size) == list:
             assert len(kernel_size) == len(dilations)
         else:
@@ -175,115 +178,37 @@ class MultiScale_TemporalConv(nn.Module):
             self.residual = lambda x: x
         else:
             self.residual = TemporalConv(in_channels, out_channels, kernel_size=residual_kernel_size, stride=stride)
-
         #全局通道上下文和局部通道上下文注意力特征融合，将原来的conv1x1换成了通道注意力
         # self.aff = AFF(out_channels)  #   上面已经完成了类似于ctrgcn中tcn的多尺度卷积，在这里再增加了注意力特征融合，增加了global,local特征的融合
-
+        self.transform = nn.Sequential(
+            nn.BatchNorm2d(tin_channels), self.act, nn.Conv2d(tin_channels, out_channels, kernel_size=1))
         # initialize
+        self.bn = nn.BatchNorm2d(out_channels)
+        self.drop = nn.Dropout(dropout, inplace=True)
+        
         self.apply(weights_init)
 
     def forward(self, x):
         # Input dim: (N,C,T,V)
-        res = self.residual(x)
-        branch_outs = []
-        for tempconv in self.branches:
-            out = tempconv(x)
-            branch_outs.append(out)
-
-        out = torch.cat(branch_outs, dim=1)
-        out += res
-        # out = self.aff(out, res)  #self.residual(x) [4, 64, 64, 25] 进行残差连接
-        return out
-
-# dgmstcn其实相当于就是在通道维度进行分组，这点就是ctrgcn中的， 然后后面加了一个类似于aff融合的模块
-#  还需要注意这点，在v上平均然后加上去了  x = torch.cat([x, x.mean(-1, keepdim=True)], -1)  # [4, 64, 100, 26] <- cat [4, 64, 100, 25] 在V上进行平均 [4, 64, 100, 1]
-# 这里说的dynamic group也不是什么新的花样，并不是先将特征分成不同组后进行卷积，而是卷积后自然形成的组，类似于ctrgcn
-class dgmstcn(nn.Module):
-
-    def __init__(self,
-                 in_channels,
-                 out_channels,
-                 mid_channels=None,
-                 num_joints=25,
-                 dropout=0.,
-                #  ms_cfg=[(3, 1), (3, 2), (3, 3), (3, 4), ('max', 3), '1x1'],  #  1.622124M 993.472935M 
-                 ms_cfg=[(5, 1), (5, 2), ('max', 3), '1x1'],  #  1.695688M 1.032167222G
-                 stride=1):
-
-        super().__init__()  # 将  [(3, 1), (3, 2), (3, 3), (3, 4), ('max', 3), '1x1']-> [(5, 1), (5, 2), ('max', 3), '1x1']
-        # Multiple branches of temporal convolution
-        self.ms_cfg = ms_cfg
-        num_branches = len(ms_cfg)  # Figure 4 6
-        self.num_branches = num_branches
-        self.in_channels = in_channels
-        self.out_channels = out_channels
-
-        self.act = nn.ReLU()
-        self.num_joints = num_joints
-        # the size of add_coeff can be smaller than the actual num_joints
-        self.add_coeff = nn.Parameter(torch.zeros(self.num_joints))  #Figure 4 D-JSF gama系数y
-
-        if mid_channels is None:
-            mid_channels = out_channels // num_branches
-            rem_mid_channels = out_channels - mid_channels * (num_branches - 1)
-        else:
-            assert isinstance(mid_channels, float) and mid_channels > 0
-            mid_channels = int(out_channels * mid_channels)
-            rem_mid_channels = mid_channels
-
-        self.mid_channels = mid_channels
-        self.rem_mid_channels = rem_mid_channels
-
-        branches = []
-        for i, cfg in enumerate(ms_cfg):
-            branch_c = rem_mid_channels if i == 0 else mid_channels
-            if cfg == '1x1':
-                branches.append(nn.Conv2d(in_channels, branch_c, kernel_size=1, stride=(stride, 1)))
-                continue
-            assert isinstance(cfg, tuple)
-            if cfg[0] == 'max':
-                branches.append(
-                    nn.Sequential(
-                        nn.Conv2d(in_channels, branch_c, kernel_size=1), nn.BatchNorm2d(branch_c), self.act,
-                        nn.MaxPool2d(kernel_size=(cfg[1], 1), stride=(stride, 1), padding=(1, 0))))
-                continue
-            assert isinstance(cfg[0], int) and isinstance(cfg[1], int)
-            branch = nn.Sequential(
-                nn.Conv2d(in_channels, branch_c, kernel_size=1), nn.BatchNorm2d(branch_c), self.act,
-                unit_tcn(branch_c, branch_c, kernel_size=cfg[0], stride=stride))
-            branches.append(branch)
-
-        self.branches = nn.ModuleList(branches)
-        tin_channels = mid_channels * (num_branches - 1) + rem_mid_channels
-
-        self.transform = nn.Sequential(
-            nn.BatchNorm2d(tin_channels), self.act, nn.Conv2d(tin_channels, out_channels, kernel_size=1))
-
-        self.bn = nn.BatchNorm2d(out_channels)
-        self.drop = nn.Dropout(dropout, inplace=True)
-
-    def inner_forward(self, x):  # bs,C',T,,V [4, 64, 100, 25]
+        # res = self.residual(x)
         N, C, T, V = x.shape  # bs,C',T,,V [4, 64, 100, 25]
         x = torch.cat([x, x.mean(-1, keepdim=True)], -1)  # [4, 64, 100, 26] <- cat [4, 64, 100, 25] 在V上进行平均 [4, 64, 100, 1]
 
         branch_outs = []
-        for tempconv in self.branches:
-            out = tempconv(x)  # # [4, 14, 100, 26] <- [4, 64, 100, 26]
+        for tempconv in self.branches:  # 四分支 conv2d(64,16) conv2d(16,16), conv2d(64,16) conv2d(16,16), conv2d(64,16) conv2d(16,16), conv2d(64,16)
+            out = tempconv(x)
             branch_outs.append(out)
 
-        out = torch.cat(branch_outs, dim=1)  # bs,C,T,V [4, 64, 100, 26] <- C分别为14(conv2d(64,14),conv2d(14,14),D=1), 10(conv2d(64,10),conv2d(10,10,),D=2),10(conv2d(64,10),conv2d(10,10),D=3),10(conv2d(64,10),D=4)),10（conv2d(64,10),maxpool2d), 10(conv2d(64,10))   6[4, C, 100, 26]
+        out = torch.cat(branch_outs, dim=1)  # [4, 64, 64, 25] 已经完成concat了，再进行AFF即通道注意力
         local_feat = out[..., :V]  # [4, 64, 100, 25]  类似于TCA-GCN中的AFF模块，分别得到global,local特征
         global_feat = out[..., V]  # 只在V上即空间上进行了平均[4, 64, 100]  # TCA-GCN中的AFF模块是在T和V上进行平均池化了[4,64,1,1]
         global_feat = torch.einsum('nct,v->nctv', global_feat, self.add_coeff[:V])  # D-JSF步骤 [4, 64, 100, 25] <- [4, 64, 100]<- gama系数self.add_coeff[:V] [25]都是0
         feat = local_feat + global_feat    # [4, 64, 100, 25]
-
         feat = self.transform(feat)  # [4, 64, 100, 25] <- 全连接吧 conv2d(64,64) [4, 64, 100, 25]
-        return feat
 
-    def forward(self, x):  #  [4, 64, 100, 25]
-        out = self.inner_forward(x)  #  [4, 64, 100, 25]
-        out = self.bn(out)
-        return self.drop(out)  #  [4, 64, 100, 25]
+        # out += res
+        # out = self.aff(out, res)  #self.residual(x) [4, 64, 64, 25] 进行残差连接
+        return out
 
 
 class CTRGC(nn.Module):
@@ -297,10 +222,12 @@ class CTRGC(nn.Module):
         else:
             self.rel_channels = in_channels // rel_reduction
             self.mid_channels = in_channels // mid_reduction
-        self.conv1 = nn.Conv2d(self.in_channels, self.rel_channels, kernel_size=1)
-        self.conv2 = nn.Conv2d(self.in_channels, self.rel_channels, kernel_size=1)
-        self.conv3 = nn.Conv2d(self.in_channels, self.out_channels, kernel_size=1)
-        self.conv4 = nn.Conv2d(self.rel_channels, self.out_channels, kernel_size=1)
+        self.conv1 = nn.Conv2d(self.in_channels, self.rel_channels, kernel_size=1)  # (3,8)或者 (64,8)
+        self.conv2 = nn.Conv2d(self.in_channels, self.rel_channels, kernel_size=1)  # (3,8, k = [1,1])
+        self.conv3 = nn.Conv2d(self.in_channels, self.out_channels, kernel_size=1)  # conv2d(3,64, k = (1,1))
+        self.conv4 = nn.Conv2d(self.rel_channels, self.out_channels, kernel_size=1)  # (8,64, k=(1,1))
+        self.conv5 = nn.Conv2d(self.in_channels, self.rel_channels, kernel_size=1)  # (3,8)或者 (64,8)
+        self.softmax = nn.Softmax(dim=-1)
         self.tanh = nn.Tanh()
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
@@ -308,11 +235,23 @@ class CTRGC(nn.Module):
             elif isinstance(m, nn.BatchNorm2d):
                 bn_init(m, 1)
 
-    def forward(self, x, A=None, alpha=1):
-        x1, x2, x3 = self.conv1(x).mean(-2), self.conv2(x).mean(-2), self.conv3(x)
-        x1 = self.tanh(x1.unsqueeze(-1) - x2.unsqueeze(-2))
-        x1 = self.conv4(x1) * alpha + (A.unsqueeze(0).unsqueeze(0) if A is not None else 0)  # N,C,V,V
-        x1 = torch.einsum('ncuv,nctv->nctu', x1, x3)
+    def forward(self, x, A=None, alpha=1):  # x [bs*2, 3, step, 25] [4,3,64,25] A v,v [25,25]因为有三个ctrgc,所以将A分开了
+        N,C,T,V = x.size()  # [4,3,64,25]
+        # [4,3,64,25] -> [4,3,25] conv2d(3,8, k=(1,1)) -> [4,8,25]
+        # x1, x2, x3 = self.conv1(x).mean(-2), self.conv2(x).mean(-2), self.conv3(x) # [4,8,25] <- conv2d(3,8) [4,3,25]
+        x1 = self.conv1(x)  # x1 = [4,8,64,25] <- conv2d(3,8, k = (1,1)) [4,3,64,25]
+        x2 = self.conv2(x)  # x1 = [4,8,64,25] <- conv2d(3,8) [4,3,64,25]
+        x3 = self.conv3(x)  #  [4,64,64, 25]<- conv2d(3,64, k = (1,1)) [4,3,64,25]
+        x1 = x1.view(-1, T, V).permute(0, 2, 1)  #  bsC,T,V -> bs,V,T
+        x2 = x2.view(-1, T, V) #  bsC,T,V
+        x1 = torch.matmul(x1, x2)  # bsC,V,V
+        x1 = self.softmax(x1)  # bsC,V,V
+        x1 = x1.view(N, -1, V, V)  # bs, C,V,V
+
+
+        x1 = self.tanh(x1)  #[4,8,25,25] <-[4,8,25,1] - [4,8,1,25]相当于是自相关性系数
+        x1 = self.conv4(x1) * alpha + (A.unsqueeze(0).unsqueeze(0) if A is not None else 0)  # N,C,V,V, x1是通道拓扑细化，A是静态拓扑 [4,64,25,25] <-conv2d(8,64) [4,8,25,25] 
+        x1 = torch.einsum('ncuv,nctv->nctu', x1, x3)  #   bs,C,T,V [4,64,64,25] <- bs,C,T,V[4,64,64,25]  bs,C,V,V[4,64,25,25] 通道细化后的节点自相关性
         return x1
 
 class unit_tcn(nn.Module):
@@ -389,13 +328,11 @@ class unit_gcn(nn.Module):
 
 
 class TCN_GCN_unit(nn.Module):
-    def __init__(self, in_channels, out_channels, A, stride=1, residual=True, adaptive=True, kernel_size=3, dilations=[1,2,3,4]):
+    def __init__(self, in_channels, out_channels, A, stride=1, residual=True, adaptive=True, kernel_size=5, dilations=[1,2]):
         super(TCN_GCN_unit, self).__init__()
         self.gcn1 = unit_gcn(in_channels, out_channels, A, adaptive=adaptive)
-        # self.tcn1 = MultiScale_TemporalConv(out_channels, out_channels, kernel_size=kernel_size, stride=stride, dilations=dilations,
-        #                                     residual=False)
-        self.tcn1 = dgmstcn(out_channels, out_channels, stride=stride)
-
+        self.tcn1 = MultiScale_TemporalConv(out_channels, out_channels, kernel_size=kernel_size, stride=stride, dilations=dilations,
+                                            residual=False)
         self.relu = nn.ReLU(inplace=True)
         if not residual:
             self.residual = lambda x: 0
@@ -461,6 +398,7 @@ class Model(nn.Module):
             x = x.view(N, T, self.num_point, -1).permute(0, 3, 1, 2).contiguous().unsqueeze(-1)
         N, C, T, V, M = x.size()   # [bs, 3, step, 25, M(numperson:2)]
 
+        # N,M,V,C,T -> N,MVC,T
         x = x.permute(0, 4, 3, 1, 2).contiguous().view(N, M * V * C, T)  # [bs, 2*25*3, step]
         x = self.data_bn(x)
         x = x.view(N, M, V, C, T).permute(0, 1, 3, 4, 2).contiguous().view(N * M, C, T, V)  # [bs*2, 3, step, 25]

@@ -332,8 +332,8 @@ class dggcn(nn.Module):
 
         if ratio is None:
             ratio = 1 / self.num_subsets
-        self.ratio = ratio
-        mid_channels = int(ratio * out_channels)
+        self.ratio = ratio  # 0.25 或者 0.125
+        mid_channels = int(ratio * out_channels) # 0.125*64 = 8
         self.mid_channels = mid_channels  # 8
 
         self.norm_cfg = norm if isinstance(norm, dict) else dict(type=norm)
@@ -357,7 +357,7 @@ class dggcn(nn.Module):
         self.beta = nn.Parameter(torch.zeros(self.num_subsets))  # Figure3 (b)DA系数
 
         if self.ada or self.ctr:
-            self.conv1 = nn.Conv2d(in_channels, mid_channels * num_subsets, 1)
+            self.conv1 = nn.Conv2d(in_channels, mid_channels * num_subsets, 1)  # 输入3,输出8*8
             self.conv2 = nn.Conv2d(in_channels, mid_channels * num_subsets, 1)
 
         if in_channels != out_channels:
@@ -373,7 +373,7 @@ class dggcn(nn.Module):
         n, c, t, v = x.shape  # bs,C,T,V [4, 3, 100, 25]
 
         res = self.down(x)  #  [4, 64, 100, 25] <- conv2d(3,64) bs,C,T,V [4, 3, 100, 25]
-        A = self.A  # K,V,V [8,25,25]
+        A = self.A  # K,V,V [8,25,25]  # 类似于细化后的A
 
         # 1 (N), K, 1 (C), 1 (T), V, V
         A = A[None, :, None, None]  # [1, 8, 1, 1, 25, 25]
@@ -391,7 +391,7 @@ class dggcn(nn.Module):
             x1 = self.conv1(tmp_x).reshape(n, self.num_subsets, self.mid_channels, -1, v)  #  bs,k,c',T,V [4,8,8,1,25]<-reshape [4, 64, 1, 25]<-conv2d(3,64) [4, 3, 1, 25]
             x2 = self.conv2(tmp_x).reshape(n, self.num_subsets, self.mid_channels, -1, v)  #  bs,k,c',T,V [4,8,8,1,25]<-reshape [4, 64, 1, 25]<-conv2d(3,64) [4, 3, 1, 25]
 
-        if self.ctr is not None:  # CA模块
+        if self.ctr is not None:  # CA模块  #  利用相减实现通道建模
             # * The shape of ada_graph is N, K, C[1], T or 1, V, V
             diff = x1.unsqueeze(-1) - x2.unsqueeze(-2)  # ctrgcn部分的逻辑  bs,k,C',T,V,V[4, 8, 8, 1, 25, 25] <- [4, 8, 8, 1, 25, 1] - [4, 8, 8, 1, 1, 25]
             ada_graph = getattr(self, self.ctr_act)(diff)  # [4, 8, 8, 1, 25, 25] <- self.ctr_act 'tanh' [4, 8, 8, 1, 25, 25]
@@ -402,19 +402,19 @@ class dggcn(nn.Module):
                 ada_graph = ada_graph * self.alpha[0]  # [4, 8, 8, 1, 25, 25] * 0
             A = ada_graph + A  # 对A没影响，A没有加DA
 
-        if self.ada is not None:  # DA模块
+        if self.ada is not None:  # DA模块 利用自注意力实现拓扑[V,C] [C,V] -> [V,V]
             # * The shape of ada_graph is N, K, 1, T[1], V, V
-            ada_graph = torch.einsum('nkctv,nkctw->nktvw', x1, x2)[:, :, None]  # [4, 8, 1, 1, 25, 25] <- [4, 8, 1, 25, 25]
-            ada_graph = getattr(self, self.ada_act)(ada_graph)  # [4, 8, 1, 1, 25, 25]  <- self.ada_act softmax
+            ada_graph = torch.einsum('nkctv,nkctw->nktvw', x1, x2)[:, :, None]  # [4, 8, 1, 1, 25, 25] <- [4, 8, 1, 25, 25] <- [4,8,8,1,25]  [4,8,8,1,25]
+            ada_graph = getattr(self, self.ada_act)(ada_graph)  #N,K,C(1),T(1),V,V [4, 8, 1, 1, 25, 25]  <- self.ada_act softmax
 
             if self.subset_wise:  # False
                 ada_graph = torch.einsum('nkctuv,k->nkctuv', ada_graph, self.beta)  # bs,k,c',T,V,V[4, 8, 1, 1, 25, 25]
             else:
                 ada_graph = ada_graph * self.beta[0]  # [4, 8, 1, 1, 25, 25]  CA权重beta
-            A = ada_graph + A  # 没影响 A没有加CA bs,k,c',T,V，V[4, 8, 8, 1, 25, 25] <- A [4, 8, 8, 1, 25, 25]   4, 8, 1, 1, 25, 25]
+            A = ada_graph + A  # 没影响 A没有加CA bs,k,c',T,V，V[4, 8, 8, 1, 25, 25] <- A [4, 8, 8, 1, 25, 25] +  [4, 8, 1, 1, 25, 25]
 
         if self.ctr is not None or self.ada is not None:
-            assert len(A.shape) == 6  # bs,k,c',1,V,V[4, 8, 8, 1, 25, 25] 
+            assert len(A.shape) == 6  # bs,k,c(8),T(1),V,V[4, 8, 8, 1, 25, 25] 
             # * C, T can be 1
             if A.shape[2] == 1 and A.shape[3] == 1:
                 A = A.squeeze(2).squeeze(2)

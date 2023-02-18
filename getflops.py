@@ -1,15 +1,15 @@
 from torchsummaryX import summary
 # from model.sectrgcn import Model
-from model.dev_ctr_sa1_aff_ta import Model
+from model.dev_ctr_sa1_da_aff import Model
 # from model.tca import Model
 # from model.dev_ctr_sa1_aff import Model
-from thop import profile
+# from thop import profile
 
 
 import torch
 import yaml
 
-cfg = {'model_args':{'num_class': 60, 'num_point': 25, 'num_person': 2, 'graph':'graph.ntu_rgb_d.Graph','graph_args':{'labeling_mode':'spatial'}}}
+cfg = {'model_args':{'num_class': 120, 'num_point': 25, 'num_person': 2, 'graph':'graph.ntu_rgb_d.Graph','graph_args':{'labeling_mode':'spatial'}}}
 device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu") # 单GPU或者CPU
 model=Model().to(device)
 # print(model)
@@ -48,6 +48,14 @@ Total params             2.493384M
 Trainable params         2.493384M
 Non-trainable params           0.0
 Mult-Adds             1.166322934G
+
+
+dev_ctr_dg
+Total params             1.695688M
+Trainable params         1.695688M
+Non-trainable params           0.0
+Mult-Adds             1.032167222G
+
 
 ta  增加参数量2.45M, 减少计算量367M
                          Totals
@@ -92,6 +100,27 @@ Trainable params        1.998744M
 Non-trainable params          0.0
 Mult-Adds             850.943734M
 
+dev_ctr_dg
+                           Totals
+Total params            1.622124M
+Trainable params        1.622124M
+Non-trainable params          0.0
+Mult-Adds             993.472935M
+
+
+
+dev_ctr_sa1_da_aff
+                            Totals
+Total params             2.493384M
+Trainable params         2.493384M
+Non-trainable params           0.0
+Mult-Adds             1.166322934G
+
+
+
+
+
+
 tca
                           Totals
 Total params           4.949904M
@@ -100,6 +129,18 @@ Non-trainable params         0.0
 Mult-Adds             799.81282M
 flops: 829.84874M params: 4.298064M
 
+ctrgcn
+Total params            1.427912M
+Trainable params        1.427912M
+Non-trainable params          0.0
+Mult-Adds             877.434614M
+flops: 893.00608M params: 1.427912M
+
+dgmsgcn
+Total params             2.556366M
+Trainable params         2.556366M
+Non-trainable params           0.0
+Mult-Adds             1.103712166G
 
 hdgcn
                            Totals
@@ -118,4 +159,15 @@ Total params             1.838284M
 Trainable params         1.838284M
 Non-trainable params           0.0
 Mult-Adds             1.455380664G
+
+
+joint流, 上边的都是bone流
+hdgcn论文中
+          X-Sub (%) X-Set (%) GFLOPs # Param. (M)
+DC-GCN [3]  84.0?   86.1?      1.83     3.37
+MS-G3D [15] 84.9?   86.8?      5.22     3.22
+CTR-GCN [1] 84.9    86.5?      1.97     1.46
+InfoGCN [5] 85.1    86.3       1.84     1.57
+HD-GCN      85.7    87.3       1.77     1.68
+
 """

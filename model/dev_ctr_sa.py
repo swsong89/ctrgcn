@@ -10,6 +10,7 @@ from einops import rearrange, repeat
 from graph.ntu_rgb_d import Graph
 
 def import_class(name):
+    print('name: ', name)
     components = name.split('.')
     mod = __import__(components[0])
     for comp in components[1:]:
@@ -381,7 +382,7 @@ class Model(nn.Module):
         self.data_bn = nn.BatchNorm1d(num_person * base_channel * num_point)  # [2*3*25]
 
         base_channel = 64
-        self.A_vector = self.get_A(graph, k).type(torch.float32)  #  [25, 25] 对角线减入度  
+        self.A_vector = self.get_A(self.graph, k).type(torch.float32)  #  [25, 25] 对角线减入度  
         self.to_joint_embedding = nn.Linear(in_channels, base_channel)  # Linear(in_features=3, out_features=64, bias=True)
         self.pos_embedding = nn.Parameter(torch.randn(1, self.num_point, base_channel))  # [1, 25, 64]
 

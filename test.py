@@ -1,5 +1,6 @@
 import torch
 import torch.nn.functional as F
+import torch.nn as nn
 
 # y = torch.arange(25).unsqueeze(-1)  # torch.range(0, spa)
 # print(y)
@@ -21,10 +22,12 @@ import torch.nn.functional as F
 # print(y_onehot.size())
 
 
-input = torch.randn(3,4)
-print(input)
-b = F.softmax(input,dim=-1) # 按列SoftMax,列和为1
-c = F.softmax(input) # 按列SoftMax,列和为1
-print(b)
-print(c)
-
+# input = torch.randn(3,4)
+# print(input)
+# b = F.softmax(input,dim=-1) # 按列SoftMax,列和为1
+# c = F.softmax(input) # 按列SoftMax,列和为1
+# print(b)
+# print(c)
+a = nn.Parameter(torch.ones(1))
+b = nn.Parameter(torch.ones(1))
+print('a: {}, b: {}'.format(a[0],b[0]))
