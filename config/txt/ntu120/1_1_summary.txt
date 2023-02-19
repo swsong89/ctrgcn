@@ -1,0 +1,71 @@
+
+1_ctr_b, focal_loss
+[ Mon Jan 23 20:29:10 2023 ] best epoch: 90 best_acc: 85.10%
+
+ctr_ce_b_xsub cross_entropy  1.43M  877.43M
+[ Wed Feb 15 15:29:46 2023 ] --------------------best epoch acc: 65  86.14%
+
+sectr
+[ Sat Jan 28 20:40:04 2023 ] best_epoch: 94 best_acc: 85.57%
+
+
+dev_ctr_aff_k3d4_b
+                             best_epoch: 69 best_acc: 84.86%
+
+
+1_dev_ctr_aff_b,相比ctr_b多了tca中的aff模块，+1.06M = 2.49M-1.43M   1.17G
+主要增加了很多参数量1.06M, 计算量也增加到了877+289=1166M
+[ Mon Jan 30 11:11:06 2023 ] best_epoch: 97 best_acc: 85.23%
+
+
+1_dev_ctr_dg_b_xsub,相比ctr_b多了dg中的dsf模块，这个模块和aff一样,精度比aff高点，但是参数量少很多
+1.695688M 1.032167222G，相比1_ctr_b 1.43M  877.43M
+[ Thu Feb 16 12:56:39 2023 ] --------------------best epoch acc: 56  85.29%
+
+
+dev_ctr_aff_k3d4_b, 相比dev_ctr_aff_b,效果反而降低了
+                             best_epoch: 69 best_acc: 84.86%
+
+
+
+
+dev_ctr_sa, 直接用的infogcn中的sa模块，效果降低
+[ Sat Feb  4 14:15:47 2023 ] best_epoch: 84 best_acc: 81.99%
+
+dev_ctr_sa1_b ，相比dev_ctr_sa_b，sa1采用自注意力方法，有效 
+1.43M 877.43M sa1不增加参数量和计算量
+[ Thu Feb  9 10:44:15 2023 ] best_epoch: 76 best_acc: 85.81%
+
+1_dev_ctr_sa1_aff_b_xsub sa1是通过自注意力实现，aff来自于tca的模块  
+2.49M  1.17G 参数量和计算量增加来自于aff模块
+[ Sat Feb 11 19:11:31 2023 ] --------------------best_epoch: 64 best_acc: 86.28%
+
+
+dev_ctr_sa1_aff_ta_b_xsub ta用的是TCA中的模块，计算量很大，但是没有效果,相比较上边的反而降低了
+4.949904M   799.81282M ta模块用参数量增加换计算量降低
+[ Sat Feb 11 18:02:16 2023 ] --------------------best_epoch: 59 best_acc: 85.36%
+
+
+1_dev_ctr_sa1_aff_ta1_b_xsub, 相比dev_ctr_sa1_aff_ta_b_xsub，去掉了TAdaAggregation，ta1中只用了RouteFuncMLP，效果提升
+2.066424M  852.35443M,去掉了TAdaAggregation，参数量大大减少
+[ Wed Feb 15 23:02:09 2023 ] --------------------best_epoch: 57 best_acc: 85.59%
+
+dev_ctr_sa1_aff_ta2_b_xsub,相比1_dev_ctr_sa1_aff_ta1_b_xsub，将ta1中的RouteFuncMLP换成了自注意力建模
+1.998744M 850.943734M，降低了一部分计算量
+[ Fri Feb 17 08:41:55 2023 ] --------------------best epoch acc: 58  85.28%
+
+
+1_dev_ctr_sa1_da_aff_b_xsub, 相比 1_dev_ctr_sa1_aff_b_xsub ，效果是降低了 86.28%
+2.493384M 1.166322934G,参数量计算量没变化
+[ Sat Feb 18 08:03:43 2023 ] --------------------best epoch acc: 77  85.69%
+
+1_dev_ctr_sa1_da_aff_fl_b_xsub,相比1_dev_ctr_sa1_da_aff_b_xsub, 效果提升了一点点
+2.493384M 1.166322934G,参数量增加主要来源aff里面的几个卷积
+[ Sun Feb 19 17:42:22 2023 ] --------------------best epoch acc: 95  85.74%
+
+
+1_dev_ctr_sa1_dsf_b_xsub
+[ Sun Feb 19 18:12:01 2023 ] --------------------best epoch acc: 71  85.41%
+
+
+ 

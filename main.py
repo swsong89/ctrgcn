@@ -364,6 +364,7 @@ class Processor():
             else:
                 lr = self.arg.base_lr * (
                         self.arg.lr_decay_rate ** np.sum(epoch >= np.array(self.arg.step)))
+            # self.print_log('lr: {}'.format(lr))  # 每次epoch打印一下lr
             for param_group in self.optimizer.param_groups:
                 param_group['lr'] = lr
             return lr

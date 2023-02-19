@@ -488,4 +488,3 @@
 [ Wed Feb 15 23:02:08 2023 ] 	Top1: 85.05%
 [ Wed Feb 15 23:02:09 2023 ] 	Top5: 97.11%
 [ Wed Feb 15 23:02:09 2023 ] --------------------best_epoch: 57 best_acc: 85.59%
-[ Wed Feb 15 23:02:09 2023 ] Training epoch: 92

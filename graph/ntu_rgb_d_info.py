@@ -36,12 +36,25 @@ outward_2 = [(j, i) for (i, j) in inward_2]
 neighbor_2 = inward_2 + outward_2
 
 class Graph:
-    def __init__(self, labeling_mode='spatial', scale=1):
+    def __init__(self, labeling_mode='spatial', k=0,scale=1):
         self.num_node = num_node
-        self.self_link = self_link
-        self.inward = inward
-        self.outward = outward
-        self.neighbor = neighbor
+        if k == 0:
+            self.self_link = self_link
+            self.inward = inward
+            self.outward = outward
+            self.neighbor = neighbor
+        elif k == 1:
+            self.self_link = self_link_1
+            self.inward = inward_1
+            self.outward = outward_1
+            self.neighbor = neighbor_1
+        elif k==2:
+            self.self_link = self_link_2
+            self.inward = inward_2
+            self.outward = outward_2
+            self.neighbor = neighbor_2
+        else:
+            print('do not know k: ', k)
         self.A_outward_binary = tools.get_adjacency_matrix(self.outward, self.num_node)
         self.A = self.get_adjacency_matrix(labeling_mode)
 

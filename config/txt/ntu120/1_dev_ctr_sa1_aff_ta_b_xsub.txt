@@ -651,6 +651,4 @@
 [ Sat Feb 11 18:02:16 2023 ] 	Top1: 85.31%
 [ Sat Feb 11 18:02:16 2023 ] 	Top5: 96.99%
 [ Sat Feb 11 18:02:16 2023 ] --------------------best_epoch: 59 best_acc: 85.36%
-[ Sat Feb 11 18:02:17 2023 ] Training epoch: 82
-[ Sat Feb 11 18:27:33 2023 ] 	Mean training loss: 0.0250.  Mean training acc: 99.65%.
-[ Sat Feb 11 18:27:33 2023 ] 	Time consumption: [Data]00%, [Network]100%
+

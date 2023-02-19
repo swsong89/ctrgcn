@@ -181,14 +181,14 @@ class MultiScale_TemporalConv(nn.Module):
         #全局通道上下文和局部通道上下文注意力特征融合，将原来的conv1x1换成了通道注意力
         # self.aff = AFF(out_channels)  #   上面已经完成了类似于ctrgcn中tcn的多尺度卷积，在这里再增加了注意力特征融合，增加了global,local特征的融合
         self.transform = nn.Sequential(
-            nn.BatchNorm2d(tin_channels), self.act, nn.Conv2d(tin_channels, out_channels, kernel_size=1))
+            nn.BatchNorm2d(out_channels), nn.ReLU(), nn.Conv2d(out_channels, out_channels, kernel_size=1))
         # initialize
         self.bn = nn.BatchNorm2d(out_channels)
-        self.drop = nn.Dropout(dropout, inplace=True)
-        
+        # self.drop = nn.Dropout(dropout, inplace=True)
+
         self.apply(weights_init)
 
-    def forward(self, x):
+    def forward(self, x):   # dgstgcn中的dsf模块
         # Input dim: (N,C,T,V)
         # res = self.residual(x)
         N, C, T, V = x.shape  # bs,C',T,,V [4, 64, 100, 25]
@@ -203,9 +203,10 @@ class MultiScale_TemporalConv(nn.Module):
         local_feat = out[..., :V]  # [4, 64, 100, 25]  类似于TCA-GCN中的AFF模块，分别得到global,local特征
         global_feat = out[..., V]  # 只在V上即空间上进行了平均[4, 64, 100]  # TCA-GCN中的AFF模块是在T和V上进行平均池化了[4,64,1,1]
         global_feat = torch.einsum('nct,v->nctv', global_feat, self.add_coeff[:V])  # D-JSF步骤 [4, 64, 100, 25] <- [4, 64, 100]<- gama系数self.add_coeff[:V] [25]都是0
-        feat = local_feat + global_feat    # [4, 64, 100, 25]
-        feat = self.transform(feat)  # [4, 64, 100, 25] <- 全连接吧 conv2d(64,64) [4, 64, 100, 25]
-
+        out = local_feat + global_feat    # [4, 64, 100, 25]
+        out = self.transform(out)  # [4, 64, 100, 25] <- 全连接吧 conv2d(64,64) [4, 64, 100, 25]
+        out = self.bn(out)
+        # out = self.drop(out)
         # out += res
         # out = self.aff(out, res)  #self.residual(x) [4, 64, 64, 25] 进行残差连接
         return out
