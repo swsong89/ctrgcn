@@ -3,7 +3,7 @@ num_worker: 8
 # feeder
 feeder: feeders.feeder_ntu.Feeder
 train_feeder_args:
-  data_path: data1/ntu120/NTU120_CSub.npz
+  data_path: data3/ntu120/NTU120_CSub.npz
   split: train
   debug: False
   random_choose: False
@@ -17,7 +17,7 @@ train_feeder_args:
   bone: True
 
 test_feeder_args:
-  data_path: data1/ntu120/NTU120_CSub.npz
+  data_path: data3/ntu120/NTU120_CSub.npz
   split: test
   window_size: 64
   p_interval: [0.95]
@@ -43,7 +43,7 @@ step: [35, 55, 85]
 warm_up_epoch: 5
 
 # training
-device: [1]
+device: [3]
 batch_size: 64  # 11657
 test_batch_size: 64
 num_epoch: 100
