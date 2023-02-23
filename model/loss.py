@@ -41,10 +41,10 @@ class FocalLoss(nn.Module):
         C = inputs.size(1)
         P = F.softmax(inputs, -1)
 
-        class_mask = inputs.data.new(N, C).fill_(0)
+        class_mask = inputs.data.new(N, C).fill_(0)  # [batch, class_num]比如120类，先让120为0
         class_mask = Variable(class_mask)
-        ids = targets.view(-1, 1)
-        class_mask.scatter_(1, ids.data, 1.)
+        ids = targets.view(-1, 1)#  拉伸 [batch, class_num]
+        class_mask.scatter_(1, ids.data, 1.)  # 让[batch, class_num]相应位置为1,其余还是0
         #print(class_mask)
 
         if inputs.is_cuda and not self.alpha.is_cuda:
@@ -52,7 +52,7 @@ class FocalLoss(nn.Module):
             self.alpha = self.alpha.cuda(inputs.get_device())
         alpha = self.alpha[ids.data.view(-1)]
 
-        probs = (P*class_mask).sum(1).view(-1,1)
+        probs = (P*class_mask).sum(1).view(-1,1) # 即，只计算了真实标签对应的预测概率的值，别的都是0
 
         log_p = probs.log()
         #print('probs size= {}'.format(probs.size()))
@@ -68,3 +68,56 @@ class FocalLoss(nn.Module):
         else:
             loss = batch_loss.sum()
         return loss
+
+
+# HDGCN
+class LabelSmoothingCrossEntropy(nn.Module):
+    def __init__(self, smoothing=0.1):
+        super(LabelSmoothingCrossEntropy, self).__init__()
+        self.smoothing = smoothing
+
+    def forward(self, x, target):
+        confidence = 1. - self.smoothing
+        logprobs = F.log_softmax(x, dim=-1)
+        nll_loss = -logprobs.gather(dim=-1, index=target.unsqueeze(1))
+        nll_loss = nll_loss.squeeze(1)
+        smooth_loss = -logprobs.mean(dim=-1)
+        loss = confidence * nll_loss + self.smoothing * smooth_loss
+        return loss.mean()
+
+
+
+# a class-balanced focal loss DG-STGCN
+# class BCELossWithLogits(BaseWeightedLoss):
+#     """Binary Cross Entropy Loss with logits.
+#     Args:
+#         loss_weight (float): Factor scalar multiplied on the loss.
+#             Default: 1.0.
+#         class_weight (list[float] | None): Loss weight for each class. If set
+#             as None, use the same weight 1 for all classes. Only applies
+#             to CrossEntropyLoss and BCELossWithLogits (should not be set when
+#             using other losses). Default: None.
+#     """
+
+#     def __init__(self, loss_weight=1.0, class_weight=None):
+#         super().__init__(loss_weight=loss_weight)
+#         self.class_weight = None
+#         if class_weight is not None:
+#             self.class_weight = torch.Tensor(class_weight)
+
+#     def _forward(self, cls_score, label, **kwargs):
+#         """Forward function.
+#         Args:
+#             cls_score (torch.Tensor): The class score.
+#             label (torch.Tensor): The ground truth label.
+#             kwargs: Any keyword argument to be used to calculate
+#                 bce loss with logits.
+#         Returns:
+#             torch.Tensor: The returned bce loss with logits.
+#         """
+#         if self.class_weight is not None:
+#             assert 'weight' not in kwargs, "The key 'weight' already exists."
+#             kwargs['weight'] = self.class_weight.to(cls_score.device)
+#         loss_cls = F.binary_cross_entropy_with_logits(cls_score, label,
+#                                                       **kwargs)
+#         return loss_cls

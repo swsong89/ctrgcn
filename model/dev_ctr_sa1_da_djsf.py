@@ -49,49 +49,6 @@ def weights_init(m):
         if hasattr(m, 'bias') and m.bias is not None:
             m.bias.data.fill_(0)
 
-# AFF是ctrgcn中时间卷积后得到的四个分支concat,再进行通道注意力
-# AFF模块类似于 # Figure 3a ctrgcn中的concat步骤,即将5x1conv d=1, 5x1conv d=2, 3x1 maxpool拼接操作,不过将直接concat变成了
-class AFF(nn.Module):  # TCA-GCN模块
-    '''
-    Only one input branch
-    '''
-
-    def __init__(self, in_channels, r=1):
-        super(AFF, self).__init__()
-        inter_channels = in_channels//r
-        channels=in_channels
-        self.local_att = nn.Sequential(
-            nn.Conv2d(channels, inter_channels, kernel_size=1, stride=1, padding=0),
-            nn.BatchNorm2d(inter_channels),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(inter_channels, channels, kernel_size=1, stride=1, padding=0),
-            nn.BatchNorm2d(channels),
-        )  # conv2d(64, 64)  conv2d(64, 64)
-
-        self.global_att = nn.Sequential(
-            nn.AdaptiveAvgPool2d(1),
-            nn.Conv2d(channels, inter_channels, kernel_size=1, stride=1, padding=0),
-            nn.BatchNorm2d(inter_channels),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(inter_channels, channels, kernel_size=1, stride=1, padding=0),
-            nn.BatchNorm2d(channels),
-        )  # AdaptiveAvgPool2d(output_size=1)   conv2d(64, 64)  conv2d(64, 64)
-
-        self.sigmoid = nn.Sigmoid()
-        # init 使用方法就是在需要的地方加上 self.aff = AFF(out_channels)  #   上面已经完成了类似于ctrgcn中tcn的多尺度卷积，在这里再增加了注意力特征融合，增加了global,local特征的融合
-        # forward         out = self.aff(out, self.residual(x))  #self.residual(x) [4, 64, 64, 25] 进行残差连接
-
-    def forward(self, x, residual):  #   bs,C',T,V [4, 64, 64, 25]  Attentional Feature Fusion 输入是类似于三个ctrgc+残差连接的结果，输出就是特征聚合
-        xa = x + residual
-        xl = self.local_att(xa)  # [4, 64, 64, 25] <- conv2d(64,64), conv2d(64,64), [4, 64, 64, 25]
-        xg = self.global_att(xa)  # 在T,V上进行了avgpool, bs,C',T,V,[4, 64, 1, 1] <-  conv2d(64,64) ,conv2d(64,64), [4, 64, 1, 1] <- AdaptiveAvgPool2d [4, 64, 64, 25]
-        xlg = xl + xg  #   bs,C',T,V [4, 64, 64, 25] xg是C维度的信息，在T,V进行了平均
-        wei = self.sigmoid(xlg)  # Attentional Feature Fusion.pdf
-        # 左边是聚合的部分，右边是residual
-        xo = 2 * x * wei + 2 * residual * (1 - wei)  # 2 * residual * (1 - wei)为空，没有进行残差连接 residual 0 
-       
-        return xo  # [4, 64, 64, 25]
-
 
 class TemporalConv(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, dilation=1):
@@ -129,6 +86,10 @@ class MultiScale_TemporalConv(nn.Module):
         # Multiple branches of temporal convolution
         self.num_branches = len(dilations) + 2
         branch_channels = out_channels // self.num_branches
+        self.num_joints = 25
+        # the size of add_coeff can be smaller than the actual num_joints
+        self.add_coeff = nn.Parameter(torch.zeros(self.num_joints))  #Figure 4 D-JSF gama系数y
+
         if type(kernel_size) == list:
             assert len(kernel_size) == len(dilations)
         else:
@@ -175,22 +136,36 @@ class MultiScale_TemporalConv(nn.Module):
         else:
             self.residual = TemporalConv(in_channels, out_channels, kernel_size=residual_kernel_size, stride=stride)
         #全局通道上下文和局部通道上下文注意力特征融合，将原来的conv1x1换成了通道注意力
-        self.aff = AFF(out_channels)  #   上面已经完成了类似于ctrgcn中tcn的多尺度卷积，在这里再增加了注意力特征融合，增加了global,local特征的融合
-
+        # self.aff = AFF(out_channels)  #   上面已经完成了类似于ctrgcn中tcn的多尺度卷积，在这里再增加了注意力特征融合，增加了global,local特征的融合
+        self.transform = nn.Sequential(
+            nn.BatchNorm2d(out_channels), nn.ReLU(), nn.Conv2d(out_channels, out_channels, kernel_size=1))
         # initialize
+        self.bn = nn.BatchNorm2d(out_channels)
+        # self.drop = nn.Dropout(dropout, inplace=True)
+
         self.apply(weights_init)
 
-    def forward(self, x):
+    def forward(self, x):   # dgstgcn中的dsf模块
         # Input dim: (N,C,T,V)
-        res = self.residual(x)
+        # res = self.residual(x)
+        N, C, T, V = x.shape  # bs,C',T,,V [4, 64, 100, 25]
+        x = torch.cat([x, x.mean(-1, keepdim=True)], -1)  # [4, 64, 100, 26] <- cat [4, 64, 100, 25] 在V上进行平均 [4, 64, 100, 1]
+
         branch_outs = []
         for tempconv in self.branches:  # 四分支 conv2d(64,16) conv2d(16,16), conv2d(64,16) conv2d(16,16), conv2d(64,16) conv2d(16,16), conv2d(64,16)
             out = tempconv(x)
             branch_outs.append(out)
 
-        out = torch.cat(branch_outs, dim=1)  # [4, 64, 64, 25] 已经完成concat了，再进行AFF即通道注意力 <- 4个[4,16,64,25]
+        out = torch.cat(branch_outs, dim=1)  # [4, 64, 64, 25] 已经完成concat了，再进行AFF即通道注意力
+        local_feat = out[..., :V]  # [4, 64, 100, 25]  类似于TCA-GCN中的AFF模块，分别得到global,local特征
+        global_feat = out[..., V]  # 只在V上即空间上进行了平均[4, 64, 100]  # TCA-GCN中的AFF模块是在T和V上进行平均池化了[4,64,1,1]
+        global_feat = torch.einsum('nct,v->nctv', global_feat, self.add_coeff[:V])  # D-JSF步骤 [4, 64, 100, 25] <- [4, 64, 100]<- gama系数self.add_coeff[:V] [25]都是0
+        out = local_feat + global_feat    # [4, 64, 100, 25]
+        out = self.transform(out)  # [4, 64, 100, 25] <- 全连接吧 conv2d(64,64) [4, 64, 100, 25]
+        out = self.bn(out)
+        # out = self.drop(out)
         # out += res
-        out = self.aff(out, res)  #self.residual(x) [4, 64, 64, 25] 进行残差连接
+        # out = self.aff(out, res)  #self.residual(x) [4, 64, 64, 25] 进行残差连接
         return out
 
 # sa1_aff中sa1是通过节点自相关性拓扑建模，sa1_da通过自相关性和之前的ctr联合起来进行建模

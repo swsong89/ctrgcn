@@ -76,4 +76,19 @@ dev_ctr_sa1_aff_ta2_b_xsub,相比1_dev_ctr_sa1_aff_ta1_b_xsub，将ta1中的Rout
 [ Mon Feb 20 20:35:03 2023 ] --------------------best epoch acc: 75  85.88%
 
 
+1_dev_ctr_sa1_da_fixed_aff_b_xsub, 相比1_dev_ctr_sa1_aff_redo_b_xsub有一点提升
+[ Tue Feb 21 23:59:06 2023 ] --------------------best epoch acc: 84  85.98%
+
+
+1_dev_ctr_sa1_da_djsf_b_xsub, 相比1_dev_ctr_sa1_aff_redo_b_xsub效果降了点
+[ Thu Feb 23 23:50:24 2023 ] --------------------best epoch acc: 60  85.68%
+
+
+1_dev_ctr_sa1_da_fixed_aff_lsce_b_xsub, 测试一下label_smooth_cross_entropy
+
+
+1_dev_ctr_sa1_da_ta1_aff_lsce_b_xsub
+
+
+
  

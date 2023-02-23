@@ -27,6 +27,7 @@ from tqdm import tqdm
 
 from torchlight import DictAction
 from model.loss import FocalLoss
+from model.loss import LabelSmoothingCrossEntropy
 
 
 import resource
@@ -295,6 +296,9 @@ class Processor():
         elif self.arg.loss == 'focal_loss':
             print(' loss: ' + self.arg.loss)
             self.loss = FocalLoss(num_class, output_device).cuda(output_device)
+        elif self.arg.loss == 'label_smooth_cross_entropy':
+            print(' loss: ' + self.arg.loss)
+            self.loss = LabelSmoothingCrossEntropy().cuda(output_device)
         else:
             print('unknown loss: ' + self.arg.loss)
 
