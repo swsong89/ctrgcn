@@ -267,9 +267,10 @@ class CTRGC(nn.Module):
         # self.da = nn.Parameter(torch.ones(1))
         # self.ctr = nn.Parameter(torch.ones(1))
 
+        # ta3相比较ta1就是kernels=[3,3]改成[1,1]
         self.conv_rf = RouteFuncMLP(c_in= self.rel_channels,  out_channels= self.rel_channels,          # number of input filters
                     ratio=1,            # reduction ratio for MLP
-                    kernels=[3,3],      # list of temporal kernel sizes
+                    kernels=[1,1],      # list of temporal kernel sizes
         )  # bs,C‘,T,1 [4, 64, 64, 1] 论文中G(')生成T维度之间的权重
 
         self.da = 1
