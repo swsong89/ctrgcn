@@ -99,4 +99,15 @@ dev_ctr_sa1_aff_ta2_b_xsub,相比1_dev_ctr_sa1_aff_ta1_b_xsub，将ta1中的Rout
 [ Sun Feb 26 17:49:16 2023 ] --------------------best epoch acc: 62  85.96%
 
 
+1_dev_ctr_sa1_da_fixed_aff_lsce_j_xsub
+[ Mon Feb 27 13:08:33 2023 ] --------------------best epoch acc: 77  85.03%
+
+1_dev_ctr_sa1_da_fixed_aff_lsce_jm_xsub
+[ Wed Mar  1 14:22:39 2023 ] --------------------best epoch acc: 61  81.64%
+
+
+1_dev_ctr_sa1_da_fixed_aff_lsce_bm_xsub
+[ Wed Mar  1 08:51:40 2023 ] --------------------best epoch acc: 57  81.50%
+
+
  

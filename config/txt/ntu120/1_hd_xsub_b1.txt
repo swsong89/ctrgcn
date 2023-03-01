@@ -1212,3 +1212,7 @@
 [ Fri Jan 13 21:28:47 2023 ] Batch Size: 64
 [ Fri Jan 13 21:28:47 2023 ] Test Batch Size: 64
 [ Fri Jan 13 21:28:47 2023 ] seed: 1
+
+
+
+[ Fri Jan 13 21:26:26 2023 ] 	Top1: 86.71%
