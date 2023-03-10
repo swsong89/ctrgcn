@@ -627,6 +627,7 @@ if __name__ == '__main__':
     print('device: ', arg.device)
     os.environ["CUDA_VISIBLE_DEVICES"] = str(arg.device[0])
     print('cuda: ', arg.device[0])
+
     # 处理因为加了关节点信息网络创建需要指导batchsize
     # print('device: ', arg.device)
     if arg.model == 'model.sectrgcn.Model':
@@ -637,8 +638,10 @@ if __name__ == '__main__':
         arg.model_args['device'] = arg.device[0]
 
     # 将log.txt改成模型名和类型名，如1_ctrgcn_b_xsub.log
+    # ./work_dir/ntu60/xsub/dev_ctr_sa1_da_fixed_aff_lsce_b
     work_dir_split = arg.work_dir.split('/')
-    arg.log_name = '1_' + work_dir_split[-1] + '_' + work_dir_split[-2]
+    # -3 ntu60  -1 dev_ctr_sa1_da_fixed_aff_lsce_b -2 xsub
+    arg.log_name = '1_' + work_dir_split[-3] + '_' + work_dir_split[-2] + '_' + work_dir_split[-1]
     print('arg.log_name: ', arg.log_name)
     if arg.weights == None:
         print('no weights')
@@ -648,6 +651,7 @@ if __name__ == '__main__':
         arg.start_epoch = start_epoch
         print('arg.start_epoch', arg.start_epoch)
 
+    # 处理data_path,在--data的时候只需要给定一个train的就好了，然后这里处理得到test
     if arg.data == None:
         print('data_path: ', arg.train_feeder_args['data_path'])
     else:
@@ -655,6 +659,8 @@ if __name__ == '__main__':
         arg.train_feeder_args['data_path'] = arg.data + data_file
         arg.test_feeder_args['data_path'] = arg.data + data_file
         print('data_path: ', arg.train_feeder_args['data_path'])
+
+    # 处理loss
     try:
         loss = arg.loss
         print('loss: ' + loss)

@@ -10,18 +10,29 @@ import torch
 import yaml
 
 cfg = {'model_args':{'num_class': 120, 'num_point': 25, 'num_person': 2, 'graph':'graph.ntu_rgb_d.Graph','graph_args':{'labeling_mode':'spatial'}}}
-device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu") # 单GPU或者CPU
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") # 单GPU或者CPU
 model=Model().to(device)
+# model=Model(**cfg).to(device) # **cfg才会传参
+
 # print(model)
 
 
 input = torch.randn(1, 3, 64, 25, 2).to(device)
 
+method = None
 
-# flops, params = profile(model, (input, ))
-# print('flops: {}M params: {}M'.format(flops/(input.size()[0]*input.size()[-1]*1000000), params/1000000))
+method = 'thop'
 
-summary(model, input)
+if method == 'thop':
+  from thop import profile
+  # thop
+  flops, params = profile(model, (input, ))
+  print('flops: {}M params: {}M'.format(flops/(input.size()[0]*input.size()[-1]*1000000), params/1000000))
+else:
+  # torchsummary
+  summary(model, input)
+
+
 """
 summary bathcsize不影响
 ctrgcn
@@ -121,6 +132,42 @@ Mult-Adds             1.166322934G
 
 
 
+
+
+sectrgcn
+
+Total params             1.838284M
+Trainable params         1.838284M
+Non-trainable params           0.0
+Mult-Adds             1.455380664G
+
+
+实验需要的
+dev_ctr_sa1_da_aff
+                            Totals
+Total params             2.493384M
+Trainable params         2.493384M
+Non-trainable params           0.0
+Mult-Adds             1.166322934G
+flops: 1191.96104M params: 2.493384M
+
+joint流, 上边的都是bone流
+
+
+hdgcn论文中
+          X-Sub (%) X-Set (%) GFLOPs # Param. (M)
+DC-GCN [3]  84.0?   86.1?      1.83     3.37
+MS-G3D [15] 84.9?   86.8?      5.22     3.22
+CTR-GCN [1] 84.9    86.5?      1.97     1.46
+InfoGCN [5] 85.1    86.3       1.84     1.57
+HD-GCN      85.7    87.3       1.77     1.68
+
+
+
+
+论文模型bone流
+
+
 tca
                           Totals
 Total params           4.949904M
@@ -150,24 +197,19 @@ Non-trainable params          0.0
 Mult-Adds             810.165334M
 flops: 945.089152M params: 1.632568M
 
+infogcn
+                           Totals
+Total params            1.553752M
+Trainable params        1.553752M
+Non-trainable params          0.0
+Mult-Adds             725.375792M
+flops: 832.011264M params: 1.553752M
 
 
-
-sectrgcn
-
-Total params             1.838284M
-Trainable params         1.838284M
+STGCN 论文说参数是2.4M
+                            Totals
+Total params             4.199242M
+Trainable params         4.199242M
 Non-trainable params           0.0
-Mult-Adds             1.455380664G
-
-
-joint流, 上边的都是bone流
-hdgcn论文中
-          X-Sub (%) X-Set (%) GFLOPs # Param. (M)
-DC-GCN [3]  84.0?   86.1?      1.83     3.37
-MS-G3D [15] 84.9?   86.8?      5.22     3.22
-CTR-GCN [1] 84.9    86.5?      1.97     1.46
-InfoGCN [5] 85.1    86.3       1.84     1.57
-HD-GCN      85.7    87.3       1.77     1.68
-
+Mult-Adds             1.469820992G
 """

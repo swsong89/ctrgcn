@@ -42,11 +42,11 @@ if __name__ == "__main__":
 
     work_dir = 'work_dir/' + arg.dataset + '/' + model_name + '_'
     
-    epoch_j = 77
+    epoch_j = 58
     epoch_b = 89
 
     # epoch_b = 0
-    epoch_jm = 71
+    epoch_jm = 61
     epoch_bm = 57
 
 
@@ -84,6 +84,13 @@ Top1 Acc: 89.2025%
 arg.alpha:  [0.6, 0.75, 0.3, 0.15]
 Top1 Acc: 89.4421%
 Top5 Acc: 98.1264%
+
+model_name:  dev_ctr_sa1_da_fixed_aff_lsce
+dataset:  ntu120/xsub
+j:  58  b:  89  jm:  61  bm:  57
+arg.alpha:  [0.6, 0.6, 0.4, 0.4]
+Top1 Acc: 89.2162%
+Top5 Acc: 98.1068%
 
 model_name:  ctr
 dataset:  ntu120/xsub

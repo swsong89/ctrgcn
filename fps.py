@@ -38,3 +38,5 @@ def measure_inference_speed(model, data, max_iter=200, log_interval=50):
                 flush=True)
             break
     return fps
+
+
