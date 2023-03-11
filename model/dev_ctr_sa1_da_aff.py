@@ -5,8 +5,10 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
-from graph.ntu_rgb_d import Graph
-
+# ntu
+# from graph.ntu_rgb_d import Graph
+# UCLA
+from graph.ucla import Graph
 def import_class(name):
     components = name.split('.')
     mod = __import__(components[0])
@@ -193,7 +195,7 @@ class MultiScale_TemporalConv(nn.Module):
         out = self.aff(out, res)  #self.residual(x) [4, 64, 64, 25] 进行残差连接
         return out
 
-# sa1_aff中sa1是通过节点自相关性拓扑建模，sa1_da通过自相关性和之前的ctr联合起来进行建模
+# sa1_aff中sa1是只通过节点自相关性拓扑建模，sa1_da就是通过自相关性和之前的ctr联合起来进行建模，DG-STGCN中的da就是sa1
 class CTRGC(nn.Module):
     def __init__(self, in_channels, out_channels, rel_reduction=8, mid_reduction=1):
         super(CTRGC, self).__init__()
@@ -236,7 +238,6 @@ class CTRGC(nn.Module):
         attention_ctr = self.tanh(x1.mean(-2).unsqueeze(-1) - x2.mean(-2).unsqueeze(-2))  #[4,8,25,25]
         x1 = attention_da*self.da + attention_ctr*self.ctr # [4,64,25,25] <- conv2d(8,64) [4,8,25,25]
         # print('da: {}, ctr: {}'.format(self.da[0], self.ctr[0]))
-
         x1 = self.conv4(x1) * alpha + (A.unsqueeze(0).unsqueeze(0) if A is not None else 0)  # N,C,V,V, x1是通道拓扑细化，A是静态拓扑 [4,64,25,25] <-conv2d(8,64) [4,8,25,25] 
         x1 = torch.einsum('ncuv,nctv->nctu', x1, x3)  #   bs,C,T,V [4,64,64,25] <- bs,C,T,V[4,64,64,25]  bs,C,V,V[4,64,25,25] 通道细化后的节点自相关性
         return x1
