@@ -25,6 +25,7 @@ test_feeder_args:
 
 # model
 model: model.dev_ctr_sa1_da_aff.Model
+loss: label_smooth_cross_entropy
 model_args:
   num_class: 10
   num_point: 20
@@ -40,10 +41,10 @@ lr_decay_rate: 0.1
 step: [50]
 
 # training
-device: [3]
+device: [1]
 batch_size: 16
 test_batch_size: 64
 num_epoch: 100
 nesterov: True
 warm_up_epoch: 5
-# nohup python main.py --config config/ucla/dev_ctr_sa1_da_fixed_aff_lsce_b.yaml  > config/log/dev_ctr_sa1_da_fixed_aff_lsce_b.log  2>&1
+# nohup python main.py --config config/ucla/dev_ctr_sa1_da_fixed_aff_lsce_b.yaml  > config/log/1.log  2>&1
