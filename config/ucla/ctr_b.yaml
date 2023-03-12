@@ -1,0 +1,47 @@
+# feeder
+work_dir: ./work_dir/ucla/ctr_b
+num_worker: 8
+feeder: feeders.feeder_ucla.Feeder
+train_feeder_args:
+  data_dir: data
+  data_path: bone
+  label_path: train
+  debug: False
+  random_choose: True
+  random_shift: False
+  random_move: False
+  window_size: 52
+  normalization: False
+  repeat: 5
+
+test_feeder_args:
+  data_dir: data
+  data_path: bone
+  label_path: val
+  debug: False
+
+
+# model
+model: model.ctr.Model
+model_args:
+  num_class: 10
+  num_point: 20
+  num_person: 1
+  graph: graph.ucla.Graph
+  graph_args:
+    labeling_mode: 'spatial'
+
+#optim
+weight_decay: 0.0001
+base_lr: 0.1
+lr_decay_rate: 0.1
+step: [50]
+
+# training
+device: [5]
+batch_size: 16
+test_batch_size: 64
+num_epoch: 100
+nesterov: True
+warm_up_epoch: 5
+# nohup python main.py --config config/ucla/ctr_b.yaml  > config/log/ctr_b.log  2>&1

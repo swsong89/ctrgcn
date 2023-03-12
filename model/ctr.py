@@ -5,7 +5,10 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.autograd import Variable
-from graph.ntu_rgb_d import Graph
+# ntu
+# from graph.ntu_rgb_d import Graph
+# UCLA
+from graph.ucla import Graph
 
 def import_class(name):
     components = name.split('.')
