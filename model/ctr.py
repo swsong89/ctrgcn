@@ -6,9 +6,9 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 # ntu
-# from graph.ntu_rgb_d import Graph
+from graph.ntu_rgb_d import Graph
 # UCLA
-from graph.ucla import Graph
+# from graph.ucla import Graph
 
 def import_class(name):
     components = name.split('.')

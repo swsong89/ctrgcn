@@ -36,29 +36,29 @@ class FocalLoss(nn.Module):
         self.class_num = class_num
         self.size_average = size_average
 
-    def forward(self, inputs, targets):
-        N = inputs.size(0)
-        C = inputs.size(1)
-        P = F.softmax(inputs, -1)
+    def forward(self, inputs, targets):  # [2, 60]  [2]
+        N = inputs.size(0)  # 
+        C = inputs.size(1)  # 60
+        P = F.softmax(inputs, -1)  # [2, 60]
 
-        class_mask = inputs.data.new(N, C).fill_(0)  # [batch, class_num]比如120类，先让120为0
+        class_mask = inputs.data.new(N, C).fill_(0)  # [2, 60] [batch, class_num]比如120类，先让120为0
         class_mask = Variable(class_mask)
-        ids = targets.view(-1, 1)#  拉伸 [batch, class_num]
-        class_mask.scatter_(1, ids.data, 1.)  # 让[batch, class_num]相应位置为1,其余还是0
+        ids = targets.view(-1, 1)#  拉伸 [batch, class_num] [2, 60]
+        class_mask.scatter_(1, ids.data, 1.)  #[2, 60]   让[batch, class_num]相应位置为1,其余还是0
         #print(class_mask)
 
         if inputs.is_cuda and not self.alpha.is_cuda:
             # print('loss forward: ', inputs.get_device())
             self.alpha = self.alpha.cuda(inputs.get_device())
-        alpha = self.alpha[ids.data.view(-1)]
+        alpha = self.alpha[ids.data.view(-1)]  # [2,1]
 
-        probs = (P*class_mask).sum(1).view(-1,1) # 即，只计算了真实标签对应的预测概率的值，别的都是0
+        probs = (P*class_mask).sum(1).view(-1,1) # [2, 1] <- [2,60]别的都是0，只有target不为0,即，只计算了真实标签对应的预测概率的值，别的都是0
 
-        log_p = probs.log()
+        log_p = probs.log()  # [2, 1]
         #print('probs size= {}'.format(probs.size()))
         #print(probs)
 
-        batch_loss = -alpha*(torch.pow((1-probs), self.gamma))*log_p
+        batch_loss = -alpha*(torch.pow((1-probs), self.gamma))*log_p  # [2, 1]
         #print('-----bacth_loss------')
         #print(batch_loss)
 
@@ -86,6 +86,25 @@ class LabelSmoothingCrossEntropy(nn.Module):
         return loss.mean()
 
 
+class LabelSmoothingCrossEntropyFocalLoss(nn.Module):
+    def __init__(self, smoothing=0.1, alpha=1, gamma=2):
+        super(LabelSmoothingCrossEntropyFocalLoss, self).__init__()
+        self.smoothing = smoothing  # 0.1
+        self.alpha = alpha  # 控制正负样本比例
+        self.gamma = gamma  # 控制难以样本比例
+
+    def forward(self, x, target):   # x [2, 60] target 值[52, 14]
+        confidence = 1. - self.smoothing  # 0.9
+        probs = F.softmax(x, dim=-1) # [2, 60]
+        logprobs = probs.log()
+        null_probs = probs.gather(dim=-1, index=target.unsqueeze(1)).squeeze(1)  # [2] <- [2,1]
+        nll_loss = -logprobs.gather(dim=-1, index=target.unsqueeze(1)).squeeze(1)  # [2] <- squeeze [2, 1]<- gather index=target.unsqueeze(1) [2,1]
+        smooth_loss = -logprobs.mean(dim=-1)  # [2]
+        nll_loss = confidence*self.alpha*torch.pow((1-null_probs), self.gamma)*nll_loss
+        smooth_loss = self.smoothing*self.alpha*torch.pow(null_probs, self.gamma)*smooth_loss
+        # smooth_loss = self.smoothing*smooth_loss 是否对其余标签进行调节因子
+        loss = nll_loss + smooth_loss  # [2]  本来应该self.smoothing /K,但是smooth_loss求平均已经除了K
+        return loss.mean()
 
 # a class-balanced focal loss DG-STGCN
 # class BCELossWithLogits(BaseWeightedLoss):

@@ -8,7 +8,7 @@ from torch.autograd import Variable
 # ntu
 # from graph.ntu_rgb_d import Graph
 # UCLA
-from graph.ucla import Graph
+# from graph.ucla import Graph
 def import_class(name):
     components = name.split('.')
     mod = __import__(components[0])
@@ -341,13 +341,17 @@ class Model(nn.Module):
                  drop_out=0, adaptive=True):
         super(Model, self).__init__()
 
-        #if graph is None:
-        #    raise ValueError()
-        #else:
-        #    Graph = import_class(graph)
-        #    self.graph = Graph(**graph_args)
+        if graph is None:
+           raise ValueError()
+        else:
+           Graph = import_class(graph)
+           self.graph = Graph(**graph_args)
 
-        self.graph = Graph(**graph_args)
+        # ntu
+        # from graph.ntu_rgb_d import Graph
+        # UCLA
+        # from graph.ucla import Graph
+        # self.graph = Graph(**graph_args)  # 为了测试模型参数量和计算量方便
 
         A = self.graph.A # 3,25,25
 

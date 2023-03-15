@@ -28,6 +28,7 @@ from tqdm import tqdm
 from torchlight import DictAction
 from model.loss import FocalLoss
 from model.loss import LabelSmoothingCrossEntropy
+from model.loss import LabelSmoothingCrossEntropyFocalLoss
 
 
 import resource
@@ -72,7 +73,7 @@ def get_parser():
     parser.add_argument('-model_saved_name', default='')
     parser.add_argument(
         '--config',
-        default='./config/nturgbd120-cross-subject/dev_ctr_sa1_b.yaml',
+        default='./config/nturgbd-cross-subject/dev_ctr_sa1_da_fixed_aff_lsce_b.yaml',
         help='path to the configuration file')
 
     # processor
@@ -299,6 +300,9 @@ class Processor():
         elif self.arg.loss == 'label_smooth_cross_entropy':
             print(' loss: ' + self.arg.loss)
             self.loss = LabelSmoothingCrossEntropy().cuda(output_device)
+        elif self.arg.loss == 'label_smooth_cross_entropy_focal_loss':
+            print(' loss: ' + self.arg.loss)
+            self.loss = LabelSmoothingCrossEntropyFocalLoss().cuda(output_device)
         else:
             print('unknown loss: ' + self.arg.loss)
 

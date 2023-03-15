@@ -1,7 +1,7 @@
 import random
 import matplotlib.pyplot as plt
 import numpy as np
-import pdb
+import random
 
 import torch
 import torch.nn.functional as F
@@ -10,8 +10,8 @@ def valid_crop_resize(data_numpy,valid_frame_num,p_interval,window):
     # input: C,T,V,M
     C, T, V, M = data_numpy.shape
     begin = 0
-    end = valid_frame_num
-    valid_size = end - begin
+    end = valid_frame_num  # 58
+    valid_size = end - begin  # 58
 
     #crop
     if len(p_interval) == 1:
@@ -24,14 +24,16 @@ def valid_crop_resize(data_numpy,valid_frame_num,p_interval,window):
         cropped_length = np.minimum(np.maximum(int(np.floor(valid_size*p)),64), valid_size)# constraint cropped_length lower bound as 64
         bias = np.random.randint(0,valid_size-cropped_length+1)
         data = data_numpy[:, begin+bias:begin+bias+cropped_length, :, :]
-        if data.shape[1] == 0:
-            print(cropped_length, bias, valid_size)
+        # if data.shape[1] == 0:
+        #     print('valid_crop_resize: ', cropped_length, bias, valid_size)
 
     # resize
-    data = torch.tensor(data,dtype=torch.float)
-    data = data.permute(0, 2, 3, 1).contiguous().view(C * V * M, cropped_length)
-    data = data[None, None, :, :]
-    data = F.interpolate(data, size=(C * V * M, window), mode='bilinear',align_corners=False).squeeze() # could perform both up sample and down sample
+    data = torch.tensor(data,dtype=torch.float)  # [3, 58, 18, 2]
+    data = data.permute(0, 2, 3, 1).contiguous().view(C * V * M, cropped_length)  # C,V,N,T 3*18*2,58
+    data = data[None, None, :, :]  # [1, 1, 108, 58]
+    # print('data shape: ', data.shape)
+    data = F.interpolate(data, size=(C * V * M, window), mode='bilinear',align_corners=False).squeeze() # [108, 150]could perform both up sample and down sample
+    # print('data shape: ', data.shape)
     data = data.contiguous().view(C, V, M, window).permute(0, 3, 1, 2).contiguous().numpy()
 
     return data
@@ -74,7 +76,7 @@ def auto_pading(data_numpy, size, random_pad=False):
 
 
 def random_choose(data_numpy, size, auto_pad=True):
-    # input: C,T,V,M 随机选择其中一段，不是很合理。因为有0
+    # input: C,T,V,M
     C, T, V, M = data_numpy.shape
     if T == size:
         return data_numpy
@@ -135,6 +137,7 @@ def random_move(data_numpy,
 
 
 def random_shift(data_numpy):
+    # input: C,T,V,M
     C, T, V, M = data_numpy.shape
     data_shift = np.zeros(data_numpy.shape)
     valid_frame = (data_numpy != 0).sum(axis=3).sum(axis=2).sum(axis=0) > 0
@@ -202,7 +205,7 @@ def openpose_match(data_numpy):
     # data of frame 2
     xy2 = data_numpy[0:2, 1:T, :, :].reshape(2, T - 1, V, 1, M)
     # square of distance between frame 1&2 (shape: T-1, M, M)
-    distance = ((xy2 - xy1) ** 2).sum(axis=2).sum(axis=0)
+    distance = ((xy2 - xy1)**2).sum(axis=2).sum(axis=0)
 
     # match pose
     forward_map = np.zeros((T, M), dtype=int) - 1
@@ -223,7 +226,7 @@ def openpose_match(data_numpy):
     new_data_numpy = np.zeros(data_numpy.shape)
     for t in range(T):
         new_data_numpy[:, t, :, :] = data_numpy[:, t, :, forward_map[
-                                                             t]].transpose(1, 2, 0)
+            t]].transpose(1, 2, 0)
     data_numpy = new_data_numpy
 
     # score sort
@@ -232,3 +235,43 @@ def openpose_match(data_numpy):
     data_numpy = data_numpy[:, :, :, rank]
 
     return data_numpy
+
+# 下面这些来自于st_gcn中的tools
+def top_k_by_category(label, score, top_k):
+    instance_num, class_num = score.shape
+    rank = score.argsort()
+    hit_top_k = [[] for i in range(class_num)]
+    for i in range(instance_num):
+        l = label[i]
+        hit_top_k[l].append(l in rank[i, -top_k:])
+
+    accuracy_list = []
+    for hit_per_category in hit_top_k:
+        if hit_per_category:
+            accuracy_list.append(sum(hit_per_category) * 1.0 / len(hit_per_category))
+        else:
+            accuracy_list.append(0.0)
+    return accuracy_list
+
+
+def calculate_recall_precision(label, score):
+    instance_num, class_num = score.shape
+    rank = score.argsort()
+    confusion_matrix = np.zeros([class_num, class_num])
+
+    for i in range(instance_num):
+        true_l = label[i]
+        pred_l = rank[i, -1]
+        confusion_matrix[true_l][pred_l] += 1
+
+    precision = []
+    recall = []
+
+    for i in range(class_num):
+        true_p = confusion_matrix[i][i]
+        false_n = sum(confusion_matrix[i, :]) - true_p
+        false_p = sum(confusion_matrix[:, i]) - true_p
+        precision.append(true_p * 1.0 / (true_p + false_p))
+        recall.append(true_p * 1.0 / (true_p + false_n))
+
+    return precision, recall
