@@ -59,7 +59,6 @@ class Feeder(Dataset):
             print('kinetics train data loading')
             self.data = np.load(self.data_path + '/val_data.npy', mmap_mode='r')   # (19796, 3, 300, 18, 2)  N，C，T，V，M
             print('kinetics train data end')
-
             kinetic_dict = np.load(self.data_path + '/val_label.pkl', allow_pickle=True) # [0:json, 1:list] 19796 [name,index]
             self.label = np.array(list(kinetic_dict)[1])
             self.sample_name = ['test_' + str(i) for i in range(len(self.data))]

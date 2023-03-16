@@ -46,7 +46,9 @@ class Feeder(Dataset):
 
     def load_data(self):
         # data: N C V T M
-        npz_data = np.load(self.data_path)
+        npz_data = np.load(self.data_path, mmap_mode='r')
+        # npz_data = np.load(self.data_path)
+        print('ntu data loading')
         if self.split == 'train':
             self.data = npz_data['x_train']
             self.label = np.where(npz_data['y_train'] > 0)[1]
@@ -57,6 +59,7 @@ class Feeder(Dataset):
             self.sample_name = ['test_' + str(i) for i in range(len(self.data))]
         else:
             raise NotImplementedError('data split only supports train/test')
+        print('ntu data end')
         N, T, _ = self.data.shape
         self.data = self.data.reshape((N, T, 2, 25, 3)).transpose(0, 4, 1, 3, 2)
 

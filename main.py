@@ -73,7 +73,7 @@ def get_parser():
     parser.add_argument('-model_saved_name', default='')
     parser.add_argument(
         '--config',
-        default='./config/nturgbd-cross-subject/dev_ctr_sa1_da_fixed_aff_lsce_b.yaml',
+        default='./config/kinetics/dev_ctr_sa1_da_fixed_aff_lsce_b.yaml',
         help='path to the configuration file')
 
     # processor
@@ -84,7 +84,7 @@ def get_parser():
         '--save-score',
         type=str2bool,
         default=True,
-        help='if ture, the classification score will be stored')
+        help='if ture, the classification score will be stored')  # 保存模型的时候是否保存结果，比如.pkl .csv
 
     # visulize and debug
     parser.add_argument(
@@ -103,7 +103,7 @@ def get_parser():
         '--save-epoch',
         type=int,
         default=50,
-        help='the start epoch to save model (#iteration)')  # 大于的时候每次都保存
+        help='the start epoch to save model (#iteration)')  # 大于的时候每次都eval然后保存模型
     parser.add_argument(
         '--eval-interval',
         type=int,
@@ -246,7 +246,7 @@ class Processor():
         self.lr = self.arg.base_lr
         self.best_acc = 0
         self.best_acc_epoch = 0
-        print('self.model.cuda', self.output_device)
+        print('model output_device', self.output_device)
         self.model = self.model.cuda(self.output_device)
 
         if type(self.arg.device) is list:
@@ -280,7 +280,7 @@ class Processor():
         # if self.arg.weights != None:
         #     print('output_device: ', output_device, '-> 0')
         #     output_device = 0  #  --weights,断点续存的话需要改成0，否则会报错, 解决RuntimeError: CUDA error: invalid device ordinal
-        # output_device = 0   # 如果训练时候保存的weights和继续训练的gpu不是一个的话，output_device需要改成0,否则报错解决RuntimeError
+        output_device = 0   # 如果训练时候保存的weights和继续训练的gpu不是一个的话，output_device需要改成0,否则报错解决RuntimeError
         self.output_device = output_device
         Model = import_class(self.arg.model)
         shutil.copy2(inspect.getfile(Model), self.arg.work_dir)
@@ -288,7 +288,7 @@ class Processor():
         self.model = Model(**self.arg.model_args)
         # print(self.model)
         num_class = self.model.num_class
-        print('output_device: ', output_device)
+        print('loss output_device: ', output_device)
         # self.loss = FocalLoss(num_class, output_device).cuda(output_device)
 
         if self.arg.loss == 'cross_entropy':
@@ -393,7 +393,7 @@ class Processor():
                 print(str, file=f)
 
             # 在config/txt里面也打印一下，这样就容易找了
-            with open('{}/{}.txt'.format('config/txt/ntu120/', self.arg.log_name), 'a') as f:
+            with open('{}/{}.txt'.format(self.arg.txt_dir, self.arg.log_name), 'a') as f:
                 print(str, file=f)
 
     def record_time(self):
@@ -626,13 +626,15 @@ if __name__ == '__main__':
         parser.set_defaults(**default_arg)
 
     arg = parser.parse_args()
+
     # 处理gpu
     # arg.device = int(arg.device)
     print('device: ', arg.device)
-    os.environ["CUDA_VISIBLE_DEVICES"] = str(arg.device[0])
-    print('cuda: ', arg.device[0])
+    # 使用多卡
+    os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(map(str,arg.device))  # '0,1,2' <-[0,1,2]
+    print('CUDA_VISIBLE_DEVICES: ', os.environ["CUDA_VISIBLE_DEVICES"])
 
-    # 处理因为加了关节点信息网络创建需要指导batchsize
+    # 处理SECTRGCN因为加了关节点信息网络创建需要指导batchsize
     # print('device: ', arg.device)
     if arg.model == 'model.sectrgcn.Model':
         if arg.phase == 'train':
@@ -641,12 +643,26 @@ if __name__ == '__main__':
             arg.model_args['batch_size'] =  arg.test_batch_size
         arg.model_args['device'] = arg.device[0]
 
+    # 处理dir
     # 将log.txt改成模型名和类型名，如1_ctrgcn_b_xsub.log
     # ./work_dir/ntu60/xsub/dev_ctr_sa1_da_fixed_aff_lsce_b
-    work_dir_split = arg.work_dir.split('/')
-    # -3 ntu60  -1 dev_ctr_sa1_da_fixed_aff_lsce_b -2 xsub
-    arg.log_name = '1_' + work_dir_split[-3] + '_' + work_dir_split[-2] + '_' + work_dir_split[-1]
+    work_dir_split = arg.work_dir.split('/')  # ['.', 'work_dir', 'ntu60', 'xsub', 'dev_ctr_sa1_da_fixed_aff_lsce_b']
+    # -3 ntu60   -2 xsub -1 dev_ctr_sa1_da_fixed_aff_lsce_b
+    # 1_ntu60_xsub_dev_ctr_sa1_da_fixed_aff_lsce_b
+    if len(work_dir_split) == 5:
+        arg.log_name = '1_' + work_dir_split[-3] + '_' + work_dir_split[-2] + '_' + work_dir_split[-1]  # -3 ntu60   -2 xsub -1 dev_ctr_sa1_da_fixed_aff_lsce_b
+        arg.txt_dir = 'config/txt/' + work_dir_split[-3]
+    elif len(work_dir_split) == 4:
+        arg.log_name = '1_' + work_dir_split[-2] + '_' + work_dir_split[-1]  #  -2 ucla -1 dev_ctr_sa1_da_fixed_aff_lsce_b
+        arg.txt_dir = 'config/txt/' + work_dir_split[-2]
+    else:
+        arg.log_name = '1_' + work_dir_split[-3] + '_' + work_dir_split[-2] + '_' + work_dir_split[-1]
+        print('work_dir_split: ', work_dir_split)
+    os.makedirs(arg.log_name, exist_ok=True)
     print('arg.log_name: ', arg.log_name)
+    print('arg.txt_dir: ', arg.txt_dir)
+
+    # 给定weights就从这里断点继续训练
     if arg.weights == None:
         print('no weights')
     else:
@@ -664,7 +680,7 @@ if __name__ == '__main__':
         arg.test_feeder_args['data_path'] = arg.data + data_file
         print('data_path: ', arg.train_feeder_args['data_path'])
 
-    # 处理loss
+    # 处理loss,不给定loss的话默认使用cross_entropy
     try:
         loss = arg.loss
         print('loss: ' + loss)

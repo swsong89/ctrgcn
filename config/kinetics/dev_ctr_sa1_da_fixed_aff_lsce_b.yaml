@@ -1,0 +1,58 @@
+work_dir: ./work_dir/kinetics/xsub/dev_ctr_sa1_da_fixed_aff_lsce_b
+num_worker: 8
+# feeder
+feeder: feeders.feeder_kinetics.Feeder
+train_feeder_args:
+  data_path: data/kinetics/kinetics-skeleton
+  split: train
+  debug: False
+  random_choose: False
+  random_shift: False
+  random_move: False
+  window_size: 64
+  normalization: False
+  random_rot: True
+  p_interval: [0.5, 1]
+  vel: False
+  bone: True
+
+test_feeder_args:
+  data_path: data/kinetics/kinetics-skeleton
+  split: test
+  window_size: 64
+  p_interval: [0.95]
+  vel: False
+  bone: True
+  debug: False
+
+# model
+model: model.dev_ctr_sa1_da_aff.Model
+loss: label_smooth_cross_entropy
+# loss: label_smooth_cross_entropy_focal_loss
+# loss: focal_loss
+model_args:
+  num_class: 400
+  num_point: 18
+  num_person: 2
+  graph: graph.kinetics.Graph
+  graph_args:
+    labeling_mode: 'spatial'
+
+#optim
+weight_decay: 0.0004
+base_lr: 0.1
+lr_decay_rate: 0.1
+step: [35, 55, 85]
+warm_up_epoch: 5
+
+# training
+device: [7]
+batch_size: 128  # 11085MiB
+test_batch_size: 128
+num_epoch: 100
+nesterov: True
+# fixed是固定sa1,da的权重为1
+
+# nohup python main.py --config config/kinetics/dev_ctr_sa1_da_fixed_aff_lsce_b.yaml  > config/log/1.log  2>&1
+# python main.py --config config/nturgbd120-cross-subject/devctr_aff_b.yaml
+# nohup python main.py --config config/nturgbd120-cross-subject/ctr_joint.yaml  --weights work_dir/ntu120/xsub/ctrgcn_joint > config/log/ctr_joint.log
