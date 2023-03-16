@@ -73,7 +73,8 @@ def get_parser():
     parser.add_argument('-model_saved_name', default='')
     parser.add_argument(
         '--config',
-        default='./config/kinetics/dev_ctr_sa1_da_fixed_aff_lsce_b.yaml',
+        default='./config/kinetics/test.yaml',
+        # default='./config/nturgbd-cross-subject/ctr_b.yaml',
         help='path to the configuration file')
 
     # processor
@@ -658,7 +659,7 @@ if __name__ == '__main__':
     else:
         arg.log_name = '1_' + work_dir_split[-3] + '_' + work_dir_split[-2] + '_' + work_dir_split[-1]
         print('work_dir_split: ', work_dir_split)
-    os.makedirs(arg.log_name, exist_ok=True)
+    os.makedirs(arg.txt_dir, exist_ok=True)
     print('arg.log_name: ', arg.log_name)
     print('arg.txt_dir: ', arg.txt_dir)
 
