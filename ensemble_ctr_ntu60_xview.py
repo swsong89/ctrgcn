@@ -35,43 +35,43 @@ if __name__ == "__main__":
 
     # 修改的参数
 
-    arg.dataset = 'ntu60/xsub'
+    arg.dataset = 'ntu60/xview'
 
+    model_name = 'ctr'
+    work_dir = 'work_dir/' + arg.dataset + '/ctr_'
 
-    model_name = 'dev_ctr_sa1_da_fixed_aff_lsce'
-
-    work_dir = 'work_dir/' + arg.dataset + '/' + model_name + '_'
-    
-    epoch_j = 61
-    epoch_b = 87
-
+    epoch_j = 81
+    epoch_b = 77
     # epoch_b = 0
-    epoch_jm = 57
-    epoch_bm = 65
+    epoch_jm = 78
+    epoch_bm = 92
 
     # arg.alpha = [0.6, 0.6, 0.4, 0.4]
     arg.alpha = [0.6, 0.75, 0.3, 0.15]
+
     """
-j
-[ Wed Mar  8 03:17:00 2023 ] --------------------best epoch acc: 61  90.38%
+    j
+    [ Wed Mar 15 07:40:59 2023 ] --------------------best epoch acc: 81  95.32%
 
-b
-[ Sun Mar  5 23:53:48 2023 ] --------------------best epoch acc: 87  90.47%
-jm
-[ Sat Mar 11 09:25:55 2023 ] --------------------best epoch acc: 57  88.03%
+    b
+    [ Mon Mar 13 17:49:01 2023 ] --------------------best epoch acc: 77  94.84%
 
-bm
-[ Tue Mar  7 09:30:19 2023 ] --------------------best epoch acc: 65  87.80%
-model_name:  dev_ctr_sa1_da_fixed_aff_lsce
-dataset:  ntu60/xsub
-j:  61  b:  87  jm:  57  bm:  65
+    jm
+    [ Thu Mar 16 13:37:20 2023 ] --------------------best epoch acc: 78  93.22%
+
+    bm
+    [ Tue Mar 14 23:42:28 2023 ] --------------------best epoch acc: 92  91.83%
+
+model_name:  ctr
+dataset:  ntu60/xview
+j:  81  b:  77  jm:  78  bm:  92
 arg.alpha:  [0.6, 0.6, 0.4, 0.4]
-Top1 Acc: 92.5578%
-Top5 Acc: 98.8233%
-j:  61  b:  87  jm:  57  bm:  65
+Top1 Acc: 96.5561%
+Top5 Acc: 99.5774%
 arg.alpha:  [0.6, 0.75, 0.3, 0.15]
-Top1 Acc: 92.6245%
-Top5 Acc: 98.8172%
+Top1 Acc: 96.6036%
+Top5 Acc: 99.5563%
+
     """
 
     if 'UCLA' in arg.dataset:
@@ -129,26 +129,19 @@ Top5 Acc: 98.8172%
     right_num = total_num = right_num_5 = 0
 
     if epoch_jm != -1 and epoch_bm != -1:
-
         for i in tqdm(range(len(label))):
-            try:
-                # print(i)  # 50816
-                l = label[i]
-                _, r11 = r1[i]
-                _, r22 = r2[i]
-                _, r33 = r3[i]
-                _, r44 = r4[i]
-                r = r11 * arg.alpha[0] + r22 * arg.alpha[1] + r33 * arg.alpha[2] + r44 * arg.alpha[3]
-                rank_5 = r.argsort()[-5:]
-                right_num_5 += int(int(l) in rank_5)
-                r = np.argmax(r)
-                right_num += int(r == int(l))
-                total_num += 1
-            except Exception as e:
-                a = 1
-                # print(i)
-        print('test_num: ', total_num)
-        print('total_num: ', len(label))
+            # print(i)  # 50816
+            l = label[i]
+            _, r11 = r1[i]
+            _, r22 = r2[i]
+            _, r33 = r3[i]
+            _, r44 = r4[i]
+            r = r11 * arg.alpha[0] + r22 * arg.alpha[1] + r33 * arg.alpha[2] + r44 * arg.alpha[3]
+            rank_5 = r.argsort()[-5:]
+            right_num_5 += int(int(l) in rank_5)
+            r = np.argmax(r)
+            right_num += int(r == int(l))
+            total_num += 1
         acc = right_num / total_num
         acc5 = right_num_5 / total_num
     elif epoch_jm != -1 and epoch_bm == -1:

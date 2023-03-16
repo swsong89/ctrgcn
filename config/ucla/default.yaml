@@ -1,4 +1,6 @@
 # feeder
+work_dir: ./work_dir/ucla/dev_ctr_sa1_da_fixed_aff_lsce_j
+num_worker: 8
 feeder: feeders.feeder_ucla.Feeder
 train_feeder_args:
   data_path: joint
@@ -18,7 +20,7 @@ test_feeder_args:
 
 
 # model
-model: model.sectrgcn.Model
+model: model.dev_ctr_sa1_da_aff.Model
 model_args:
   num_class: 10
   num_point: 20
@@ -34,9 +36,10 @@ lr_decay_rate: 0.1
 step: [50]
 
 # training
-device: 0
+device: [3]
 batch_size: 16
 test_batch_size: 64
 num_epoch: 100
 nesterov: True
 warm_up_epoch: 5
+# nohup python main.py --config config/ucla/default.yaml  > config/log/default.log  2>&1

@@ -38,7 +38,7 @@ if __name__ == "__main__":
     arg.dataset = 'ucla'
 
 
-    model_name = 'dev_ctr_sa1_da_fixed_aff_lsce'
+    model_name = 'dev_ctr_sa1_da_aff'
 
     work_dir = 'work_dir/' + arg.dataset + '/' + model_name + '_'
     
@@ -67,7 +67,7 @@ jm
 bm
 [ Sat Mar 11 22:39:09 2023 ] --------------------best epoch acc: 68  87.50%
 [ Fri Mar 10 16:15:05 2023 ] --------------------best epoch acc: 94  90.73%
-model_name:  dev_ctr_sa1_da_fixed_aff_lsce
+model_name:  dev_ctr_sa1_da_fixed_aff
 dataset:  ucla
 j:  61  b:  87  jm:  57  bm:  65
 arg.alpha:  [0.6, 0.6, 0.4, 0.4]
