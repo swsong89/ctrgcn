@@ -47,40 +47,60 @@ class Feeder(Dataset):
 
     def load_data(self):
         # data: N C V T M
-        data_path_name = self.data_path.replace('.npz', '') #'./data/ntu/NTU60_CV'
-        print('data_path_name: ', data_path_name)
-        train_data_path = data_path_name + '_train_data.npy'
-        if not os.path.exists(train_data_path):  # '_train_data.npz' 不存在还没有生成
-            print('train_data_path is not exist: ', train_data_path)
-            print('data convert loading: ', self.data_path)
-            npz_data = np.load(self.data_path)
-            data = npz_data['x_train']
-            N, T, _ = data.shape  # N,T,150
-            print('train_data shape: ', data.shape)
-            data = data.reshape((N, T, 2, 25, 3)).transpose(0, 4, 1, 3, 2)  # N,C,T,V,M, N,3,T,25,2
-            label = np.where(npz_data['y_train'] > 0)[1]
-            np.save(data_path_name + '_train_data', data)
-            np.save(data_path_name + '_train_label', label)
-            data = npz_data['x_test']
-            N, T, _ = data.shape  # N,T,150
-            print('test_data shape: ', data.shape)
-            data = data.reshape((N, T, 2, 25, 3)).transpose(0, 4, 1, 3, 2)  # N,C,T,V,M, N,3,T,25,2
-            label = np.where(npz_data['y_test'] > 0)[1]
-            np.save(data_path_name + '_val_data', data)
-            np.save(data_path_name + '_val_label', label)
-            print('data convert end')
-            print('ntu ' + self.split + ' data loading')
-
-        if self.split == 'train':
-            self.data = np.load(data_path_name + '_train_data.npy', mmap_mode='r')
-            self.label = np.load(data_path_name + '_train_label.npy')
-            self.sample_name = ['train_' + str(i) for i in range(len(self.data))]
-        elif self.split == 'test':
-            self.data = np.load(data_path_name + '_val_data.npy', mmap_mode='r')
-            self.label = np.load(data_path_name + '_val_label.npy')
-            self.sample_name = ['test_' + str(i) for i in range(len(self.data))]
+        # mmap_mode 相对于直接读入训练时间增加了1/3, 之前17m,现在25m
+        mmap_mode = False
+        if not mmap_mode:
+            npz_data = np.load(self.data_path, mmap_mode='r')
+            # npz_data = np.load(self.data_path)
+            print('ntu data loading')
+            if self.split == 'train':
+                self.data = npz_data['x_train']
+                self.label = np.where(npz_data['y_train'] > 0)[1]
+                self.sample_name = ['train_' + str(i) for i in range(len(self.data))]
+            elif self.split == 'test':
+                self.data = npz_data['x_test']
+                self.label = np.where(npz_data['y_test'] > 0)[1]
+                self.sample_name = ['test_' + str(i) for i in range(len(self.data))]
+            else:
+                raise NotImplementedError('data split only supports train/test')
+            N, T, _ = self.data.shape
+            self.data = self.data.reshape((N, T, 2, 25, 3)).transpose(0, 4, 1, 3, 2)
         else:
-            raise NotImplementedError('data split only supports train/test')		
+            data_path_name = self.data_path.replace('.npz', '') #'./data/ntu/NTU60_CV'
+            print('data_path_name: ', data_path_name)
+            train_data_path = data_path_name + '_train_data.npy'
+            if not os.path.exists(train_data_path):  # '_train_data.npz' 不存在还没有生成
+                print('train_data_path is not exist: ', train_data_path)
+                print('data convert loading: ', self.data_path)
+                npz_data = np.load(self.data_path)
+                data = npz_data['x_train']
+                N, T, _ = data.shape  # N,T,150
+                print('train_data shape: ', data.shape)
+                data = data.reshape((N, T, 2, 25, 3)).transpose(0, 4, 1, 3, 2)  # N,C,T,V,M, N,3,T,25,2
+                label = np.where(npz_data['y_train'] > 0)[1]
+                np.save(data_path_name + '_train_data', data)
+                np.save(data_path_name + '_train_label', label)
+                data = npz_data['x_test']
+                N, T, _ = data.shape  # N,T,150
+                print('test_data shape: ', data.shape)
+                data = data.reshape((N, T, 2, 25, 3)).transpose(0, 4, 1, 3, 2)  # N,C,T,V,M, N,3,T,25,2
+                label = np.where(npz_data['y_test'] > 0)[1]
+                np.save(data_path_name + '_val_data', data)
+                np.save(data_path_name + '_val_label', label)
+                print('data convert end')
+                print('ntu ' + self.split + ' data loading')
+
+            if self.split == 'train':
+                self.data = np.load(data_path_name + '_train_data.npy', mmap_mode='r')
+                self.label = np.load(data_path_name + '_train_label.npy')
+                self.sample_name = ['train_' + str(i) for i in range(len(self.data))]
+            elif self.split == 'test':
+                self.data = np.load(data_path_name + '_val_data.npy', mmap_mode='r')
+                self.label = np.load(data_path_name + '_val_label.npy')
+                self.sample_name = ['test_' + str(i) for i in range(len(self.data))]
+            else:
+                raise NotImplementedError('data split only supports train/test')
+
         print('ntu ' + self.split + ' data end')
 
     def get_mean_map(self):
