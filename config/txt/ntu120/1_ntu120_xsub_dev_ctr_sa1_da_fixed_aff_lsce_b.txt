@@ -551,4 +551,4 @@
 [ Fri Feb 24 11:02:25 2023 ] 	Mean test loss of 796 batches: 1.2796167427271454.
 [ Fri Feb 24 11:02:26 2023 ] 	Top1: 86.72%
 [ Fri Feb 24 11:02:26 2023 ] 	Top5: 97.04%
-[ Fri Feb 24 11:02:26 2023 ] --------------------best epoch acc: 89  87.01%[ Sun Mar  5 00:21:19 2023 ] using warm up, epoch: 5
+[ Fri Feb 24 11:02:26 2023 ] --------------------best epoch acc: 89  87.01%
