@@ -251,6 +251,7 @@ class Processor():
         self.model = self.model.cuda(self.output_device)
 
         if type(self.arg.device) is list:
+            print('self.arg.device: ', self.arg.device)
             if len(self.arg.device) > 1:
                 self.model = nn.DataParallel(
                     self.model,
@@ -631,9 +632,11 @@ if __name__ == '__main__':
     # 处理gpu
     # arg.device = int(arg.device)
     print('device: ', arg.device)
-    # 使用多卡
+    # # 使用多卡
     os.environ["CUDA_VISIBLE_DEVICES"] = ','.join(map(str,arg.device))  # '0,1,2' <-[0,1,2]
     print('CUDA_VISIBLE_DEVICES: ', os.environ["CUDA_VISIBLE_DEVICES"])
+    arg.device = [i for i in range(len(arg.device))]
+    print('new device: ', arg.device)
 
     # 处理SECTRGCN因为加了关节点信息网络创建需要指导batchsize
     # print('device: ', arg.device)

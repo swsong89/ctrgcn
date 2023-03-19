@@ -49,6 +49,7 @@ class Feeder(Dataset):
         # data: N C V T M
         # mmap_mode 相对于直接读入训练时间增加了1/3, 之前17m,现在25m
         mmap_mode = False
+        print('mmap_mode: ', mmap_mode)
         if not mmap_mode:
             npz_data = np.load(self.data_path, mmap_mode='r')
             # npz_data = np.load(self.data_path)

@@ -6,10 +6,10 @@ train_feeder_args:
   data_path: data/kinetics/kinetics-skeleton
   split: train
   debug: False
-  random_choose: False
+  random_choose: True
   random_shift: False
-  random_move: False
-  window_size: 64
+  random_move: True
+  window_size: 64 # window_size目前先用64的，后面看结果
   normalization: False
   random_rot: True
   p_interval: [0.5, 1]
@@ -42,17 +42,17 @@ model_args:
 weight_decay: 0.0004
 base_lr: 0.1
 lr_decay_rate: 0.1
-step: [35, 55, 85]
+step: [20, 30, 40, 50]
 warm_up_epoch: 5
 
 # training
 device: [7]
-batch_size: 128  # 11085MiB
+batch_size: 128  # window 64 64  11085MiB   128 19851MiB
 test_batch_size: 128
-num_epoch: 100
+num_epoch: 60
 nesterov: True
 # fixed是固定sa1,da的权重为1
 
-# nohup python main.py --config config/kinetics/dev_ctr_sa1_da_fixed_aff_lsce_b.yaml  > config/log/1.log  2>&1
+# nohup python main.py --save-epoch 30 --config config/kinetics/dev_ctr_sa1_da_fixed_aff_lsce_b.yaml  > config/log/1.log  2>&1
 # python main.py --config config/nturgbd120-cross-subject/devctr_aff_b.yaml
-# nohup python main.py --config config/nturgbd120-cross-subject/ctr_joint.yaml  --weights work_dir/ntu120/xsub/ctrgcn_joint > config/log/ctr_joint.log
+# nohup python main.py   --config config/nturgbd120-cross-subject/ctr_joint.yaml  --weights work_dir/ntu120/xsub/ctrgcn_joint > config/log/ctr_joint.log
