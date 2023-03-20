@@ -1,7 +1,7 @@
-import torch
-import torch.nn.functional as F
-import torch.nn as nn
-
+# import torch
+# import torch.nn.functional as F
+# import torch.nn as nn
+import numpy as np
 # y = torch.arange(25).unsqueeze(-1)  # torch.range(0, spa)
 # print(y)
 # print(y.size())
@@ -28,6 +28,25 @@ import torch.nn as nn
 # c = F.softmax(input) # 按列SoftMax,列和为1
 # print(b)
 # print(c)
-a = nn.Parameter(torch.ones(1))
-b = nn.Parameter(torch.ones(1))
-print('a: {}, b: {}'.format(a[0],b[0]))
+x = 1
+gamm_list = [0, 1, 2, 3, 5]
+gamma = 5
+epsion = 0.9
+x_list = [0.005, 0.01, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 0.99]
+x = np.array(x_list)
+x1 = 1-x
+
+for gamma in gamm_list:
+  q_x = epsion
+  m_x = (1-x)**gamma
+  log_x = np.log(x)
+  y = -q_x*m_x*log_x
+
+  q_x1 = (1-epsion)/60
+  m_x1 = x1**gamma
+  log_x1 = np.log(x1)
+  y1 = -q_x1*m_x1*log_x1
+  y = y + y1
+  print('gamma: ', gamma)
+  for i in y:
+    print(i)

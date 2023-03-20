@@ -361,7 +361,8 @@
 [ Fri Feb 24 00:23:08 2023 ] 	Top1: 86.78%
 [ Fri Feb 24 00:23:08 2023 ] 	Top5: 97.13%
 [ Fri Feb 24 00:23:08 2023 ] --------------------best epoch acc: 71  86.89%
-[ Fri Feb 24 00:23:08 2023 ] Training epoch: 77
+
+
 [ Fri Feb 24 00:35:05 2023 ] Load weights from work_dir/ntu120/xsub/dev_ctr_sa1_da_fixed_aff_lsce_b/runs-71-69864.pt.
 [ Fri Feb 24 00:35:07 2023 ] using warm up, epoch: 5
 [ Fri Feb 24 00:37:44 2023 ] Parameters:

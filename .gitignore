@@ -12,3 +12,5 @@ data1
 data2
 data3
 # config/txt
+nohup.out
+test.py

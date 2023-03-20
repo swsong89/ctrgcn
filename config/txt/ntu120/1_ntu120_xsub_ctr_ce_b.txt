@@ -249,7 +249,8 @@
 [ Tue Feb 14 09:34:39 2023 ] 	Top1: 86.03%
 [ Tue Feb 14 09:34:40 2023 ] 	Top5: 97.13%
 [ Tue Feb 14 09:34:40 2023 ] --------------------best_epoch: 62 best_acc: 86.03%
-[ Tue Feb 14 09:34:40 2023 ] Training epoch: 63
+
+
 [ Tue Feb 14 16:34:04 2023 ] Load weights from work_dir/ntu120/xsub/ctr_ce_b/runs-62-61008.pt.
 [ Tue Feb 14 16:34:06 2023 ] using warm up, epoch: 5
 [ Tue Feb 14 16:36:45 2023 ] Parameters:
