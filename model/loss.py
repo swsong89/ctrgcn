@@ -102,8 +102,8 @@ class LabelSmoothingCrossEntropyFocalLoss(nn.Module):
         smooth_loss = -logprobs.mean(dim=-1)  # [2]
         nll_loss = confidence*self.alpha*torch.pow((1-null_probs), self.gamma)*nll_loss
 
-        smooth_loss = self.smoothing*self.alpha*torch.pow(null_probs, self.gamma)*smooth_loss  # loss1 fl1
-        # smooth_loss = self.smoothing*smooth_loss 是否对其余标签进行调节因子  ## loss 2 fl2
+        # smooth_loss = self.smoothing*self.alpha*torch.pow(null_probs, self.gamma)*smooth_loss  # loss1 fl1
+        smooth_loss = self.smoothing*smooth_loss # 是否对其余标签进行调节因子  loss 2 fl2
 
         loss = nll_loss + smooth_loss  # [2]  本来应该self.smoothing /K,但是smooth_loss求平均已经除了K
         return loss.mean()

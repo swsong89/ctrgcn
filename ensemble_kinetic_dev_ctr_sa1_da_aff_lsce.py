@@ -35,76 +35,46 @@ if __name__ == "__main__":
 
     # 修改的参数
 
-    arg.dataset = 'ntu120/xsub'
+    arg.dataset = 'kinetics/xsub'
 
 
-    model_name = 'dev_ctr_sa1_da_fixed_aff_lsce'
+    model_name = 'dev_ctr_sa1_da_aff_lsce_w150'
 
     work_dir = 'work_dir/' + arg.dataset + '/' + model_name + '_'
     
-    epoch_j = 58
-    epoch_b = 89
+    epoch_j = 41
+    epoch_b = 45
 
     # epoch_b = 0
-    epoch_jm = 61
-    epoch_bm = 57
+    epoch_jm = -1
+    epoch_bm = -1
 
 
     """
 j
-                                                             ctr 74  84.68%
-[ Mon Feb 27 15:21:05 2023 ] --------------------best epoch acc: 77  85.03%
-
+[ Tue Mar 21 09:47:58 2023 ] --------------------best epoch acc: 30  27.81%
+[ Tue Mar 21 21:14:13 2023 ] --------------------best epoch acc: 41  31.04%
 
 b
-                                                             ctr 97  85.74%
-[ Fri Feb 24 11:02:26 2023 ] --------------------best epoch acc: 89  87.01%
+[ Mon Mar 20 08:16:57 2023 ] --------------------best epoch acc: 45  29.99%
 
 jm
                                                             ctr  73  80.78%
-[ Tue Feb 28 12:08:53 2023 ] --------------------best epoch acc: 57  81.41%
+[ Sat Mar  4 08:50:55 2023 ] --------------------best epoch acc: 65  83.81%
 
 bm
                                                              ctr 69  80.95%
-[ Tue Feb 28 11:56:41 2023 ] --------------------best epoch acc: 57  81.50%
-
-model_name:  dev_ctr_sa1_da_fixed_aff_lsce
-dataset:  ntu120/xsub
-j:  77  b:  89  jm:  57 81.57%  bm:  57
-arg.alpha:  [0.6, 0.6, 0.4, 0.4]
-Top1 Acc: 89.1907%
-Top5 Acc: 98.1048%
-arg.alpha:  [0.6, 0.75, 0.3, 0.15]
-Top1 Acc: 89.4637%  提升了0.27%
-Top5 Acc: 98.1421%
-
-j:  77  b:  89  jm:  71 81.41%  bm:  57
-arg.alpha:  [0.6, 0.6, 0.4, 0.4]
-Top1 Acc: 89.2025%
-arg.alpha:  [0.6, 0.75, 0.3, 0.15]
-Top1 Acc: 89.4421%
-Top5 Acc: 98.1264%
-
-model_name:  dev_ctr_sa1_da_fixed_aff_lsce
-dataset:  ntu120/xsub
-j:  58  b:  89  jm:  61  bm:  57
-arg.alpha:  [0.6, 0.6, 0.4, 0.4]
-Top1 Acc: 89.2162%
-Top5 Acc: 98.1068%
-
-arg.alpha:  [0.6, 0.75, 0.3, 0.15]
-58_89_61_57 0.8951
-
-
-model_name:  ctr
-dataset:  ntu120/xsub
-j:  74  b:  97  jm:  73  bm:  69
-arg.alpha:  [0.6, 0.6, 0.4, 0.4]
-Top1 Acc: 89.0689%
-Top5 Acc: 98.2600%
-arg.alpha:  [0.6, 0.75, 0.3, 0.15]
-Top1 Acc: 88.9570% 降低了0.1%
-Top5 Acc: 98.2207%
+[ Fri Mar  3 15:19:42 2023 ] --------------------best epoch acc: 98  83.53%
+model_name:  dev_ctr_sa1_da_aff_lsce_w150
+dataset:  kinetics/xsub  19796
+j:  24  b:  45  jm:  -1  bm:  -1
+arg.alpha:  1
+Top1 Acc: 31.0921%
+Top5 Acc: 52.0812%
+j:  41  b:  45  jm:  -1  bm:  -1
+arg.alpha:  1
+Top1 Acc: 32.4611%
+Top5 Acc: 53.5361%
     """
 
     if 'UCLA' in arg.dataset:
@@ -128,11 +98,35 @@ Top5 Acc: 98.2207%
         elif 'xview' in arg.dataset:
             npz_data = np.load('./data/' + 'ntu/' + 'NTU60_CV.npz')
             label = np.where(npz_data['y_test'] > 0)[1]
+    elif 'kinetic' in arg.dataset:
+        npz_data = np.load('./data/' + 'kinetics/kinetics-skeleton/' + 'val_data.npy', mmap_mode='r')
+        kinetic_dict = np.load('./data/' + 'kinetics/kinetics-skeleton/' + 'val_label.pkl',allow_pickle=True)
+        label = np.array(list(kinetic_dict)[1])
     else:
         raise NotImplementedError
+    print('begin')
+    unvalid_label_num = 0
+    for i in range(len(npz_data)):
 
+        valid_frame_num = np.sum(npz_data[i].sum(0).sum(-1).sum(-1) != 0)  # 统计这个样本数据不为0的帧数
+        if valid_frame_num == 0:
+            unvalid_label_num += 1
+            print('index, frame, label: ', i, valid_frame_num, label[i]) 
+    print('label_sum: ', len(npz_data), ' unvalid_label_num: ', unvalid_label_num)
+    print('end')
 
-    
+    # print('begin')
+    # unvalid_label_num = 0
+    # npz_train_data = np.load('./data/' + 'kinetics/kinetics-skeleton/' + 'train_data.npy', mmap_mode='r')
+
+    # for i in range(len(npz_train_data)):
+
+    #     valid_frame_num = np.sum(npz_train_data[i].sum(0).sum(-1).sum(-1) != 0)  # 统计这个样本数据不为0的帧数
+    #     if valid_frame_num == 0:
+    #         unvalid_label_num += 1
+    #         print('index, frame, label: ', i, valid_frame_num, 0) 
+    # print('label_sum: ', len(npz_train_data), ' unvalid_label_num: ', unvalid_label_num)
+    # print('end')    label_sum:  240436  unvalid_label_num:  1328
     if epoch_j != -1:
         print('load pkl: ', os.path.join(work_dir + 'j', 'epoch{}_test_score.pkl'.format(epoch_j)))
         with open(os.path.join(work_dir + 'j', 'epoch{}_test_score.pkl'.format(epoch_j)), 'rb') as r1:  # j
@@ -143,12 +137,12 @@ Top5 Acc: 98.2207%
         with open(os.path.join(work_dir + 'b', 'epoch{}_test_score.pkl'.format(epoch_b)), 'rb') as r2:  # b
             r2 = list(pickle.load(r2).items())  # 50880
 
-    if epoch_b != -1:
+    if epoch_jm != -1:
         print('load pkl: ', os.path.join(work_dir + 'jm', 'epoch{}_test_score.pkl'.format(epoch_jm)))
         with open(os.path.join(work_dir + 'jm', 'epoch{}_test_score.pkl'.format(epoch_jm)), 'rb') as r3:  # jm
             r3 = list(pickle.load(r3).items())  # 50880
 
-    if epoch_b != -1:
+    if epoch_bm != -1:
         print('load pkl: ', os.path.join(work_dir + 'bm', 'epoch{}_test_score.pkl'.format(epoch_bm)))
         with open(os.path.join(work_dir + 'bm', 'epoch{}_test_score.pkl'.format(epoch_bm)), 'rb') as r4:  # bm
             r4 = list(pickle.load(r4).items())  # 50880
@@ -162,8 +156,8 @@ Top5 Acc: 98.2207%
     right_num = total_num = right_num_5 = 0
 
     if epoch_jm != -1 and epoch_bm != -1:
-        arg.alpha = [0.6, 0.6, 0.4, 0.4]
-        # arg.alpha = [0.6, 0.75, 0.3, 0.15]
+        # arg.alpha = [0.6, 0.6, 0.4, 0.4]
+        arg.alpha = [0.6, 0.75, 0.3, 0.15]
         for i in tqdm(range(len(label))):
             try:
                 # print(i)  # 50816

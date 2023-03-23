@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 # ntu
-from graph.ntu_rgb_d import Graph
+# from graph.ntu_rgb_d import Graph
 # UCLA
 # from graph.ucla import Graph
 
@@ -279,13 +279,14 @@ class Model(nn.Module):
                  drop_out=0, adaptive=True):
         super(Model, self).__init__()
 
-        #if graph is None:
-        #    raise ValueError()
-        #else:
-        #    Graph = import_class(graph)
-        #    self.graph = Graph(**graph_args)
-        print('graph_args: ', graph_args)
-        self.graph = Graph(**graph_args)
+        if graph is None:
+           raise ValueError()
+        else:
+           Graph = import_class(graph)
+           self.graph = Graph(**graph_args)
+
+        # print('graph_args: ', graph_args)
+        # self.graph = Graph(**graph_args)
 
         A = self.graph.A # 3,25,25
 
