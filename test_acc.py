@@ -4,7 +4,7 @@
 import numpy as np
 
 file_path = 'config/txt/ntu120/' + '/1_ntu120_xsub_dev_ctr_sa1_da_fixed_aff_lsce_b.txt'
-file_path = 'config/txt/ntu120/' + '/1_ntu120_xsub_ctr_b.txt'
+file_path = 'config/txt/ntu120/' + '/1_ntu120_xsub_dev_ctr_sa1_da_fixed_aff_lsce_b_r2.txt'
 
 with open(file_path, "r") as f:  # 打开文件
     data = f.readlines()  # 读取文件

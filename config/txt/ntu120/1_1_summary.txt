@@ -77,6 +77,8 @@ dev_ctr_sa1_aff_ta2_b_xsub,相比1_dev_ctr_sa1_aff_ta1_b_xsub，将ta1中的Rout
 
 
 1_dev_ctr_sa1_da_fixed_aff_b_xsub, 相比1_dev_ctr_sa1_aff_redo_b_xsub有一点提升
+相比1_dev_ctr_sa1_aff_b_xsub,只使用自相关，这个使用自相关和ctr中的相关,参数量计算量无变化
+2.493384M 1.166322934G -> 2.493384M 1.166322934G 
 [ Tue Feb 21 23:59:06 2023 ] --------------------best epoch acc: 84  85.98%
 
 
@@ -88,6 +90,8 @@ dev_ctr_sa1_aff_ta2_b_xsub,相比1_dev_ctr_sa1_aff_ta1_b_xsub，将ta1中的Rout
 [ Fri Feb 24 11:02:26 2023 ] --------------------best epoch acc: 89  87.01%
 
 1_dev_ctr_sa1_da_ta1_aff_lsce_b_xsub
+相比1_dev_ctr_sa1_da_fixed_aff_b_xsub, 将conv3换成了ta1,参数量减少,计算量减少
+2.493384M 1.166322934G -> 2.066424M 852.35443M
 [ Sun Feb 26 17:41:49 2023 ] --------------------best epoch acc: 61  86.33%
 
 
@@ -110,4 +114,10 @@ dev_ctr_sa1_aff_ta2_b_xsub,相比1_dev_ctr_sa1_aff_ta1_b_xsub，将ta1中的Rout
 [ Wed Mar  1 08:51:40 2023 ] --------------------best epoch acc: 57  81.50%
 
 
+
+1_ntu60_xsub_dev_ctr_sa1_da_fixed_aff_lsce_b
+[ Sun Mar  5 23:53:48 2023 ] --------------------best epoch acc: 87  90.47%
+
+1_ntu60_xsub_dev_ctr_sa1_da_fixed_aff_lscefl_b, lscefl比之前的差点
+[ Thu Mar 16 11:44:45 2023 ] --------------------best epoch acc: 70  89.65%
  

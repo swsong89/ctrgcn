@@ -21,3 +21,5 @@ Bm       81.2 81.7     epoch: 74 81.00
 Jm       81.4 81.6    epoch: 73   80.78      
 Top1     88.9
 
+最好的结果是1_dev_ctr_sa1_da_fixed_aff_lsce_b_xsub
+

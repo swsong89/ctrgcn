@@ -101,7 +101,11 @@ class Feeder(Dataset):
                     from .bone_pairs import kinetics_pairs
                     bone_data_numpy = np.zeros_like(data_numpy)
                     for v1, v2 in kinetics_pairs:
-                        bone_data_numpy[:, :, v1 - 1] = data_numpy[:, :, v1 - 1] - data_numpy[:, :, v2 - 1]
+                        # print('v1 v2: ', v1, v2)
+                        # print('v1-1 v2-1: ', v1-1, v2-1)
+                        # 由于ntu节点对是从1开始的，所以下面需要减1，而kinetics是从0开始的，所以不需要减1
+                        # bone_data_numpy[:, :, v1 - 1] = data_numpy[:, :, v1 - 1] - data_numpy[:, :, v2 - 1]
+                        bone_data_numpy[:, :, v1] = data_numpy[:, :, v1] - data_numpy[:, :, v2]
                     data_numpy = bone_data_numpy
                 if self.vel:
                     data_numpy[:, :-1] = data_numpy[:, 1:] - data_numpy[:, :-1]
