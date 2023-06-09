@@ -17,7 +17,7 @@ python main.py --config config/nturgbd120-cross-subject/ctr_jm.yaml --work-dir w
 python main.py --config config/nturgbd120-cross-subject/ctr_bm.yaml --work-dir work_dir/ntu120/xsub/ctr_bm/ --phase test  --weights work_dir/ntu120/xsub/ctr_bm/runs-69-67896.pt --device 0
 
 
-
+最好的结果是1_dev_ctr_sa1_da_fixed_aff_lsce_b_xsub
 
 
 sectrgcn cross set
@@ -25,3 +25,15 @@ python main.py --config config/nturgbd120-cross-set/default.yaml --work-dir work
 cross subject
 python main.py --config config/nturgbd120-cross-subject/default.yaml   --weights work_dir/ntu120/csetsectrgcnfl/runs-100-85100.pt 
 tensorboard --logdir work_dir/ntu120/csubsectrgcnfl/runs
+
+最好的结果是dev_ctr_sa1_da_fixed_aff_lsce
+训练命令
+python main.py --config config/nturgbd120-cross-subject/dev_ctr_sa1_da_fixed_aff_lsce_b.yaml 
+测试单个流命令
+python main.py --config config/nturgbd120-cross-subject/dev_ctr_sa1_da_fixed_aff_lsce_b.yaml   --phase test  --weights ----  --device 0 
+集成四个流
+python ensemble_ntu120_xsub_dev_ctr_sa1_da_aff_lsce.py
+
+
+
+
